@@ -1,4 +1,4 @@
-#/bin/sh
+#!/bin/bash
 
 # Check if argument ($1) is a valid year (4 digits starting with 19 or 20)
 [[ $1 =~ ^(19|20)[0-9]{2}$ ]] && YEAR=$1
@@ -10,5 +10,5 @@ FILENAME=COTAHIST_A${YEAR}.ZIP
 URL=http://www.bmfbovespa.com.br/InstDados/SerHist/${FILENAME}
 
 echo "Downloading ${FILENAME}..."
-wget -q --random-wait -O ${FILENAME} "${URL}"
-unzip -q -o ${FILENAME}
+wget -q --random-wait -O "${FILENAME}" "${URL}"
+unzip -q -o "${FILENAME}"

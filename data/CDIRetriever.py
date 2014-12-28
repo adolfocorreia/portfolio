@@ -10,14 +10,11 @@ class CDIRetriever(DataRetriever):
     def __init__(self):
         DataRetriever.__init__(self, "cdi")
 
-
     def _get_data_file_patterns(self):
-        return [ "./" + self.data_directory + "/CDI_%s.csv" ]
-
+        return ["./" + self.data_directory + "/CDI_%s.csv"]
 
     def _available_codes(self):
-        return [ "CDI" ]
-
+        return ["CDI"]
 
     def _load_data_files(self):
         print "Loading CDI CSV files..."
@@ -31,7 +28,7 @@ class CDIRetriever(DataRetriever):
 
             df = pd.read_csv(
                 file_name,
-                names=['date','annual'],
+                names=['date', 'annual'],
                 header=0,
                 parse_dates=['date'],
                 index_col=['date']
@@ -46,10 +43,8 @@ class CDIRetriever(DataRetriever):
         self._data['daily'] = (self._data.annual + 1.0)**(1.0 / 252.0) - 1.0
         self._data['daily_plus_one'] = self._data.daily + 1.0
 
-
     def get_value(self, code, date):
         raise Exception("Not implemented!")
-
 
     def get_variation(self, code, begin_date, end_date):
         DataRetriever.get_variation(self, code, begin_date, end_date)
@@ -61,7 +56,4 @@ class CDIRetriever(DataRetriever):
         end = end - dt.timedelta(days=1)
 
         interval_df = self._data.ix[start:end]
-
-        result = interval_df.daily_plus_one.prod() - 1.0
-
-        return result
+        return interval_df.daily_plus_one.prod() - 1.0

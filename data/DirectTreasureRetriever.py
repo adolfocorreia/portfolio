@@ -7,7 +7,7 @@ from DataRetriever import DataRetriever
 
 class DirectTreasureRetriever(DataRetriever):
 
-    _base_bond_codes=[
+    _base_bond_codes = [
         "LFT",
         "LTN",
         "NTN-B",
@@ -16,20 +16,16 @@ class DirectTreasureRetriever(DataRetriever):
         "NTN-F",
     ]
 
-
     def __init__(self):
         self._bond_codes = []
         DataRetriever.__init__(self, "dt")
 
-
     def _get_data_file_patterns(self):
-        return [ "./" + self.data_directory + "/" + code + "_%s.xls"
-            for code in DirectTreasureRetriever._base_bond_codes ]
-
+        return ["./" + self.data_directory + "/" + code + "_%s.xls"
+                for code in DirectTreasureRetriever._base_bond_codes]
 
     def _available_codes(self):
         return self._bond_codes
-
 
     def _load_data_files(self):
         print "Loading Direct Treasure XLS files..."
@@ -57,8 +53,6 @@ class DirectTreasureRetriever(DataRetriever):
                 self._bond_codes.append(bond_code)
                 self._data[bond_code] = pd.DataFrame()
 
-                #print "Loading %s..." % (bond_code)
-
                 df = excel.parse(
                     sheet_name,
                     names=names,
@@ -70,11 +64,9 @@ class DirectTreasureRetriever(DataRetriever):
 
                 self._data[bond_code] = self._data[bond_code].append(df)
 
-
     def get_value(self, code, date):
         DataRetriever.get_value(self, code, date)
         return self._data[code].ix[date].PU_Base_Manha
-
 
     def get_variation(self, code, begin_date, end_date):
         raise Exception("Not implemented!")

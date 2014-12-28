@@ -1,8 +1,3 @@
-# Quote files available @ http://www.bmfbovespa.com.br/pt-br/cotacoes-historicas/FormSeriesHistoricasArq.asp
-
-# Dividends and JSCP data available @ http://www.bovespa.com.br/pdf/vorp.zip - http://www.bmfbovespa.com.br/pt-br/mercados/download/vorp.zip
-# Negotiation and offers data available @ ftp://ftp.bmf.com.br/marketdata
-
 import glob
 import pandas as pd
 
@@ -14,14 +9,11 @@ class StocksRetriever(DataRetriever):
     def __init__(self):
         DataRetriever.__init__(self, "stocks")
 
-
     def _get_data_file_patterns(self):
-        return [ "./" + self.data_directory + "/COTAHIST_A%s.ZIP" ]
-
+        return ["./" + self.data_directory + "/COTAHIST_A%s.ZIP"]
 
     def _available_codes(self):
         return self._data.index.levels[1].values
-
 
     def _load_data_files(self):
         print "Loading stocks TXT files..."
@@ -55,13 +47,13 @@ class StocksRetriever(DataRetriever):
             (243, 245, "DISMES"),
         ]
 
-        colspecs = [ (item[0]-1, item[1]) for item in fields ]
-        names = [ item[2] for item in fields ]
+        colspecs = [(item[0]-1, item[1]) for item in fields]
+        names = [item[2] for item in fields]
 
-        filter_CODBDI = [
-            "02",  # Lote padrao
-            "12",  # Fundos imobiliarios
-        ]
+        # filter_CODBDI = [
+        #     "02",  # Lote padrao
+        #     "12",  # Fundos imobiliarios
+        # ]
 
         prices = [
             "PREABE",
@@ -71,7 +63,7 @@ class StocksRetriever(DataRetriever):
             "PREULT",
             "PREOFC",
             "PREOFV",
-            #"VOLTOT",
+            # "VOLTOT",
             "PREEXE",
         ]
 
@@ -93,17 +85,14 @@ class StocksRetriever(DataRetriever):
 
             self._data = self._data.append(df)
 
-
         for col in prices:
             self._data[col] = self._data[col] / 100.0
 
         print "Done loading stocks TXT files."
 
-
     def get_value(self, code, date):
         DataRetriever.get_value(self, code, date)
-        return self._data.ix[date,code].PREULT.values[0]
-
+        return self._data.ix[date, code].PREULT.values[0]
 
     def get_variation(self, code, begin_date, end_date):
         raise Exception("Not implemented!")

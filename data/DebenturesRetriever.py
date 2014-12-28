@@ -12,19 +12,15 @@ class DebenturesRetriever(DataRetriever):
         "TEPE31",
     ]
 
-
     def __init__(self):
         DataRetriever.__init__(self, "debentures")
 
-
     def _get_data_file_patterns(self):
-        return [ "./" + self.data_directory + "/" + code + "_NEG_%s.csv"
-            for code in DebenturesRetriever._debenture_codes ]
-
+        return ["./" + self.data_directory + "/" + code + "_NEG_%s.csv"
+                for code in DebenturesRetriever._debenture_codes]
 
     def _available_codes(self):
         return DebenturesRetriever._debenture_codes
-
 
     def _load_data_files(self):
         print "Loading debentures CSV files..."
@@ -51,7 +47,8 @@ class DebenturesRetriever(DataRetriever):
         for file_name in file_list:
             print "Loading file %s..." % file_name
 
-            reg_exp = re.search(self.data_directory + "/(.*)_NEG_\d{4}\.csv", file_name)
+            reg_exp = re.search(self.data_directory + "/(.*)_NEG_\d{4}\.csv",
+                                file_name)
             deb = reg_exp.groups()[0]
 
             df = pd.read_csv(
@@ -65,12 +62,9 @@ class DebenturesRetriever(DataRetriever):
 
             self._data[deb] = self._data[deb].append(df)
 
-
     def get_value(self, code, date):
         DataRetriever.get_value(self, code, date)
-
         return self._data[code].ix[date].PU_Medio
-
 
     def get_variation(self, code, begin_date, end_date):
         raise Exception("Not implemented!")
