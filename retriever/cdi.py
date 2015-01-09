@@ -2,7 +2,7 @@ import pandas as pd
 import datetime as dt
 import glob
 
-from DataRetriever import DataRetriever
+from retriever import DataRetriever
 
 
 class CDIRetriever(DataRetriever):
@@ -11,7 +11,7 @@ class CDIRetriever(DataRetriever):
         DataRetriever.__init__(self, "cdi")
 
     def _get_data_file_patterns(self):
-        return ["./" + self.data_directory + "/CDI_%s.csv"]
+        return [self.data_directory + "/CDI_%s.csv"]
 
     def _available_codes(self):
         return ["CDI"]

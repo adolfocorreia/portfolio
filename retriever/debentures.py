@@ -2,7 +2,7 @@ import glob
 import re
 import pandas as pd
 
-from DataRetriever import DataRetriever
+from retriever import DataRetriever
 
 
 class DebenturesRetriever(DataRetriever):
@@ -16,7 +16,7 @@ class DebenturesRetriever(DataRetriever):
         DataRetriever.__init__(self, "debentures")
 
     def _get_data_file_patterns(self):
-        return ["./" + self.data_directory + "/" + code + "_NEG_%s.csv"
+        return [self.data_directory + "/" + code + "_NEG_%s.csv"
                 for code in DebenturesRetriever._debenture_codes]
 
     def _available_codes(self):

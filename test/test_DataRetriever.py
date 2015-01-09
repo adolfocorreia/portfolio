@@ -1,9 +1,9 @@
 import unittest
 
-from CDIRetriever import CDIRetriever
-from DebenturesRetriever import DebenturesRetriever
-from DirectTreasureRetriever import DirectTreasureRetriever
-from StocksRetriever import StocksRetriever
+from retriever.cdi import CDIRetriever
+from retriever.debentures import DebenturesRetriever
+from retriever.dt import DirectTreasureRetriever
+from retriever.stocks import StocksRetriever
 
 
 class DataRetrieverTestCase(unittest.TestCase):

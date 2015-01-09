@@ -2,7 +2,7 @@ import string
 import glob
 import pandas as pd
 
-from DataRetriever import DataRetriever
+from retriever import DataRetriever
 
 
 class DirectTreasureRetriever(DataRetriever):
@@ -21,7 +21,7 @@ class DirectTreasureRetriever(DataRetriever):
         DataRetriever.__init__(self, "dt")
 
     def _get_data_file_patterns(self):
-        return ["./" + self.data_directory + "/" + code + "_%s.xls"
+        return [self.data_directory + "/" + code + "_%s.xls"
                 for code in DirectTreasureRetriever._base_bond_codes]
 
     def _available_codes(self):

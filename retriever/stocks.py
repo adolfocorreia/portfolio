@@ -1,7 +1,7 @@
 import glob
 import pandas as pd
 
-from DataRetriever import DataRetriever
+from retriever import DataRetriever
 
 
 class StocksRetriever(DataRetriever):
@@ -10,7 +10,7 @@ class StocksRetriever(DataRetriever):
         DataRetriever.__init__(self, "stocks")
 
     def _get_data_file_patterns(self):
-        return ["./" + self.data_directory + "/COTAHIST_A%s.ZIP"]
+        return [self.data_directory + "/COTAHIST_A%s.ZIP"]
 
     def _available_codes(self):
         return self._data.index.levels[1].values

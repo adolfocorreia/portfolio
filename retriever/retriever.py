@@ -2,6 +2,7 @@ from abc import ABCMeta, abstractmethod
 import os
 import time
 import re
+import inspect
 
 
 class DataRetriever:
@@ -12,7 +13,10 @@ class DataRetriever:
 
     def __init__(self, asset_name):
         self.asset_name = asset_name.lower()
-        self.data_directory = "data_" + asset_name.lower()
+
+        module_file = inspect.getfile(inspect.currentframe())
+        module_dir = os.path.dirname(os.path.abspath(module_file))
+        self.data_directory = module_dir + "/data_" + asset_name.lower()
 
         self._check_data_files()
         self._load_data_files()
