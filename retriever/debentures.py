@@ -2,7 +2,7 @@ import glob
 import re
 import pandas as pd
 
-from retriever import DataRetriever
+from .retriever import DataRetriever
 
 
 class DebenturesRetriever(DataRetriever):
@@ -47,7 +47,7 @@ class DebenturesRetriever(DataRetriever):
         for file_name in file_list:
             print "Loading file %s..." % file_name
 
-            reg_exp = re.search(self.data_directory + "/(.*)_NEG_\d{4}\.csv",
+            reg_exp = re.search(self.data_directory + r"/(.*)_NEG_\d{4}\.csv",
                                 file_name)
             deb = reg_exp.groups()[0]
 

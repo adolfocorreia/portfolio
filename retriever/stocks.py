@@ -1,7 +1,7 @@
 import glob
 import pandas as pd
 
-from retriever import DataRetriever
+from .retriever import DataRetriever
 
 
 class StocksRetriever(DataRetriever):

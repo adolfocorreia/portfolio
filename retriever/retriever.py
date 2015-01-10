@@ -9,7 +9,7 @@ class DataRetriever:
     __metaclass__ = ABCMeta
 
     _initial_year = 2014
-    _date_regex = re.compile("^\d{4}-\d{2}-\d{2}$")
+    _date_regex = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
     def __init__(self, asset_name):
         self.asset_name = asset_name.lower()

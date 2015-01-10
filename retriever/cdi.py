@@ -2,7 +2,7 @@ import pandas as pd
 import datetime as dt
 import glob
 
-from retriever import DataRetriever
+from .retriever import DataRetriever
 
 
 class CDIRetriever(DataRetriever):
