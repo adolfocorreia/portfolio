@@ -36,7 +36,7 @@ class CDIRetriever(DataRetriever):
 
             self._data = self._data.append(df)
 
-        self._data.annual = self._data.annual / 10000.0
+        self._data.annual /= 10000.0
         self._data['annual_plus_one'] = self._data.annual + 1.0
 
         # http://www.cetip.com.br/astec/di_documentos/metodologia2_i1.htm

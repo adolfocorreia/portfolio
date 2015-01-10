@@ -86,7 +86,7 @@ class StocksRetriever(DataRetriever):
             self._data = self._data.append(df)
 
         for col in prices:
-            self._data[col] = self._data[col] / 100.0
+            self._data[col] /= 100.0
 
         print "Done loading stocks TXT files."
 
