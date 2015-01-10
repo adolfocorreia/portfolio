@@ -69,7 +69,7 @@ class StocksRetriever(DataRetriever):
 
         self._data = pd.DataFrame()
 
-        file_list = glob.glob(self.data_directory + "/COTAHIST_A*.TXT")
+        file_list = sorted(glob.glob(self.data_directory + "/COTAHIST_A*.TXT"))
 
         for file_name in file_list:
             print "Loading file %s..." % file_name
