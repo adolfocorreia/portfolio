@@ -3,6 +3,8 @@ import os
 import time
 import re
 import inspect
+import datetime as dt
+import numpy as np
 
 
 class DataRetriever:
@@ -52,6 +54,13 @@ class DataRetriever:
             newer_than_base_year = (os.path.getmtime(file_name)
                                     > first_day_of_base_year)
             return newer_than_base_year
+
+    @staticmethod
+    def _find_closest_day_value(data_frame, date):
+        day = dt.datetime.strptime(date, "%Y-%m-%d")
+        delta_array = data_frame.index.to_pydatetime() - day
+        closest_index = np.argmin(np.abs(delta_array))
+        return data_frame.iloc[closest_index]
 
     def _check_data_files(self):
         current_year = time.localtime()[0]

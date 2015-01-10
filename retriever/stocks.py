@@ -92,7 +92,16 @@ class StocksRetriever(DataRetriever):
 
     def get_value(self, code, date):
         DataRetriever.get_value(self, code, date)
-        return self._data.ix[date, code].PREULT.values[0]
+
+        ts = pd.Timestamp(date)
+
+        sub_df = self._data.xs(code, level='CODNEG')
+
+        if ts in sub_df.index:
+            return sub_df.ix[ts].PREULT
+        else:
+            raise Exception("%s value not available at %s."
+                            % (code, date))
 
     def get_variation(self, code, begin_date, end_date):
         raise Exception("Not implemented!")
