@@ -19,7 +19,7 @@ class CDIRetriever(DataRetriever):
     def _load_data_files(self):
         print "Loading CDI CSV files..."
 
-        file_list = glob.glob(self.data_directory + "/CDI_*.csv")
+        file_list = sorted(glob.glob(self.data_directory + "/CDI_*.csv"))
 
         self._data = pd.DataFrame()
 

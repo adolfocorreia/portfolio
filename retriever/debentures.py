@@ -42,7 +42,7 @@ class DebenturesRetriever(DataRetriever):
         for deb in self._debenture_codes:
             self._data[deb] = pd.DataFrame()
 
-        file_list = glob.glob(self.data_directory + "/*_NEG_*.csv")
+        file_list = sorted(glob.glob(self.data_directory + "/*_NEG_*.csv"))
 
         for file_name in file_list:
             print "Loading file %s..." % file_name

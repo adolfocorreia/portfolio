@@ -41,7 +41,7 @@ class DirectTreasureRetriever(DataRetriever):
             "PU_Base_Manha"
         ]
 
-        file_list = glob.glob(self.data_directory + "/*.xls")
+        file_list = sorted(glob.glob(self.data_directory + "/*.xls"))
         for file_name in file_list:
             print "Loading file %s..." % file_name
 
