@@ -56,14 +56,14 @@ class DataRetrieverTestCase(unittest.TestCase):
         print
         dr = StocksRetriever()
         self.assertIsNotNone(dr)
-        # self.assertAlmostEqual(
-        #     dr.get_value("ITUB3", "2014-01-02"),
-        #     25.88
-        # )
-        # self.assertAlmostEqual(
-        #     dr.get_value("PETR3", "2014-01-02"),
-        #     15.27
-        # )
+        self.assertAlmostEqual(
+            dr.get_value("ITUB3", "2014-01-02"),
+            29.43
+        )
+        self.assertAlmostEqual(
+            dr.get_value("PETR3", "2014-01-02"),
+            15.82
+        )
 
 
 if __name__ == '__main__':
