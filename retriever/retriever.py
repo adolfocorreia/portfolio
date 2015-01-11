@@ -29,7 +29,7 @@ class DataRetriever:
         os.chdir(self.data_directory)
         os.system("./download_%s_files.sh %s" % (self.asset_name, year))
         os.chdir(old_path)
-        time.sleep(1)
+        time.sleep(2)
 
     @staticmethod
     def _is_file_up_to_date(file_name, base_year):
