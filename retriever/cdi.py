@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import datetime as dt
 import glob
 
@@ -40,7 +41,9 @@ class CDIRetriever(DataRetriever):
         self._data['annual_plus_one'] = self._data.annual + 1.0
 
         # http://www.cetip.com.br/astec/di_documentos/metodologia2_i1.htm
-        self._data['daily'] = (self._data.annual + 1.0)**(1.0 / 252.0) - 1.0
+        self._data['daily'] = np.around(
+            (self._data.annual + 1.0)**(1.0 / 252.0) - 1.0,
+            decimals=8)
         self._data['daily_plus_one'] = self._data.daily + 1.0
 
     def get_value(self, code, date):
@@ -56,4 +59,4 @@ class CDIRetriever(DataRetriever):
         end = end - dt.timedelta(days=1)
 
         interval_df = self._data.ix[start:end]
-        return interval_df.daily_plus_one.prod() - 1.0
+        return round(interval_df.daily_plus_one.prod() - 1.0, 8)

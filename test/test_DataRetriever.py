@@ -13,9 +13,13 @@ class DataRetrieverTestCase(unittest.TestCase):
         print
         dr = CDIRetriever()
         self.assertIsNotNone(dr)
-        self.assertAlmostEqual(
+        self.assertEqual(
             dr.get_variation("CDI", "2014-01-02", "2014-01-03"),
-            (0.0977 + 1.0)**(1.0 / 252.0) - 1.0
+            round((0.0977 + 1.0)**(1.0 / 252.0) - 1.0, 8)
+        )
+        self.assertEqual(
+            dr.get_variation("CDI", "2014-01-03", "2015-01-03"),
+            0.10821161
         )
 
     def test_debentures(self):

@@ -13,9 +13,17 @@ CSV_FILE=CDI_${YEAR}.csv
 
 OFFSET=86400  # 24*60*60
 INITIAL_TS=$(date -j -f "%Y-%m-%d %H:%M:%S" "${YEAR}-01-01 00:00:00" "+%s")
+FINAL_TS=$(date -j -f "%Y-%m-%d %H:%M:%S" "${YEAR}-12-31 00:00:00" "+%s")
 TODAY=$(date "+%Y-%m-%d")
 TODAY_TS=$(date -j -f "%Y-%m-%d %H:%M:%S" "${TODAY} 00:00:00" "+%s")
-END_TS=$((TODAY_TS + OFFSET))
+
+if [[ ${FINAL_TS} -lt ${TODAY_TS} ]] ; then
+    MINIMAL_TS=${FINAL_TS}
+else
+    MINIMAL_TS=${TODAY_TS}
+fi
+
+END_TS=$((MINIMAL_TS + OFFSET))
 
 echo "Date,CDI" > ${CSV_FILE}
 
