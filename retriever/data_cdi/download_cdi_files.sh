@@ -2,8 +2,8 @@
 
 # Check if argument ($1) is a valid year (4 digits starting with 19 or 20)
 [[ $1 =~ ^(19|20)[0-9]{2}$ ]] && YEAR=$1
-# If argument is not present or is invalid, use year 2014
-[[ -z $YEAR ]] && YEAR=2014
+# If argument is not present or is invalid, use current year
+[[ -z $YEAR ]] && YEAR=$(date +"%Y")
 
 
 #http://www.cetip.com.br/astec/series_v05/paginas/taxadi_i1.htm
@@ -33,10 +33,12 @@ while [[ "${CURRENT_TS}" -le "${END_TS}" ]] ; do
     FILENAME=${CURRENT_DATE}.txt
 
     # Download file only if it does not exist and if day is not Saturday (6) nor Sunday (7)
-    [[ ! -e ${FILENAME} && $(date -j -f "%s" "${CURRENT_TS}" "+%u") -lt 6 ]] && wget -q "${URL}/${FILENAME}"
+    [[ ! -e ${FILENAME} && $(date -j -f "%s" "${CURRENT_TS}" "+%u") -lt 6 ]] && wget -q --random-wait "${URL}/${FILENAME}"
 
-    [[ -e ${FILENAME} ]] && echo -n "${CURRENT_DATE}," >> ${CSV_FILE}
-    [[ -e ${FILENAME} ]] && cat "${FILENAME}" >> ${CSV_FILE}
+    if [[ -e ${FILENAME} ]] ; then
+        echo -n "${CURRENT_DATE}," >> ${CSV_FILE}
+        cat "${FILENAME}" >> ${CSV_FILE}
+    fi
 
     CURRENT_TS=$((CURRENT_TS + OFFSET))
 done
