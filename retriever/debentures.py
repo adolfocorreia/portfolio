@@ -64,14 +64,9 @@ class DebenturesRetriever(DataRetriever):
 
     def get_value(self, code, date):
         DataRetriever.get_value(self, code, date)
-
         ts = pd.Timestamp(date)
-
-        if ts in self._data[code].index:
-            return self._data[code].ix[ts].PU_Medio
-        else:
-            raise Exception("%s value not available at %s."
-                            % (code, date))
+        asof_ts = self._data[code].index.asof(ts)
+        return self._data[code].ix[asof_ts].PU_Medio
 
     def get_variation(self, code, begin_date, end_date):
         raise Exception("Not implemented!")

@@ -34,6 +34,14 @@ class DataRetrieverTestCase(unittest.TestCase):
             dr.get_value("TEPE31", "2014-01-03"),
             1021.587536
         )
+        self.assertAlmostEqual(
+            dr.get_value("RDVT11", "2015-01-01"),
+            1157.962552
+        )
+        self.assertAlmostEqual(
+            dr.get_value("TEPE31", "2015-01-01"),
+            1268.458594
+        )
 
     def test_dt(self):
         print
@@ -55,6 +63,10 @@ class DataRetrieverTestCase(unittest.TestCase):
             dr.get_value("NTN-F_010117", "2014-01-02"),
             945.17
         )
+        self.assertAlmostEqual(
+            dr.get_value("LFT_070315", "2015-01-01"),
+            6537.17
+        )
 
     def test_stocks(self):
         print
@@ -67,6 +79,10 @@ class DataRetrieverTestCase(unittest.TestCase):
         self.assertAlmostEqual(
             dr.get_value("PETR3", "2014-01-02"),
             15.82
+        )
+        self.assertAlmostEqual(
+            dr.get_value("BBDC3", "2015-01-01"),
+            34.32
         )
 
 
