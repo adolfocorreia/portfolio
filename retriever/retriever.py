@@ -3,8 +3,6 @@ import os
 import time
 import re
 import inspect
-import datetime as dt
-import numpy as np
 
 
 class DataRetriever:
