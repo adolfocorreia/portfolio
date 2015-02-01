@@ -11,21 +11,21 @@ class DataRetriever:
     _initial_year = 2014
     _date_regex = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
-    def __init__(self, asset_name):
-        self.asset_name = asset_name.lower()
+    def __init__(self, asset_type):
+        self.asset_type = asset_type.lower()
 
         module_file = inspect.getfile(inspect.currentframe())
         module_dir = os.path.dirname(os.path.abspath(module_file))
-        self.data_directory = module_dir + "/data_" + asset_name.lower()
+        self.data_directory = module_dir + "/data_" + asset_type.lower()
 
         self._check_data_files()
         self._load_data_files()
 
     def _download_data_files(self, year):
-        print "Downloading %s data files..." % self.asset_name
+        print "Downloading %s data files..." % self.asset_type
         old_path = os.getcwd()
         os.chdir(self.data_directory)
-        os.system("./download_%s_files.sh %s" % (self.asset_name, year))
+        os.system("./download_%s_files.sh %s" % (self.asset_type, year))
         os.chdir(old_path)
         time.sleep(2)
 

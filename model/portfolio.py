@@ -38,3 +38,5 @@ class Portfolio:
             elif kind == "Deb":
                 self.securities.append(
                     InfraDebenture(row.Ativo, row.Vencimento, row.Taxa))
+            else:
+                raise Exception("Unknown security kind!")
