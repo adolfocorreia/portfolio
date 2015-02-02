@@ -2,6 +2,7 @@ from abc import ABCMeta
 from datetime import datetime
 
 from rate import BondRate, FixedRate, CDIRate, SELICRate, IPCARate
+import retriever
 
 
 """
@@ -22,6 +23,11 @@ class Security:
     def __init__(self, name, issuer=""):
         self.name = name
         self.issuer = issuer
+        self.retriever = None
+
+    def get_value(self, date):
+        date_str = date.strftime("%Y-%m-%d")
+        return self.retriever.get_value(self.name, date_str)
 
 
 #####################
@@ -53,12 +59,14 @@ class Stock(EquitySecurity):
         code = int(name[-1])
         assert code >= 3 and code <= 8, "Invalid stock: %s" % name
         EquitySecurity.__init__(self, name)
+        self.retriever = retriever.get_bovespa_retriever()
 
 
 class StockUnit(EquitySecurity):
     def __init__(self, name):
         assert name.endswith("11")
         EquitySecurity.__init__(self, name)
+        self.retriever = retriever.get_bovespa_retriever()
 
 
 class SubscriptionRight(EquitySecurity):
@@ -67,6 +75,7 @@ class SubscriptionRight(EquitySecurity):
         assert code == 1 or code == 2
         self.stock = stock
         EquitySecurity.__init__(self, name)
+        self.retriever = retriever.get_bovespa_retriever()
 
 
 ##########################
@@ -96,6 +105,7 @@ class RealEstateFundShare(FundShare):
     def __init__(self, name):
         assert name.endswith("11") or name.endswith("11B")
         FundShare.__init__(self, name)
+        self.retriever = retriever.get_bovespa_retriever()
 
 
 ###################
@@ -114,6 +124,12 @@ class DebtSecurity(Security):
     def is_expired(self):
         return self.maturity < datetime.now()
 
+    def get_value(self, date):
+        if self.is_expired():
+            return 0.0
+        else:
+            return Security.get_value(self, date)
+
 
 ##################
 # Treasure Bonds #
@@ -126,6 +142,7 @@ class TreasureBond(DebtSecurity):
         maturity = datetime.strptime(name[-6:], "%d%m%y")
         DebtSecurity.__init__(self, name, maturity, rate)
         self.issuer = "Tesouro Nacional"
+        self.retriever = retriever.get_directtreasure_retriever()
 
     @staticmethod
     def create(name, rate_value):
@@ -186,23 +203,36 @@ class NTNBP(TreasureBond):
 class BankBond(DebtSecurity):
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, maturity, rate, issue_date):
+    def __init__(self, name, maturity, rate, issue_date, unit_value):
         DebtSecurity.__init__(self, name, maturity, rate)
         self.issue_date = issue_date
+        self.unit_value = unit_value
+        self.retriever = retriever.get_cdi_retriever()
+
+    def get_value(self, date):
+        if self.is_expired():
+            return 0.0
+        else:
+            begin_date = self.issue_date.strftime("%Y-%m-%d")
+            end_date = date.strftime("%Y-%m-%d")
+            variation = self.retriever.get_variation("CDI",
+                                                     begin_date,
+                                                     end_date)
+            return self.rate.rate * (1.0+variation) * self.unit_value
 
 
 class LCI(BankBond):
-    def __init__(self, name, maturity, rate_value, issue_date):
+    def __init__(self, name, maturity, rate_value, issue_date, unit_value):
         assert name.startswith("LCI")
         rate = CDIRate(rate_value)
-        BankBond.__init__(self, name, maturity, rate, issue_date)
+        BankBond.__init__(self, name, maturity, rate, issue_date, unit_value)
 
 
 class CDB(BankBond):
-    def __init__(self, name, maturity, rate_value, issue_date):
+    def __init__(self, name, maturity, rate_value, issue_date, unit_value):
         assert name.startswith("CDB")
         rate = CDIRate(rate_value)
-        BankBond.__init__(self, name, maturity, rate, issue_date)
+        BankBond.__init__(self, name, maturity, rate, issue_date, unit_value)
 
 
 ##############
@@ -215,6 +245,7 @@ class Debenture(DebtSecurity):
     def __init__(self, name, maturity, rate_value):
         rate = IPCARate(rate_value)
         DebtSecurity.__init__(self, name, maturity, rate)
+        self.retriever = retriever.get_debentures_retriever()
 
 
 class RegularDebenture(Debenture):
