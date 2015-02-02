@@ -18,8 +18,29 @@ class DataRetriever:
         module_dir = os.path.dirname(os.path.abspath(module_file))
         self.data_directory = module_dir + "/data_" + asset_type.lower()
 
-        self._check_data_files()
-        self._load_data_files()
+        self._needs_to_be_loaded = True
+        self.check_and_update_data()
+
+    def check_and_update_data(self):
+        self._check_and_download_data_files()
+        self._check_and_load_data_files()
+
+    def _check_and_load_data_files(self):
+        if self._needs_to_be_loaded:
+            self._load_data_files()
+            self._needs_to_be_loaded = False
+
+    def _check_and_download_data_files(self):
+        current_year = time.localtime()[0]
+        for year in range(DataRetriever._initial_year, current_year+1):
+            for file_pattern in self._get_data_file_patterns():
+                file_name = file_pattern % year
+                if not self._is_file_up_to_date(file_name, year):
+                    self._download_data_files(year)
+                    self._needs_to_be_loaded = True
+                    # Check again to see if file was downloaded
+                    if not self._is_file_up_to_date(file_name, year):
+                        raise Exception("File %s was not updated!" % file_name)
 
     def _download_data_files(self, year):
         print "Downloading %s data files..." % self.asset_type
@@ -52,17 +73,6 @@ class DataRetriever:
             newer_than_base_year = (os.path.getmtime(file_name)
                                     > first_day_of_base_year)
             return newer_than_base_year
-
-    def _check_data_files(self):
-        current_year = time.localtime()[0]
-        for year in range(DataRetriever._initial_year, current_year+1):
-            for file_pattern in self._get_data_file_patterns():
-                file_name = file_pattern % year
-                if not self._is_file_up_to_date(file_name, year):
-                    self._download_data_files(year)
-                    # Check again to see if file was downloaded
-                    if not self._is_file_up_to_date(file_name, year):
-                        raise Exception("File %s was not updated!" % file_name)
 
     @abstractmethod
     def _get_data_file_patterns(self):
