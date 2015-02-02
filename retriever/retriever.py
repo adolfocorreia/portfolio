@@ -3,6 +3,7 @@ import os
 import time
 import re
 import inspect
+from datetime import datetime as dt
 
 
 class DataRetriever:
@@ -85,6 +86,9 @@ class DataRetriever:
     @abstractmethod
     def _load_data_files(self):
         pass
+
+    def get_today_value(self, code):
+        return self.get_value(code, dt.strftime(dt.today(), "%Y-%m-%d"))
 
     @abstractmethod
     def get_value(self, code, date):
