@@ -18,7 +18,7 @@ class DirectTreasureRetriever(DataRetriever):
 
     def __init__(self):
         self._bond_codes = []
-        DataRetriever.__init__(self, "dt")
+        DataRetriever.__init__(self, "directtreasure")
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/" + code + "_%s.xls"

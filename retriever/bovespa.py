@@ -4,10 +4,10 @@ import pandas as pd
 from .retriever import DataRetriever
 
 
-class StocksRetriever(DataRetriever):
+class BovespaRetriever(DataRetriever):
 
     def __init__(self):
-        DataRetriever.__init__(self, "stocks")
+        DataRetriever.__init__(self, "bovespa")
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/COTAHIST_A%s.ZIP"]

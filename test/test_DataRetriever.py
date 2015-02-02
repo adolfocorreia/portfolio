@@ -1,9 +1,9 @@
 import unittest
 
-from retriever import (CDIRetriever,
-                       DebenturesRetriever,
-                       DirectTreasureRetriever,
-                       StocksRetriever)
+from retriever import (get_cdi_retriever,
+                       get_debentures_retriever,
+                       get_directtreasure_retriever,
+                       get_bovespa_retriever)
 
 
 class DataRetrieverTestCase(unittest.TestCase):
@@ -11,7 +11,7 @@ class DataRetrieverTestCase(unittest.TestCase):
 
     def test_cdi(self):
         print
-        dr = CDIRetriever()
+        dr = get_cdi_retriever()
         self.assertIsNotNone(dr)
         self.assertEqual(
             dr.get_variation("CDI", "2014-01-02", "2014-01-03"),
@@ -24,7 +24,7 @@ class DataRetrieverTestCase(unittest.TestCase):
 
     def test_debentures(self):
         print
-        dr = DebenturesRetriever()
+        dr = get_debentures_retriever()
         self.assertIsNotNone(dr)
         self.assertAlmostEqual(
             dr.get_value("RDVT11", "2014-01-02"),
@@ -43,9 +43,9 @@ class DataRetrieverTestCase(unittest.TestCase):
             1268.458594
         )
 
-    def test_dt(self):
+    def test_directtreasure(self):
         print
-        dr = DirectTreasureRetriever()
+        dr = get_directtreasure_retriever()
         self.assertIsNotNone(dr)
         self.assertAlmostEqual(
             dr.get_value("LFT_070314", "2014-01-02"),
@@ -68,9 +68,9 @@ class DataRetrieverTestCase(unittest.TestCase):
             6537.17
         )
 
-    def test_stocks(self):
+    def test_bovespa(self):
         print
-        dr = StocksRetriever()
+        dr = get_bovespa_retriever()
         self.assertIsNotNone(dr)
         self.assertAlmostEqual(
             dr.get_value("ITUB3", "2014-01-02"),
