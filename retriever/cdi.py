@@ -38,18 +38,16 @@ class CDIRetriever(DataRetriever):
             self._data = self._data.append(df)
 
         self._data.annual /= 10000.0
-        self._data['annual_plus_one'] = self._data.annual + 1.0
 
         # http://www.cetip.com.br/astec/di_documentos/metodologia2_i1.htm
         self._data['daily'] = np.around(
             (self._data.annual + 1.0)**(1.0 / 252.0) - 1.0,
             decimals=8)
-        self._data['daily_plus_one'] = self._data.daily + 1.0
 
     def get_value(self, code, date):
         raise Exception("Not implemented!")
 
-    def get_variation(self, code, begin_date, end_date):
+    def get_variation(self, code, begin_date, end_date, percentage=1.0):
         DataRetriever.get_variation(self, code, begin_date, end_date)
 
         start = dt.datetime.strptime(begin_date, "%Y-%m-%d")
@@ -59,4 +57,4 @@ class CDIRetriever(DataRetriever):
         end = end - dt.timedelta(days=1)
 
         interval_df = self._data.ix[start:end]
-        return round(interval_df.daily_plus_one.prod() - 1.0, 8)
+        return round((interval_df.daily*percentage + 1.0).prod() - 1.0, 8)

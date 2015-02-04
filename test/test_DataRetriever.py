@@ -21,6 +21,22 @@ class DataRetrieverTestCase(unittest.TestCase):
             dr.get_variation("CDI", "2014-01-03", "2015-01-03"),
             0.10821161
         )
+        self.assertEqual(
+            dr.get_variation("CDI", "2014-06-25", "2015-02-02"),
+            0.06718371
+        )
+        self.assertEqual(
+            dr.get_variation("CDI", "2014-06-25", "2015-02-02", 1.04),
+            0.06996239
+        )
+        self.assertEqual(
+            dr.get_variation("CDI", "2014-06-11", "2015-02-02"),
+            0.07109966
+        )
+        self.assertEqual(
+            dr.get_variation("CDI", "2014-06-11", "2015-02-02", 1.015),
+            0.07220353
+        )
 
     def test_debentures(self):
         print

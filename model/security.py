@@ -215,10 +215,9 @@ class BankBond(DebtSecurity):
         else:
             begin_date = self.issue_date.strftime("%Y-%m-%d")
             end_date = date.strftime("%Y-%m-%d")
-            variation = self.retriever.get_variation("CDI",
-                                                     begin_date,
-                                                     end_date)
-            return self.rate.rate * (1.0+variation) * self.unit_value
+            variation = self.retriever.get_variation(
+                "CDI", begin_date, end_date, self.rate.rate)
+            return (1.0 + variation) * self.unit_value
 
 
 class LCI(BankBond):
