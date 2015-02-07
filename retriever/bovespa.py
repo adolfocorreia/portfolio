@@ -1,13 +1,13 @@
 import glob
 import pandas as pd
 
-from .retriever import DataRetriever
+from .retriever import ValueRetriever
 
 
-class BovespaRetriever(DataRetriever):
+class BovespaRetriever(ValueRetriever):
 
     def __init__(self):
-        DataRetriever.__init__(self, "bovespa")
+        ValueRetriever.__init__(self, "bovespa")
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/COTAHIST_A%s.ZIP"]
@@ -91,11 +91,8 @@ class BovespaRetriever(DataRetriever):
         print "Done loading stocks TXT files."
 
     def get_value(self, code, date):
-        DataRetriever.get_value(self, code, date)
+        ValueRetriever.get_value(self, code, date)
         ts = pd.Timestamp(date)
         sub_df = self._data.xs(code, level='CODNEG')
         asof_ts = sub_df.index.asof(ts)
         return sub_df.ix[asof_ts].PREULT
-
-    def get_variation(self, code, begin_date, end_date):
-        raise Exception("Not implemented!")

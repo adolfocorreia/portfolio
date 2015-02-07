@@ -49,7 +49,7 @@ class DataRetriever:
         os.chdir(self.data_directory)
         os.system("./download_%s_files.sh %s" % (self.asset_type, year))
         os.chdir(old_path)
-        time.sleep(2)
+        time.sleep(5)
 
     @staticmethod
     def _is_file_up_to_date(file_name, base_year):
@@ -87,16 +87,24 @@ class DataRetriever:
     def _load_data_files(self):
         pass
 
-    def get_today_value(self, code):
-        return self.get_value(code, dt.strftime(dt.today(), "%Y-%m-%d"))
 
-    @abstractmethod
-    def get_value(self, code, date):
-        assert code in self._available_codes()
-        assert DataRetriever._date_regex.match(date)
+class ValueRetriever(DataRetriever):
+        __metaclass__ = ABCMeta
 
-    @abstractmethod
-    def get_variation(self, code, begin_date, end_date):
-        assert code in self._available_codes()
-        assert DataRetriever._date_regex.match(begin_date)
-        assert DataRetriever._date_regex.match(end_date)
+        def get_today_value(self, code):
+            return self.get_value(code, dt.strftime(dt.today(), "%Y-%m-%d"))
+
+        @abstractmethod
+        def get_value(self, code, date):
+            assert code in self._available_codes()
+            assert DataRetriever._date_regex.match(date)
+
+
+class VariationRetriever(DataRetriever):
+        __metaclass__ = ABCMeta
+
+        @abstractmethod
+        def get_variation(self, code, begin_date, end_date):
+            assert code in self._available_codes()
+            assert DataRetriever._date_regex.match(begin_date)
+            assert DataRetriever._date_regex.match(end_date)

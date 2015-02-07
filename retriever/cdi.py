@@ -3,13 +3,13 @@ import numpy as np
 import datetime as dt
 import glob
 
-from .retriever import DataRetriever
+from .retriever import VariationRetriever
 
 
-class CDIRetriever(DataRetriever):
+class CDIRetriever(VariationRetriever):
 
     def __init__(self):
-        DataRetriever.__init__(self, "cdi")
+        VariationRetriever.__init__(self, "cdi")
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/CDI_%s.csv"]
@@ -44,11 +44,8 @@ class CDIRetriever(DataRetriever):
             (self._data.annual + 1.0)**(1.0 / 252.0) - 1.0,
             decimals=8)
 
-    def get_value(self, code, date):
-        raise Exception("Not implemented!")
-
     def get_variation(self, code, begin_date, end_date, percentage=1.0):
-        DataRetriever.get_variation(self, code, begin_date, end_date)
+        VariationRetriever.get_variation(self, code, begin_date, end_date)
 
         start = dt.datetime.strptime(begin_date, "%Y-%m-%d")
         end = dt.datetime.strptime(end_date, "%Y-%m-%d")

@@ -2,10 +2,10 @@ import string
 import glob
 import pandas as pd
 
-from .retriever import DataRetriever
+from .retriever import ValueRetriever
 
 
-class DirectTreasureRetriever(DataRetriever):
+class DirectTreasureRetriever(ValueRetriever):
 
     _base_bond_codes = [
         "LFT",
@@ -18,7 +18,7 @@ class DirectTreasureRetriever(DataRetriever):
 
     def __init__(self):
         self._bond_codes = []
-        DataRetriever.__init__(self, "directtreasure")
+        ValueRetriever.__init__(self, "directtreasure")
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/" + code + "_%s.xls"
@@ -66,10 +66,7 @@ class DirectTreasureRetriever(DataRetriever):
                 self._data[bond_code] = self._data[bond_code].append(df)
 
     def get_value(self, code, date):
-        DataRetriever.get_value(self, code, date)
+        ValueRetriever.get_value(self, code, date)
         ts = pd.Timestamp(date)
         asof_ts = self._data[code].index.asof(ts)
         return self._data[code].ix[asof_ts].PU_Base_Manha
-
-    def get_variation(self, code, begin_date, end_date):
-        raise Exception("Not implemented!")

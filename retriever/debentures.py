@@ -2,10 +2,10 @@ import glob
 import re
 import pandas as pd
 
-from .retriever import DataRetriever
+from .retriever import ValueRetriever
 
 
-class DebenturesRetriever(DataRetriever):
+class DebenturesRetriever(ValueRetriever):
 
     _debenture_codes = [
         "RDVT11",
@@ -13,7 +13,7 @@ class DebenturesRetriever(DataRetriever):
     ]
 
     def __init__(self):
-        DataRetriever.__init__(self, "debentures")
+        ValueRetriever.__init__(self, "debentures")
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/" + code + "_NEG_%s.csv"
@@ -63,10 +63,7 @@ class DebenturesRetriever(DataRetriever):
             self._data[deb] = self._data[deb].append(df)
 
     def get_value(self, code, date):
-        DataRetriever.get_value(self, code, date)
+        ValueRetriever.get_value(self, code, date)
         ts = pd.Timestamp(date)
         asof_ts = self._data[code].index.asof(ts)
         return self._data[code].ix[asof_ts].PU_Medio
-
-    def get_variation(self, code, begin_date, end_date):
-        raise Exception("Not implemented!")
