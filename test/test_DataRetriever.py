@@ -1,9 +1,12 @@
 import unittest
 
-from retriever import (get_cdi_retriever,
-                       get_debentures_retriever,
-                       get_directtreasure_retriever,
-                       get_bovespa_retriever)
+from retriever import (
+    get_cdi_retriever,
+    get_debentures_retriever,
+    get_directtreasure_retriever,
+    get_bovespa_retriever,
+    get_index_retriever,
+)
 
 
 class DataRetrieverTestCase(unittest.TestCase):
@@ -100,6 +103,37 @@ class DataRetrieverTestCase(unittest.TestCase):
             dr.get_value("BBDC3", "2015-01-01"),
             34.32
         )
+
+    def test_index(self):
+        print
+        ir = get_index_retriever()
+        self.assertIsNotNone(ir)
+
+        total = 0.0
+        ibrx50 = ir.get_composition("IBrX50")
+        self.assertEqual(len(ibrx50), 50)
+        for stock in ibrx50:
+            total += stock["part"]
+        self.assertAlmostEqual(total, 100.0)
+
+        total = 0.0
+        ibrx100 = ir.get_composition("IBrX100")
+        self.assertEqual(len(ibrx100), 100)
+        for stock in ibrx100:
+            total += stock["part"]
+        self.assertAlmostEqual(total, 100.0)
+
+        total = 0.0
+        ifix = ir.get_composition("IFIX")
+        for stock in ifix:
+            total += stock["part"]
+        self.assertAlmostEqual(total, 100.0)
+
+        total = 0.0
+        ibovespa = ir.get_composition("Ibovespa")
+        for stock in ibovespa:
+            total += stock["part"]
+        self.assertAlmostEqual(total, 100.0)
 
 
 if __name__ == '__main__':
