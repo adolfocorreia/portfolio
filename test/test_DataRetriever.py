@@ -114,26 +114,26 @@ class DataRetrieverTestCase(unittest.TestCase):
         self.assertEqual(len(ibrx50), 50)
         for stock in ibrx50:
             total += stock["part"]
-        self.assertAlmostEqual(total, 100.0)
+        self.assertAlmostEqual(total, 1.0)
 
         total = 0.0
         ibrx100 = ir.get_composition("IBrX100")
         self.assertEqual(len(ibrx100), 100)
         for stock in ibrx100:
             total += stock["part"]
-        self.assertAlmostEqual(total, 100.0)
+        self.assertAlmostEqual(total, 1.0)
 
         total = 0.0
         ifix = ir.get_composition("IFIX")
         for stock in ifix:
             total += stock["part"]
-        self.assertAlmostEqual(total, 100.0)
+        self.assertAlmostEqual(total, 1.0)
 
         total = 0.0
         ibovespa = ir.get_composition("Ibovespa")
         for stock in ibovespa:
             total += stock["part"]
-        self.assertAlmostEqual(total, 100.0)
+        self.assertAlmostEqual(total, 1.0)
 
 
 if __name__ == '__main__':

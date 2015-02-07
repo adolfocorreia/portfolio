@@ -37,7 +37,7 @@ class IndexRetriever:
             td = td.find_next_sibling("td")
             stock["quantity"] = td.span.string.replace(',', '')
             td = td.find_next_sibling("td")
-            stock["part"] = float(td.span.string)
+            stock["part"] = float(td.span.string) / 100.0
             row = row.find_next_sibling("tr")
             stocks.append(stock)
 
