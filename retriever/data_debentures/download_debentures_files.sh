@@ -6,10 +6,17 @@
 [[ -z $YEAR ]] && YEAR=$(date +"%Y")
 
 
-DEBS=(
-RDVT11
-TEPE31
-)
+DEBS=()
+read_array() {
+    i=0
+    while read line
+    do
+        DEBS[i]=$line
+        i=$((i + 1))
+    done < "$1"
+}
+[ -e "./debentures.txt" ] && read_array "./debentures.txt"
+
 
 # PU: curva teórica
 #http://www.debentures.com.br/exploreosnd/consultaadados/emissoesdedebentures/puhistorico_f.asp
