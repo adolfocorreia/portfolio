@@ -1,7 +1,15 @@
 from abc import ABCMeta
 from datetime import datetime
 
-from rate import BondRate, FixedRate, CDIRate, SELICRate, IPCARate
+from .rate import BondRate, FixedRate, CDIRate, SELICRate, IPCARate
+from .category import (
+    MainCategories,
+    StocksCategories,
+    PrivateDebtCategories,
+    PublicDebtCategories,
+)
+
+
 import retriever
 
 
@@ -24,6 +32,8 @@ class Security:
         self.name = name
         self.issuer = issuer
         self.retriever = None
+        self.category = None
+        self.subcategory = None
 
     def get_value(self, date):
         date_str = date.strftime("%Y-%m-%d")
@@ -60,6 +70,8 @@ class Stock(EquitySecurity):
         assert code >= 3 and code <= 8, "Invalid stock: %s" % name
         EquitySecurity.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
+        self.category = MainCategories.Stocks
+        self.subcategory = StocksCategories.National
 
 
 class StockUnit(EquitySecurity):
@@ -67,6 +79,8 @@ class StockUnit(EquitySecurity):
         assert name.endswith("11")
         EquitySecurity.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
+        self.category = MainCategories.Stocks
+        self.subcategory = StocksCategories.National
 
 
 class SubscriptionRight(EquitySecurity):
@@ -76,6 +90,8 @@ class SubscriptionRight(EquitySecurity):
         self.stock = stock
         EquitySecurity.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
+        self.category = MainCategories.Stocks
+        self.subcategory = StocksCategories.National
 
 
 ##########################
@@ -106,6 +122,7 @@ class RealEstateFundShare(FundShare):
         assert name.endswith("11") or name.endswith("11B")
         FundShare.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
+        self.category = MainCategories.RealEstate
 
 
 ###################
@@ -143,6 +160,7 @@ class TreasureBond(DebtSecurity):
         DebtSecurity.__init__(self, name, maturity, rate)
         self.issuer = "Tesouro Nacional"
         self.retriever = retriever.get_directtreasure_retriever()
+        self.category = MainCategories.PublicDebt
 
     @staticmethod
     def create(name, rate_value):
@@ -165,6 +183,7 @@ class LTN(TreasureBond):
         assert name.startswith("LTN_")
         rate = FixedRate(rate_value)
         TreasureBond.__init__(self, name, rate)
+        self.subcategory = PublicDebtCategories.Fixed
 
 
 class LFT(TreasureBond):
@@ -172,6 +191,7 @@ class LFT(TreasureBond):
         assert name.startswith("LFT_")
         rate = SELICRate(rate_value)
         TreasureBond.__init__(self, name, rate)
+        self.subcategory = PublicDebtCategories.Floating
 
 
 class NTNF(TreasureBond):
@@ -179,6 +199,7 @@ class NTNF(TreasureBond):
         assert name.startswith("NTN-F_")
         rate = FixedRate(rate_value)
         TreasureBond.__init__(self, name, rate)
+        self.subcategory = PublicDebtCategories.Fixed
 
 
 class NTNB(TreasureBond):
@@ -187,6 +208,7 @@ class NTNB(TreasureBond):
                 not name.startswith("NTN-B_Principal_"))
         rate = IPCARate(rate_value)
         TreasureBond.__init__(self, name, rate)
+        self.subcategory = PublicDebtCategories.Inflation
 
 
 class NTNBP(TreasureBond):
@@ -194,6 +216,7 @@ class NTNBP(TreasureBond):
         assert name.startswith("NTN-B_Principal_")
         rate = FixedRate(rate_value)
         TreasureBond.__init__(self, name, rate)
+        self.subcategory = PublicDebtCategories.Inflation
 
 
 #############
@@ -208,6 +231,7 @@ class BankBond(DebtSecurity):
         self.issue_date = issue_date
         self.unit_value = unit_value
         self.retriever = retriever.get_cdi_retriever()
+        self.category = MainCategories.PrivateDebt
 
     def get_value(self, date):
         if self.is_expired():
@@ -225,6 +249,7 @@ class LCI(BankBond):
         assert name.startswith("LCI")
         rate = CDIRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value)
+        self.subcategory = PrivateDebtCategories.Floating
 
 
 class CDB(BankBond):
@@ -232,6 +257,7 @@ class CDB(BankBond):
         assert name.startswith("CDB")
         rate = CDIRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value)
+        self.subcategory = PrivateDebtCategories.Floating
 
 
 ##############
@@ -245,6 +271,8 @@ class Debenture(DebtSecurity):
         rate = IPCARate(rate_value)
         DebtSecurity.__init__(self, name, maturity, rate)
         self.retriever = retriever.get_debentures_retriever()
+        self.category = MainCategories.PrivateDebt
+        self.subcategory = PrivateDebtCategories.Inflation
 
 
 class RegularDebenture(Debenture):

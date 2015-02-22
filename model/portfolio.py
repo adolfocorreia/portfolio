@@ -1,7 +1,9 @@
 import pandas as pd
 from datetime import datetime as dt
 
-from model import (
+from allocation import AllocationSet
+
+from .security import (
     EquitySecurity,
     InfraDebenture,
     LCI,
@@ -9,11 +11,18 @@ from model import (
     TreasureBond,
 )
 
+from .category import (
+    MainCategories,
+)
+
 
 class Portfolio:
 
     def __init__(self):
+        self.at_day = dt.today()
         self.securities = {}
+        self.portfolio_value = 0.0
+        self.categories_values = dict.fromkeys(MainCategories._keys, 0.0)
 
     def load_from_csv(self, file):
         df = pd.read_csv(
@@ -41,7 +50,8 @@ class Portfolio:
             elif kind == "LCI":
                 rate = float(row.Taxa[:-1]) / 100.0
                 self.add_security(
-                    LCI(row.Ativo, row.Vencimento, rate, row.Data, row.PrecoUnitario),
+                    LCI(row.Ativo, row.Vencimento, rate, row.Data,
+                        row.PrecoUnitario),
                     row.Quantidade)
             elif kind == "Deb":
                 rate = float(row.Taxa[:-1]) / 100.0
@@ -52,49 +62,34 @@ class Portfolio:
                 raise Exception("Unknown security kind!")
 
     def add_security(self, security, amount):
-        name = security.name
-        if name in self.securities:
-            old_amount = self.securities[name][1]
-            self.securities[name] = (security, old_amount + amount)
+        unit_value = security.get_value(self.at_day)
+        total_value = unit_value * amount
+        if security.name in self.securities:
+            old_amount = self.securities[security.name][1]
         else:
-            self.securities[name] = (security, amount)
+            old_amount = 0.0
 
-    def print_portfolio(self, at_day=None):
-        portfolio_total = 0.0
-        classes_total = {
-            'FII': 0.0,
-            'TD': 0.0,
-            'BOV': 0.0,
-            'LCI': 0.0,
-            'DEB': 0.0,
-        }
+        self.securities[security.name] = (security, old_amount + amount)
+        self.portfolio_value += total_value
+        self.categories_values[security.category.key] += total_value
 
-        if at_day is None:
-            at_day = dt.today()
-
+    def print_portfolio(self):
         for name, (security, amount) in sorted(self.securities.iteritems()):
-            value_at_day = security.get_value(at_day)
-            total = value_at_day * amount
-            print "%30s: %8.2f * %6.2f  =  R$ %8.2f" % (name, value_at_day, amount, total)
-
-            portfolio_total += total
-            if isinstance(security, RealEstateFundShare):
-                classes_total['FII'] += total
-            elif isinstance(security, TreasureBond):
-                classes_total['TD'] += total
-            elif isinstance(security, EquitySecurity):
-                classes_total['BOV'] += total
-            elif isinstance(security, LCI):
-                classes_total['LCI'] += total
-            elif isinstance(security, InfraDebenture):
-                classes_total['DEB'] += total
-            else:
-                raise Exception()
+            unit_value = security.get_value(self.at_day)
+            value = unit_value * amount
+            print "%30s: %8.2f * %6.2f  =  R$ %8.2f" % (
+                name, unit_value, amount, value)
 
         print
-        print "  FII: R$ %9.2f  (%5.2f%%)" % (classes_total['FII'], classes_total['FII'] / portfolio_total * 100.0)
-        print "  BOV: R$ %9.2f  (%5.2f%%)" % (classes_total['BOV'], classes_total['BOV'] / portfolio_total * 100.0)
-        print "   TD: R$ %9.2f  (%5.2f%%)" % (classes_total['TD'], classes_total['TD'] / portfolio_total * 100.0)
-        print "  LCI: R$ %9.2f  (%5.2f%%)" % (classes_total['LCI'], classes_total['LCI'] / portfolio_total * 100.0)
-        print "  DEB: R$ %9.2f  (%5.2f%%)" % (classes_total['DEB'], classes_total['DEB'] / portfolio_total * 100.0)
-        print "Total: R$ %9.2f" % portfolio_total
+
+        for cat in MainCategories._keys:
+            print "%12s: R$ %9.2f  (%5.2f%%)" % (
+                cat, self.categories_values[cat],
+                self.categories_values[cat] / self.portfolio_value * 100.0)
+        print "       TOTAL: R$ %9.2f" % self.portfolio_value
+
+    def get_allocation(self):
+        allocations = [(x[0], x[1] / self.portfolio_value)
+                       for x in self.categories_values.items()]
+
+        return AllocationSet(allocations)

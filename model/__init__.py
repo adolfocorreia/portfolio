@@ -31,8 +31,16 @@ from .security import (
 from .portfolio import (
     Portfolio,
 )
+from .category import (
+    MainCategories,
+    StocksCategories,
+    PrivateDebtCategories,
+    PublicDebtCategories,
+    CashCategories,
+)
 
 __all__ = [
+
     "Security",
     "EquitySecurity",
     "Stock",
@@ -63,4 +71,11 @@ __all__ = [
     # "Swap",
 
     "Portfolio",
+
+    "MainCategories",
+    "StocksCategories",
+    "PrivateDebtCategories",
+    "PublicDebtCategories",
+    "CashCategories",
+
 ]
