@@ -20,15 +20,15 @@ def compare_allocation_sets(goal, real, total_value=100.0):
 
         g = goal.map[cat]
         r = real.map[cat]
-        d = g-r
+        d = r-g
         nd = d/g
         v = abs(d) * total_value
 
         print cat
         print "Goal: %5.2f | Real: %5.2f | Diff: %5.2f" % (g, r, nd)
-        if d > 0.0:
+        if d < 0.0:
             print "-    Add R$ %8.2f to balance" % v
-        elif d < 0.0:
+        elif d > 0.0:
             print "- Remove R$ %8.2f to balance" % v
         else:
             print "- Perfect! No need to balance"
