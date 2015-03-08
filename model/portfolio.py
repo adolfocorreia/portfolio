@@ -1,5 +1,6 @@
 import pandas as pd
 from datetime import datetime as dt
+from collections import namedtuple
 
 from allocation import AllocationSet
 
@@ -14,6 +15,9 @@ from .security import (
 from .category import (
     MainCategories,
 )
+
+
+PortfolioItem = namedtuple("PortfolioItem", ["sec", "amount"])
 
 
 class Portfolio:
@@ -65,11 +69,12 @@ class Portfolio:
         unit_value = security.get_value(self.at_day)
         total_value = unit_value * amount
         if security.name in self.securities:
-            old_amount = self.securities[security.name][1]
+            old_amount = self.securities[security.name].amount
         else:
             old_amount = 0.0
 
-        self.securities[security.name] = (security, old_amount + amount)
+        self.securities[security.name] = PortfolioItem(security,
+                                                       old_amount + amount)
         self.portfolio_value += total_value
         self.categories_values[security.category.key] += total_value
 
@@ -91,5 +96,14 @@ class Portfolio:
     def get_allocation(self):
         allocations = [(x[0], x[1] / self.portfolio_value)
                        for x in self.categories_values.items()]
-
         return AllocationSet(allocations)
+
+    def get_category_securities_allocation(self, category):
+        assert category in self.categories_values
+        filtered_securities = {k: v for (k, v) in self.securities.iteritems()
+                               if v.sec.category.key == category}
+        total = self.categories_values[category]
+        alloc = {k: v.sec.get_value(self.at_day) * v.amount / total
+                 for (k, v) in filtered_securities.iteritems()}
+
+        return alloc

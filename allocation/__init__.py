@@ -4,6 +4,7 @@ from .allocation import (
     Allocation,
     AllocationSet,
     compare_allocation_sets,
+    compare_securities_allocation,
 )
 
 __all__ = [
@@ -11,4 +12,5 @@ __all__ = [
     "Allocation",
     "AllocationSet",
     "compare_allocation_sets",
+    "compare_securities_allocation",
 ]
