@@ -12,6 +12,8 @@ class IndexRetriever:
         "IFIX": __base_URL + "IFIX",
         "SMLL": __base_URL + "SMLL",
         "IDIV": __base_URL + "IDIV",
+        "IGCX": __base_URL + "IGC",
+        "ISEE": __base_URL + "ISE",
     }
 
     def get_composition(self, index):
