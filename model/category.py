@@ -9,7 +9,8 @@ MainCategories = Enum(
 )
 
 StocksCategories = Enum(
-    'National',
+    'NationalIndex',
+    'NationalSmall',
     'Foreign',
 )
 
