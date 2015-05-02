@@ -5,14 +5,17 @@
 # If argument is not present or is invalid, use current year
 [[ -z $YEAR ]] && YEAR=$(date +"%Y")
 
-BONDS=(
-LFT
-LTN
-NTN-B
-NTN-B_Principal
-NTN-C
-NTN-F
-)
+BONDS=()
+read_array() {
+    i=0
+    while read line
+    do
+        BONDS[i]=$line
+        i=$((i + 1))
+    done < "$1"
+}
+[ -e "./codes.txt" ] && read_array "./codes.txt"
+
 
 #http://www.tesouro.fazenda.gov.br/balanco-e-estatisticas
 URL=http://www.tesouro.fazenda.gov.br/documents/10180/137713
