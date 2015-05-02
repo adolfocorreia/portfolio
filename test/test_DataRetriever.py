@@ -5,6 +5,7 @@ from retriever import (
     get_debentures_retriever,
     get_directtreasure_retriever,
     get_bovespa_retriever,
+    get_fund_retriever,
     get_index_retriever,
 )
 
@@ -104,6 +105,19 @@ class DataRetrieverTestCase(unittest.TestCase):
             34.32
         )
 
+    def test_fund(self):
+        print
+        dr = get_fund_retriever()
+        self.assertIsNotNone(dr)
+        self.assertAlmostEqual(
+            dr.get_value("06041290000106", "2015-01-23"),
+            5.6174202
+        )
+        self.assertAlmostEqual(
+            dr.get_value("06041290000106", "2014-12-31"),
+            5.610184
+        )
+
     def test_index(self):
         print
         ir = get_index_retriever()
@@ -132,6 +146,18 @@ class DataRetrieverTestCase(unittest.TestCase):
         total = 0.0
         ibovespa = ir.get_composition("Ibovespa")
         for stock in ibovespa:
+            total += stock["part"]
+        self.assertAlmostEqual(total, 1.0)
+
+        total = 0.0
+        igcx = ir.get_composition("IGCX")
+        for stock in igcx:
+            total += stock["part"]
+        self.assertAlmostEqual(total, 1.0)
+
+        total = 0.0
+        isee = ir.get_composition("ISEE")
+        for stock in isee:
             total += stock["part"]
         self.assertAlmostEqual(total, 1.0)
 

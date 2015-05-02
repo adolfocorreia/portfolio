@@ -4,6 +4,7 @@ from .cdi import CDIRetriever
 from .debentures import DebenturesRetriever
 from .directtreasure import DirectTreasureRetriever
 from .bovespa import BovespaRetriever
+from .fund import FundRetriever
 
 from .index import IndexRetriever
 
@@ -35,6 +36,11 @@ def get_bovespa_retriever():
     return get_bovespa_retriever.instance
 get_bovespa_retriever.instance = None
 
+def get_fund_retriever():
+    if get_fund_retriever.instance is None:
+        get_fund_retriever.instance = FundRetriever()
+    return get_fund_retriever.instance
+get_fund_retriever.instance = None
 
 def get_index_retriever():
     if get_index_retriever.instance is None:
@@ -49,5 +55,6 @@ __all__ = [
     "get_debentures_retriever",
     "get_dt_retriever",
     "get_bovespa_retriever",
+    "get_fund_retriever",
     "get_index_retriever",
 ]
