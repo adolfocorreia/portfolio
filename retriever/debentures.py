@@ -7,20 +7,15 @@ from .retriever import ValueRetriever
 
 class DebenturesRetriever(ValueRetriever):
 
-    _debenture_codes = [
-        "RDVT11",
-        "TEPE31",
-    ]
-
     def __init__(self):
         ValueRetriever.__init__(self, "debentures")
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/" + code + "_NEG_%s.csv"
-                for code in DebenturesRetriever._debenture_codes]
+                for code in self.codes]
 
     def _available_codes(self):
-        return DebenturesRetriever._debenture_codes
+        return self.codes
 
     def _load_data_files(self):
         print "Loading debentures CSV files..."
@@ -39,7 +34,7 @@ class DebenturesRetriever(ValueRetriever):
         ]
 
         self._data = {}
-        for deb in self._debenture_codes:
+        for deb in self.codes:
             self._data[deb] = pd.DataFrame()
 
         file_list = sorted(glob.glob(self.data_directory + "/*_NEG_*.csv"))

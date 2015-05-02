@@ -7,25 +7,16 @@ from .retriever import ValueRetriever
 
 class DirectTreasureRetriever(ValueRetriever):
 
-    _base_bond_codes = [
-        "LFT",
-        "LTN",
-        "NTN-B",
-        "NTN-B_Principal",
-        "NTN-C",
-        "NTN-F",
-    ]
-
     def __init__(self):
-        self._bond_codes = []
+        self._complete_codes = []
         ValueRetriever.__init__(self, "directtreasure")
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/" + code + "_%s.xls"
-                for code in DirectTreasureRetriever._base_bond_codes]
+                for code in self.codes]
 
     def _available_codes(self):
-        return self._bond_codes
+        return self._complete_codes
 
     def _load_data_files(self):
         print "Loading Direct Treasure XLS files..."
@@ -50,7 +41,7 @@ class DirectTreasureRetriever(ValueRetriever):
             for sheet_name in excel.sheet_names:
                 bond_code = string.replace(sheet_name, " ", "_")
 
-                self._bond_codes.append(bond_code)
+                self._complete_codes.append(bond_code)
                 if bond_code not in self._data:
                     self._data[bond_code] = pd.DataFrame()
 

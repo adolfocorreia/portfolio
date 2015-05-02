@@ -15,7 +15,7 @@ read_array() {
         i=$((i + 1))
     done < "$1"
 }
-[ -e "./debentures.txt" ] && read_array "./debentures.txt"
+[ -e "./codes.txt" ] && read_array "./codes.txt"
 
 
 # PU: curva teórica

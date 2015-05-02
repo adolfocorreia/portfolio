@@ -19,6 +19,9 @@ class DataRetriever:
         module_dir = os.path.dirname(os.path.abspath(module_file))
         self.data_directory = module_dir + "/data_" + asset_type.lower()
 
+        self.codes = [line.strip()
+                for line in open(self.data_directory + "/codes.txt")]
+
         self._needs_to_be_loaded = True
         self.check_and_update_data()
 
