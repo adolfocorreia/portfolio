@@ -71,7 +71,7 @@ class Stock(EquitySecurity):
         EquitySecurity.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
         self.category = MainCategories.Stocks
-        self.subcategory = StocksCategories.National
+        self.subcategory = StocksCategories.NationalIndex
 
 
 class StockUnit(EquitySecurity):
@@ -80,7 +80,7 @@ class StockUnit(EquitySecurity):
         EquitySecurity.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
         self.category = MainCategories.Stocks
-        self.subcategory = StocksCategories.National
+        self.subcategory = StocksCategories.NationalIndex
 
 
 class SubscriptionRight(EquitySecurity):
@@ -91,7 +91,7 @@ class SubscriptionRight(EquitySecurity):
         EquitySecurity.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
         self.category = MainCategories.Stocks
-        self.subcategory = StocksCategories.National
+        self.subcategory = StocksCategories.NationalIndex
 
 
 ##########################
@@ -114,7 +114,10 @@ class ExchangeTradedFundShare(FundShare):
 
 
 class HedgeFundShare(FundShare):
-    pass
+    def __init__(self, name):
+        FundShare.__init__(self, name)
+        self.retriever = retriever.get_fund_retriever()
+        self.category = MainCategories.Other
 
 
 class RealEstateFundShare(FundShare):
@@ -123,6 +126,13 @@ class RealEstateFundShare(FundShare):
         FundShare.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
         self.category = MainCategories.RealEstate
+
+
+class StockFundShare(FundShare):
+    def __init__(self, name):
+        FundShare.__init__(self, name)
+        self.retriever = retriever.get_fund_retriever()
+        self.category = MainCategories.Stocks
 
 
 ###################
@@ -236,12 +246,21 @@ class BankBond(DebtSecurity):
     def get_value(self, date):
         if self.is_expired():
             return 0.0
-        else:
+        elif isinstance(self.rate, CDIRate):
             begin_date = self.issue_date.strftime("%Y-%m-%d")
             end_date = date.strftime("%Y-%m-%d")
             variation = self.retriever.get_variation(
                 "CDI", begin_date, end_date, self.rate.rate)
             return (1.0 + variation) * self.unit_value
+        elif isinstance(self.rate, FixedRate):
+            delta = date - self.issue_date
+            days = delta.days
+            annual_rate = self.rate.rate
+            daily_rate = (annual_rate + 1.0)**(1.0 / 365.0) - 1.0
+            variation = (daily_rate + 1.0)**days - 1.0
+            return (1.0 + variation) * self.unit_value
+        else:
+            assert False
 
 
 class LCI(BankBond):
@@ -258,6 +277,14 @@ class CDB(BankBond):
         rate = CDIRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value)
         self.subcategory = PrivateDebtCategories.Floating
+
+
+class LC(BankBond):
+    def __init__(self, name, maturity, rate_value, issue_date, unit_value):
+        assert name.startswith("LC")
+        rate = FixedRate(rate_value)
+        BankBond.__init__(self, name, maturity, rate, issue_date, unit_value)
+        self.subcategory = PrivateDebtCategories.Fixed
 
 
 ##############

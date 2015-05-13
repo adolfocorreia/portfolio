@@ -6,6 +6,7 @@ MainCategories = Enum(
     'PrivateDebt',
     'PublicDebt',
     'Cash',
+    'Other',
 )
 
 StocksCategories = Enum(

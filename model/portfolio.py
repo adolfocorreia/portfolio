@@ -8,7 +8,11 @@ from .security import (
     EquitySecurity,
     InfraDebenture,
     LCI,
+    CDB,
+    LC,
+    HedgeFundShare,
     RealEstateFundShare,
+    StockFundShare,
     TreasureBond,
 )
 
@@ -57,13 +61,35 @@ class Portfolio:
                     LCI(row.Ativo, row.Vencimento, rate, row.Data,
                         row.PrecoUnitario),
                     row.Quantidade)
+            elif kind == "CDB":
+                rate = float(row.Taxa[:-1]) / 100.0
+                self.add_security(
+                    CDB(row.Ativo, row.Vencimento, rate, row.Data,
+                        row.PrecoUnitario),
+                    row.Quantidade)
+            elif kind == "LC":
+                rate = float(row.Taxa[:-1]) / 100.0
+                self.add_security(
+                    LC(row.Ativo, row.Vencimento, rate, row.Data,
+                        row.PrecoUnitario),
+                    row.Quantidade)
             elif kind == "Deb":
                 rate = float(row.Taxa[:-1]) / 100.0
                 self.add_security(
                     InfraDebenture(row.Ativo, row.Vencimento, rate),
                     row.Quantidade)
+            elif kind == "HedgeFund":
+                pass
+                # TODO
+                # self.add_security(
+                #     HedgeFundShare(row.Ativo),
+                #     row.Quantidade)
+            elif kind == "StockFund":
+                self.add_security(
+                    StockFundShare(row.Ativo),
+                    row.Quantidade)
             else:
-                raise Exception("Unknown security kind!")
+                raise Exception("Unknown security kind: %s" % kind)
 
     def add_security(self, security, amount):
         unit_value = security.get_value(self.at_day)
@@ -82,7 +108,7 @@ class Portfolio:
         for name, (security, amount) in sorted(self.securities.iteritems()):
             unit_value = security.get_value(self.at_day)
             value = unit_value * amount
-            print "%30s: %8.2f * %6.2f  =  R$ %8.2f" % (
+            print "%30s: %8.2f * %8.2f  =  R$ %8.2f" % (
                 name, unit_value, amount, value)
 
         print
