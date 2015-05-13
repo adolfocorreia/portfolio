@@ -37,8 +37,8 @@ class FundRetriever(ValueRetriever):
             "Var12Meses",
         ]
 
-        file_list = sorted(glob.glob(self.data_directory + "/*.xlsx"),
-                reverse=True)
+        file_list = sorted(glob.glob(self.data_directory +
+                "/??????????????_????.xlsx"))
         for file_name in file_list:
             print "Loading file %s..." % file_name
 
@@ -57,7 +57,7 @@ class FundRetriever(ValueRetriever):
                 skiprows=0
             )
 
-            self._data[fund_cnpj] = self._data[fund_cnpj].append(df)
+            self._data[fund_cnpj] = self._data[fund_cnpj].append(df.iloc[::-1])
 
     def get_value(self, code, date):
         ValueRetriever.get_value(self, code, date)
