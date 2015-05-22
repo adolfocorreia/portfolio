@@ -12,6 +12,7 @@ from .security import (
     LC,
     HedgeFundShare,
     RealEstateFundShare,
+    ExchangeTradedFundShare,
     StockFundShare,
     TreasureBond,
 )
@@ -40,7 +41,7 @@ class Portfolio:
         )
 
         for index, row in df.iterrows():
-            kind = row.Tipo
+            kind = row.Categoria
 
             if kind == "TD":
                 rate = float(row.Taxa[:-1]) / 100.0
@@ -78,15 +79,18 @@ class Portfolio:
                 self.add_security(
                     InfraDebenture(row.Ativo, row.Vencimento, rate),
                     row.Quantidade)
+            elif kind == "ETF":
+                self.add_security(
+                    ExchangeTradedFundShare(row.Ativo, row.Subcategoria),
+                    row.Quantidade)
             elif kind == "HedgeFund":
                 pass
-                # TODO
                 # self.add_security(
                 #     HedgeFundShare(row.Ativo),
                 #     row.Quantidade)
             elif kind == "StockFund":
                 self.add_security(
-                    StockFundShare(row.Ativo),
+                    StockFundShare(row.Ativo, row.Subcategoria),
                     row.Quantidade)
             else:
                 raise Exception("Unknown security kind: %s" % kind)

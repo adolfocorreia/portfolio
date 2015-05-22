@@ -110,7 +110,13 @@ class MutualFundShare(FundShare):
 
 
 class ExchangeTradedFundShare(FundShare):
-    pass
+    def __init__(self, name, subcat):
+        assert name.endswith("11")
+        assert subcat in ("Internacional", "Small")
+        FundShare.__init__(self, name)
+        self.retriever = retriever.get_bovespa_retriever()
+        self.category = MainCategories.Stocks
+        self.subcategory = subcat
 
 
 class HedgeFundShare(FundShare):
@@ -129,10 +135,12 @@ class RealEstateFundShare(FundShare):
 
 
 class StockFundShare(FundShare):
-    def __init__(self, name):
+    def __init__(self, name, subcat):
+        assert subcat in ("Internacional", "Small")
         FundShare.__init__(self, name)
         self.retriever = retriever.get_fund_retriever()
         self.category = MainCategories.Stocks
+        self.subcategory = subcat
 
 
 ###################
