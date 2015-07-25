@@ -36,6 +36,7 @@ from .portfolio import (
 from .category import (
     MainCategories,
     StocksCategories,
+    RealEstateCategories,
     PrivateDebtCategories,
     PublicDebtCategories,
     CashCategories,
@@ -78,6 +79,7 @@ __all__ = [
 
     "MainCategories",
     "StocksCategories",
+    "RealEstateCategories",
     "PrivateDebtCategories",
     "PublicDebtCategories",
     "CashCategories",

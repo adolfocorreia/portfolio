@@ -5,6 +5,7 @@ from .rate import BondRate, FixedRate, CDIRate, SELICRate, IPCARate
 from .category import (
     MainCategories,
     StocksCategories,
+    RealEstateCategories,
     PrivateDebtCategories,
     PublicDebtCategories,
 )
@@ -112,11 +113,11 @@ class MutualFundShare(FundShare):
 class ExchangeTradedFundShare(FundShare):
     def __init__(self, name, subcat):
         assert name.endswith("11")
-        assert subcat in ("Internacional", "Small")
+        assert StocksCategories[subcat] is not None, "Subcategory: %s" % subcat
         FundShare.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
         self.category = MainCategories.Stocks
-        self.subcategory = subcat
+        self.subcategory = StocksCategories[subcat]
 
 
 class HedgeFundShare(FundShare):
@@ -132,15 +133,16 @@ class RealEstateFundShare(FundShare):
         FundShare.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
         self.category = MainCategories.RealEstate
+        self.subcategory = RealEstateCategories.Brick
 
 
 class StockFundShare(FundShare):
     def __init__(self, name, subcat):
-        assert subcat in ("Internacional", "Small")
+        assert StocksCategories[subcat] is not None, "Subcategory: %s" % subcat
         FundShare.__init__(self, name)
         self.retriever = retriever.get_fund_retriever()
         self.category = MainCategories.Stocks
-        self.subcategory = subcat
+        self.subcategory = StocksCategories[subcat]
 
 
 ###################

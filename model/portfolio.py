@@ -19,6 +19,10 @@ from .security import (
 
 from .category import (
     MainCategories,
+    StocksCategories,
+    RealEstateCategories,
+    PrivateDebtCategories,
+    PublicDebtCategories,
 )
 
 
@@ -31,7 +35,8 @@ class Portfolio:
         self.at_day = dt.today()
         self.securities = {}
         self.portfolio_value = 0.0
-        self.categories_values = dict.fromkeys(MainCategories._keys, 0.0)
+        self.categories_values = dict.fromkeys(list(MainCategories), 0.0)
+        self.subcategories_values = {}
 
     def load_from_csv(self, file):
         df = pd.read_csv(
@@ -106,7 +111,14 @@ class Portfolio:
         self.securities[security.name] = PortfolioItem(security,
                                                        old_amount + amount)
         self.portfolio_value += total_value
-        self.categories_values[security.category.key] += total_value
+
+        cat = security.category
+        subcat = security.subcategory
+
+        self.categories_values[cat] += total_value
+
+        subcat_value = self.subcategories_values.get((cat, subcat), 0.0)
+        self.subcategories_values[(cat, subcat)] = subcat_value + total_value
 
     def print_portfolio(self):
         for name, (security, amount) in sorted(self.securities.iteritems()):
@@ -117,9 +129,9 @@ class Portfolio:
 
         print
 
-        for cat in MainCategories._keys:
+        for cat in sorted(list(MainCategories)):
             print "%12s: R$ %9.2f  (%5.2f%%)" % (
-                cat, self.categories_values[cat],
+                cat.name, self.categories_values[cat],
                 self.categories_values[cat] / self.portfolio_value * 100.0)
         print "       TOTAL: R$ %9.2f" % self.portfolio_value
 
@@ -131,8 +143,28 @@ class Portfolio:
     def get_category_securities_allocation(self, category):
         assert category in self.categories_values
         filtered_securities = {k: v for (k, v) in self.securities.iteritems()
-                               if v.sec.category.key == category}
+                               if v.sec.category == category}
         total = self.categories_values[category]
+        alloc = {k: v.sec.get_value(self.at_day) * v.amount / total
+                 for (k, v) in filtered_securities.iteritems()}
+
+        return alloc
+
+    def get_subcategory_securities_allocation(self, category, subcategory):
+        assert category in self.categories_values
+        if category == "Stocks":
+            assert subcategory in StocksCategories._keys
+        elif category == "RealEstate":
+            assert subcategory in RealEstateCategories._keys
+        elif category == "PrivateDebt":
+            assert subcategory in PrivateDebtCategories._keys
+        elif category == "PublicDebt":
+            assert subcategory in PublicDebtCategories._keys
+
+        filtered_securities = {k: v for (k, v) in self.securities.iteritems()
+                               if v.sec.category.key == category and
+                                  v.sec.subcategory.key == subcategory}
+        total = self.subcategories_values[(category, subcategory)]
         alloc = {k: v.sec.get_value(self.at_day) * v.amount / total
                  for (k, v) in filtered_securities.iteritems()}
 

@@ -15,7 +15,7 @@ class AllocationSet:
 
 def compare_allocation_sets(goal, real, total_value=100.0):
     assert len(goal.map) == len(real.map)
-    for cat in goal.map.keys():
+    for cat in sorted(goal.map.keys()):
         assert cat in real.map
 
         g = goal.map[cat]
@@ -24,14 +24,14 @@ def compare_allocation_sets(goal, real, total_value=100.0):
         nd = d/g
         v = abs(d) * total_value
 
-        print cat
+        print "== " + cat.name + " =="
         print "Goal: %5.2f | Real: %5.2f | Diff: %5.2f" % (g, r, nd)
         if d < 0.0:
-            print "-    Add R$ %8.2f to balance" % v
+            print "     Add R$ %8.2f to balance" % v
         elif d > 0.0:
-            print "- Remove R$ %8.2f to balance" % v
+            print "  Remove R$ %8.2f to balance" % v
         else:
-            print "- Perfect! No need to balance"
+            print "  Perfect! No need to balance"
 
 
 def compare_securities_allocation(goal, real, total_value=100.0):

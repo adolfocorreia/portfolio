@@ -1,34 +1,59 @@
 from enum import Enum
 
-MainCategories = Enum(
+
+class OrderedEnum(Enum):
+    def __ge__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value >= other.value
+        return NotImplemented
+    def __gt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value > other.value
+        return NotImplemented
+    def __le__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value <= other.value
+        return NotImplemented
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        return NotImplemented
+
+
+MainCategories = OrderedEnum("MainCategories", [
     'Stocks',
     'RealEstate',
     'PrivateDebt',
     'PublicDebt',
     'Cash',
     'Other',
-)
+])
 
-StocksCategories = Enum(
+StocksCategories = OrderedEnum("StocksCategories", [
     'NationalIndex',
     'NationalSmall',
     'Foreign',
-)
+])
 
-PrivateDebtCategories = Enum(
+RealEstateCategories = OrderedEnum("RealEstateCategories", [
+    'Brick',
+    'Paper',
+])
+
+PrivateDebtCategories = OrderedEnum("PrivateDebtCategories", [
     'Inflation',
     'Fixed',
     'Floating',
-)
+])
 
-PublicDebtCategories = Enum(
+PublicDebtCategories = OrderedEnum("PublicDebtCategories", [
     'Inflation',
     'Fixed',
     'Floating',
-)
+])
 
-CashCategories = Enum(
+CashCategories = OrderedEnum("CashCategories", [
     'Gold',
     'Dollar',
     'Euro',
-)
+])
