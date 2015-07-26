@@ -38,3 +38,28 @@ class SecuritySelector:
         secs = [(x[0], x[1]/total) for x in secs]
 
         return dict(secs)
+
+
+def join_securities(securitiesA, securitiesB, num_of_secs=20):
+    # 0. Convert securities dict to a list of 2-tuples
+    secsA = securitiesA.items()
+    secsB = securitiesB.items()
+
+    # 1. Join same security entries
+    joined_secs = defaultdict(float)
+    for sec in secsA:
+        joined_secs[sec[0]] += sec[1]
+    for sec in secsB:
+        joined_secs[sec[0]] += sec[1]
+    secs = joined_secs.items()
+
+    # 2. Sort and remove least significant securities
+    secs = sorted(secs, key=operator.itemgetter(1), reverse=True)
+    if num_of_secs != 0:
+        secs = secs[:num_of_secs]
+
+    # 3. Normalize percentages
+    total = reduce(lambda x, y: x+y, map(lambda x: x[1], secs))
+    secs = [(x[0], x[1]/total) for x in secs]
+
+    return dict(secs)
