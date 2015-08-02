@@ -24,14 +24,8 @@ def compare_allocation_sets(goal, real, total_value=100.0):
         nd = d/g
         v = abs(d) * total_value
 
-        print "== " + cat.name + " =="
-        print "Goal: %5.2f | Real: %5.2f | Diff: %5.2f" % (g, r, nd)
-        if d < 0.0:
-            print "     Add R$ %8.2f to balance" % v
-        elif d > 0.0:
-            print "  Remove R$ %8.2f to balance" % v
-        else:
-            print "  Perfect! No need to balance"
+        print "%-20s Goal: %5.1f%% | Real: %5.1f%% | Diff: %7.2f%%    %6s R$ %8.2f" \
+            % (cat.name, g*100.0, r*100.0, nd*100.0, "Remove" if d>0.0 else "Add", v)
 
 
 def compare_securities_allocation(goal, real, total_value=100.0):
@@ -46,6 +40,7 @@ def compare_securities_allocation(goal, real, total_value=100.0):
     assert approx_equal.approx_equal(sum(goal.values()), 1.0)
     assert approx_equal.approx_equal(sum(real.values()), 1.0)
 
+    tuple_list = []
     for sec in goal:
         g = goal[sec]
         r = real[sec]
@@ -53,12 +48,12 @@ def compare_securities_allocation(goal, real, total_value=100.0):
         nd = d/g
         v = abs(d) * total_value
 
-        print sec
-        print "Goal: %5.2f%% | Real: %5.2f%% | Diff: %7.2f%%" \
-            % (g*100.0, r*100.0, nd*100.0)
-        if d < 0.0:
-            print "    -    Add R$ %8.2f to balance" % v
-        elif d > 0.0:
-            print "    - Remove R$ %8.2f to balance" % v
-        else:
-            print "    - Perfect! No need to balance"
+        tuple_list.append((sec,g,r,d,nd,v))
+
+    sorted_tuples = sorted(tuple_list, reverse=True,
+        key=lambda x: (abs(x[4]),abs(x[5])))
+
+    for i in sorted_tuples:
+        (sec,g,r,d,nd,v) = i
+        print "%-15s Goal: %5.2f%% | Real: %5.2f%% | Diff: %7.2f%%    %4s R$ %8.2f" \
+            % (sec, g*100.0, r*100.0, nd*100.0, "Sell" if d>0.0 else "Buy", v)
