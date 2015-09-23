@@ -246,12 +246,14 @@ class NTNBP(TreasureBond):
 class BankBond(DebtSecurity):
     __metaclass__ = ABCMeta
 
-    def __init__(self, name, maturity, rate, issue_date, unit_value):
+    def __init__(self, name, maturity, rate, issue_date, unit_value, subcat):
+        assert PrivateDebtCategories[subcat] is not None, "Subcategory: %s" % subcat
         DebtSecurity.__init__(self, name, maturity, rate)
         self.issue_date = issue_date
         self.unit_value = unit_value
         self.retriever = retriever.get_cdi_retriever()
         self.category = MainCategories.PrivateDebt
+        self.subcategory = PrivateDebtCategories[subcat]
 
     def get_value(self, date):
         if self.is_expired():
@@ -274,27 +276,24 @@ class BankBond(DebtSecurity):
 
 
 class LCI(BankBond):
-    def __init__(self, name, maturity, rate_value, issue_date, unit_value):
+    def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
         assert name.startswith("LCI")
         rate = CDIRate(rate_value)
-        BankBond.__init__(self, name, maturity, rate, issue_date, unit_value)
-        self.subcategory = PrivateDebtCategories.Floating
+        BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
 
 
 class CDB(BankBond):
-    def __init__(self, name, maturity, rate_value, issue_date, unit_value):
+    def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
         assert name.startswith("CDB")
         rate = CDIRate(rate_value)
-        BankBond.__init__(self, name, maturity, rate, issue_date, unit_value)
-        self.subcategory = PrivateDebtCategories.Floating
+        BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
 
 
 class LC(BankBond):
-    def __init__(self, name, maturity, rate_value, issue_date, unit_value):
+    def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
         assert name.startswith("LC")
         rate = FixedRate(rate_value)
-        BankBond.__init__(self, name, maturity, rate, issue_date, unit_value)
-        self.subcategory = PrivateDebtCategories.Fixed
+        BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
 
 
 ##############

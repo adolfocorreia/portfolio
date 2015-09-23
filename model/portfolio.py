@@ -73,19 +73,19 @@ class Portfolio:
                 rate = float(row.Taxa[:-1]) / 100.0
                 self.add_security(
                     LCI(row.Ativo, row.Vencimento, rate, row.Data,
-                        row.PrecoUnitario),
+                        row.PrecoUnitario, row.Subcategoria),
                     row.Quantidade)
             elif kind == "CDB":
                 rate = float(row.Taxa[:-1]) / 100.0
                 self.add_security(
                     CDB(row.Ativo, row.Vencimento, rate, row.Data,
-                        row.PrecoUnitario),
+                        row.PrecoUnitario, row.Subcategoria),
                     row.Quantidade)
             elif kind == "LC":
                 rate = float(row.Taxa[:-1]) / 100.0
                 self.add_security(
                     LC(row.Ativo, row.Vencimento, rate, row.Data,
-                        row.PrecoUnitario),
+                        row.PrecoUnitario, row.Subcategoria),
                     row.Quantidade)
             elif kind == "Deb":
                 rate = float(row.Taxa[:-1]) / 100.0
