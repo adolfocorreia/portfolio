@@ -50,7 +50,7 @@ class DirectTreasureRetriever(ValueRetriever):
                     names=names,
                     parse_dates=['Dia'],
                     dayfirst=True,
-                    index_col=['Dia'],
+                    index_col=0,
                     skiprows=1
                 )
 
