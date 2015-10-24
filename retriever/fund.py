@@ -1,4 +1,3 @@
-import string
 import glob
 import re
 import pandas as pd
@@ -37,8 +36,8 @@ class FundRetriever(ValueRetriever):
             "Var12Meses",
         ]
 
-        file_list = sorted(glob.glob(self.data_directory +
-                "/??????????????_????.xlsx"))
+        file_list = sorted(glob.glob(
+            self.data_directory + "/??????????????_????.xlsx"))
         for file_name in file_list:
             print "Loading file %s..." % file_name
 
@@ -53,7 +52,7 @@ class FundRetriever(ValueRetriever):
                 names=names,
                 parse_dates=['Data'],
                 dayfirst=True,
-                index_col=['Data'],
+                index_col=0,
                 skiprows=0
             )
 
