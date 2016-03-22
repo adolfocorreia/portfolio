@@ -24,7 +24,7 @@ class IndexRetriever:
 
         session = requests.session()
         content = session.get(url, headers={'Connection': 'close'}).content
-        page = BeautifulSoup(content)
+        page = BeautifulSoup(content, "lxml")
 
         table_id = "ctl00_contentPlaceHolderConteudo_grdResumoCarteiraTeorica_ctl00"
         row = page.find(id=table_id).tbody.tr
