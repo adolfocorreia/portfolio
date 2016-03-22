@@ -68,7 +68,7 @@ class EquitySecurity(Security):
 class Stock(EquitySecurity):
     def __init__(self, name):
         code = int(name[-1])
-        assert code >= 3 and code <= 8, "Invalid stock: %s" % name
+        assert code >= 1 and code <= 8, "Invalid stock: %s" % name
         EquitySecurity.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
         self.category = MainCategories.Stocks
