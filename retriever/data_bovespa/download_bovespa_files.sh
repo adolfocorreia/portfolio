@@ -9,7 +9,7 @@ set -e
 
 #http://www.bmfbovespa.com.br/pt-br/cotacoes-historicas/FormSeriesHistoricasArq.asp
 FILENAME=COTAHIST_A${YEAR}.ZIP
-URL=http://www.bmfbovespa.com.br/InstDados/SerHist/${FILENAME}
+URL=http://bvmf.bmfbovespa.com.br/InstDados/SerHist/${FILENAME}
 
 echo "Downloading ${FILENAME}..."
 wget -q --random-wait -O "${FILENAME}" "${URL}"

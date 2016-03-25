@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup
 
 class IndexRetriever:
 
-    __base_URL = "http://www.bmfbovespa.com.br/indices/ResumoCarteiraTeorica.aspx?idioma=en-us&Indice="
+    __base_URL = "http://bvmf.bmfbovespa.com.br/indices/ResumoCarteiraTeorica.aspx?idioma=en-us&Indice="
     _index_URLs = {
         "Ibovespa": __base_URL + "Ibovespa",
         "IBrX100": __base_URL + "IBrX",
