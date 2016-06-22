@@ -1,4 +1,4 @@
-#/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -20,9 +20,18 @@ read_array() {
 
 
 #http://www.tesouro.fazenda.gov.br/balanco-e-estatisticas
-URL=http://www.tesouro.fazenda.gov.br/documents/10180/137713
+
+URL_BASE=http://sisweb.tesouro.gov.br/apex
+source ./URLs.txt
 
 for BOND in "${BONDS[@]}" ; do
     echo "Downloading ${BOND}_${YEAR}.xls..."
-    wget -q --random-wait -O ${BOND}_${YEAR}.xls "${URL}/${BOND}_${YEAR}.xls"
+    wget -q --random-wait -O ${BOND}_${YEAR}.xls ${URL_BASE}/${URLS[${BOND}_${YEAR}]}
 done
+
+# Old URL
+#URL=http://www.tesouro.fazenda.gov.br/documents/10180/137713
+#for BOND in "${BONDS[@]}" ; do
+#    echo "Downloading ${BOND}_${YEAR}.xls..."
+#    wget -q --random-wait -O ${BOND}_${YEAR}.xls "${URL}/${BOND}_${YEAR}.xls"
+#done

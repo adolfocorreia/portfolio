@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
@@ -35,7 +35,7 @@ while [[ "${CURRENT_TS}" -le "${END_TS}" ]] ; do
     FILENAME=${CURRENT_DATE}.txt
 
     # Download file only if it does not exist and if day is not Saturday (6) nor Sunday (7)
-    [[ ! -e ${FILENAME} && $(date -j -f "%s" "${CURRENT_TS}" "+%u") -lt 6 ]] && wget -q --random-wait "${URL}/${FILENAME}"
+    [[ ! -e ${FILENAME} && $(date -j -f "%s" "${CURRENT_TS}" "+%u") -lt 6 ]] && wget -q --random-wait "${URL}/${FILENAME}" || true
 
     if [[ -e ${FILENAME} ]] ; then
         echo -n "${CURRENT_DATE}," >> ${CSV_FILE}
