@@ -41,5 +41,5 @@ for DEB in "${DEBS[@]}" ; do
     CSV_NEG_FILE_NAME=${DEB}_NEG_${YEAR}.csv
     echo "Downloading ${CSV_NEG_FILE_NAME}..."
     wget -q --random-wait -O- "${URL_NEG}${DEB}" | iconv --from-code=ISO-8859-1 --to-code=UTF-8 | dos2unix -q > ${TSV_NEG_FILE_NAME}
-    [ -e ${TSV_NEG_FILE_NAME} ] && gtail -n +3 ${TSV_NEG_FILE_NAME} | sed 's/\.//g' | sed 's/,/./g' | tr '\t' ',' > ${CSV_NEG_FILE_NAME}
+    [ -e ${TSV_NEG_FILE_NAME} ] && gtail -n +3 ${TSV_NEG_FILE_NAME} | sed '/Não existe consulta para os itens selecionados/d' |  sed 's/\.//g' | sed 's/,/./g' | tr '\t' ',' > ${CSV_NEG_FILE_NAME}
 done
