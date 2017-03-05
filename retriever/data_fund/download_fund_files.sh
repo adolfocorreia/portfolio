@@ -12,7 +12,6 @@ read_array() {
     i=0
     while read LINE
     do
-        #FUNDS[i]=${LINE//[\.\/-]/}
         FUNDS[i]=${LINE}
         i=$((i + 1))
     done < "$1"
