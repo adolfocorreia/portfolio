@@ -12,19 +12,32 @@ read_array() {
     i=0
     while read LINE
     do
-        FUNDS[i]=${LINE//[\.\/-]/}
+        #FUNDS[i]=${LINE//[\.\/-]/}
+        FUNDS[i]=${LINE}
         i=$((i + 1))
     done < "$1"
 }
 [ -e "./codes.txt" ] && read_array "./codes.txt"
 
-SEARCH_URL="http://fundosdeinvestimentos.valor.com.br/vo2/Safi/Home/Pesquisa"
-SEARCH_DATA="TipoBusca=cnpj&Buscar=Buscar&AdminList=&txtBuscaPorFundo="
-SHEET_URL="http://fundosdeinvestimentos.valor.com.br/vo2/Safi/Home/ExcelEx"
-SHEET_DATA="per=3&dtIni=01/01/${YEAR}&dtFim=31/12/${YEAR}&anbid="
+source env/bin/activate
 
 for CNPJ in "${FUNDS[@]}" ; do
-    echo "Downloading ${CNPJ}_${YEAR}.xlsx..."
-    FUND_ID=$(wget -q --random-wait -O- --post-data "${SEARCH_DATA}${CNPJ}" "${SEARCH_URL}" | grep FundoResult | sed -e 's/^.*anbid=//' | sed -e "s/'.*$//")
-    wget -q --random-wait -O "${CNPJ}_${YEAR}.xlsx" --post-data "${SHEET_DATA}${FUND_ID}" "${SHEET_URL}"
+    CNPJ_NUMBERS=${CNPJ//[\.\/-]/}
+
+    echo "Downloading ${CNPJ_NUMBERS}_${YEAR}-MM.csv files..."
+    ./cvm_retriever.py "${CNPJ}" "${YEAR}"
+
+    YEAR_FILE="${CNPJ_NUMBERS}_${YEAR}.csv"
+    echo "Assembling ${YEAR_FILE} file..."
+    head -n 1 "${CNPJ_NUMBERS}_${YEAR}-01.csv" > "${YEAR_FILE}"
+
+    for MONTH in $(seq -f "%02g" 1 12) ; do
+        MONTH_FILE="${CNPJ_NUMBERS}_${YEAR}-${MONTH}.csv"
+        [ -e "${MONTH_FILE}" ] && gtail -n +2 "${MONTH_FILE}" | while read LINE
+        do
+            [[ $LINE =~ ", , , , , , ," ]] && continue
+            echo -n "${YEAR}-${MONTH}-" >> "${YEAR_FILE}"
+            echo "${LINE}" >> "${YEAR_FILE}"
+        done
+    done
 done
