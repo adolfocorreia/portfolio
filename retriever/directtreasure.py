@@ -1,6 +1,7 @@
 import string
 import glob
 import pandas as pd
+import re
 
 from .retriever import ValueRetriever
 
@@ -32,6 +33,8 @@ class DirectTreasureRetriever(ValueRetriever):
             "PU_Base_Manha"
         ]
 
+        regex = re.compile(r"NTN-B_Princ_([0-9]{6})")
+
         file_list = sorted(glob.glob(self.data_directory + "/*.xls"))
         for file_name in file_list:
             print "Loading file %s..." % file_name
@@ -40,6 +43,8 @@ class DirectTreasureRetriever(ValueRetriever):
 
             for sheet_name in excel.sheet_names:
                 bond_code = string.replace(sheet_name, " ", "_")
+                if regex.match(bond_code):
+                    bond_code = regex.sub(r"NTN-B_Principal_\g<1>", bond_code)
 
                 self._complete_codes.append(bond_code)
                 if bond_code not in self._data:
