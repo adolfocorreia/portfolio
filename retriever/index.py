@@ -1,3 +1,5 @@
+import inspect
+import os
 import requests
 from bs4 import BeautifulSoup
 
@@ -16,6 +18,11 @@ class IndexRetriever:
         "ISEE": __base_URL + "ISE",
     }
 
+    def __init__(self):
+        module_file = inspect.getfile(inspect.currentframe())
+        module_dir = os.path.dirname(os.path.abspath(module_file))
+        self.data_directory = module_dir + "/data_index"
+
     def get_composition(self, index):
         assert index in IndexRetriever._index_URLs
         url = IndexRetriever._index_URLs[index]
@@ -24,9 +31,17 @@ class IndexRetriever:
 
         session = requests.session()
         content = session.get(url, headers={'Connection': 'close'}).content
-        page = BeautifulSoup(content, "lxml")
-
         table_id = "ctl00_contentPlaceHolderConteudo_grdResumoCarteiraTeorica_ctl00"
+
+        file_name = self.data_directory + "/" + index + ".html"
+        if table_id in content:
+            with open(file_name, "w") as f:
+                f.write(content)
+        else:
+            with open(file_name, "r") as f:
+                content = f.read()
+
+        page = BeautifulSoup(content, "lxml")
         row = page.find(id=table_id).tbody.tr
         while row:
             stock = {}
