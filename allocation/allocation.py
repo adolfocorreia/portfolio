@@ -45,7 +45,7 @@ def compare_securities_allocation(goal, real, total_value=100.0):
         g = goal[sec]
         r = real[sec]
         d = r-g
-        nd = d/g
+        nd = d/g if g != 0.0 else 0.0
         v = abs(d) * total_value
 
         tuple_list.append((sec,g,r,d,nd,v))
