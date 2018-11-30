@@ -55,9 +55,9 @@ class DirectTreasureRetriever(ValueRetriever):
                     names=names,
                     parse_dates=['Dia'],
                     dayfirst=True,
-                    index_col=0,
                     skiprows=1
                 )
+                df.set_index('Dia', inplace=True)
 
                 self._data[bond_code] = self._data[bond_code].append(df)
 
