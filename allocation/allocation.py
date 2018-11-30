@@ -21,7 +21,7 @@ def compare_allocation_sets(goal, real, total_value=100.0):
         g = goal.map[cat]
         r = real.map[cat]
         d = r-g
-        nd = d/g
+        nd = d/g if g != 0.0 else 0.0
         v = abs(d) * total_value
 
         print "%-20s Goal: %5.1f%% | Real: %5.1f%% | Diff: %7.2f%%    %6s R$ %8.2f" \
