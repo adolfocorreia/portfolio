@@ -14,10 +14,10 @@ URL=ftp://ftp.cetip.com.br/MediaCDI
 CSV_FILE=CDI_${YEAR}.csv
 
 OFFSET=86400  # 24*60*60
-INITIAL_TS=$(date -j -f "%Y-%m-%d %H:%M:%S" "${YEAR}-01-01 00:00:00" "+%s")
-FINAL_TS=$(date -j -f "%Y-%m-%d %H:%M:%S" "${YEAR}-12-31 00:00:00" "+%s")
+INITIAL_TS=$(date --date="${YEAR}-01-01 00:00:00" "+%s")
+FINAL_TS=$(date --date="${YEAR}-12-31 00:00:00" "+%s")
 TODAY=$(date "+%Y-%m-%d")
-TODAY_TS=$(date -j -f "%Y-%m-%d %H:%M:%S" "${TODAY} 00:00:00" "+%s")
+TODAY_TS=$(date --date="${TODAY} 00:00:00" "+%s")
 
 if [[ ${FINAL_TS} -lt ${TODAY_TS} ]] ; then
     MINIMAL_TS=${FINAL_TS}
@@ -31,11 +31,11 @@ echo "Date,CDI" > ${CSV_FILE}
 
 CURRENT_TS=$INITIAL_TS
 while [[ "${CURRENT_TS}" -le "${END_TS}" ]] ; do
-    CURRENT_DATE=$(date -j -f "%s" "${CURRENT_TS}" "+%Y%m%d")
+    CURRENT_DATE=$(date --date="@${CURRENT_TS}" "+%Y%m%d")
     FILENAME=${CURRENT_DATE}.txt
 
     # Download file only if it does not exist and if day is not Saturday (6) nor Sunday (7)
-    [[ ! -e ${FILENAME} && $(date -j -f "%s" "${CURRENT_TS}" "+%u") -lt 6 ]] && wget -q --random-wait "${URL}/${FILENAME}" || true
+    [[ ! -e ${FILENAME} && $(date --date="@${CURRENT_TS}" "+%u") -lt 6 ]] && wget -q --random-wait "${URL}/${FILENAME}" || true
 
     if [[ -e ${FILENAME} ]] ; then
         echo -n "${CURRENT_DATE}," >> ${CSV_FILE}

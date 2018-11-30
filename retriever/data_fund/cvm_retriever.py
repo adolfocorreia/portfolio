@@ -56,7 +56,7 @@ captcha_url = base_img_url + end_img_url
 br.retrieve(captcha_url, captcha_file)
 
 # Manually solve the captcha
-print "Please enter below the number shown in the Preview window:"
+print "Please enter below the number shown in the viewer window:"
 solver = CaptchaSolver("browser")
 with open(captcha_file, "rb") as f:
     raw_data = f.read()

@@ -32,7 +32,7 @@ for CNPJ in "${FUNDS[@]}" ; do
 
     for MONTH in $(seq -f "%02g" 1 12) ; do
         MONTH_FILE="${CNPJ_NUMBERS}_${YEAR}-${MONTH}.csv"
-        [ -e "${MONTH_FILE}" ] && gtail -n +2 "${MONTH_FILE}" | while read LINE
+        [ -e "${MONTH_FILE}" ] && tail -n +2 "${MONTH_FILE}" | while read LINE
         do
             [[ $LINE =~ ", , , , , , ," ]] && continue
             echo -n "${YEAR}-${MONTH}-" >> "${YEAR_FILE}"
