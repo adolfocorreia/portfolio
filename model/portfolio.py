@@ -1,16 +1,16 @@
-import pandas as pd
-from datetime import datetime as dt
 from collections import namedtuple
+from datetime import datetime as dt
+
+import pandas as pd
 
 from allocation import AllocationSet
 
 from .security import (
     EquitySecurity,
     InfraDebenture,
-    LCI,
-    CDB,
-    LC,
-    HedgeFundShare,
+    BankBondCDI,
+    BankBondPre,
+    BankBondIPCA,
     RealEstateFundShare,
     ExchangeTradedFundShare,
     StockFundShare,
@@ -46,14 +46,15 @@ class Portfolio:
         self.subcategories_values[MainCategories.Cash] = dict.fromkeys(list(CashCategories), 0.0)
 
 
-    def load_from_csv(self, file):
+    def load_from_csv(self, file_name):
         df = pd.read_csv(
-            file,
+            file_name,
             parse_dates=['Data', 'Vencimento'],
-            header=0
+            header=0,
+            comment='#'
         )
 
-        for index, row in df.iterrows():
+        for _, row in df.iterrows():
             kind = row.Categoria
 
             if kind == "TD":
@@ -69,24 +70,26 @@ class Portfolio:
                 self.add_security(
                     RealEstateFundShare(row.Ativo),
                     row.Quantidade)
-            elif kind == "LCI":
+            elif kind == "LCI" or kind == "CDB" or kind == "LC":
                 rate = float(row.Taxa[:-1]) / 100.0
-                self.add_security(
-                    LCI(row.Ativo, row.Vencimento, rate, row.Data,
-                        row.PrecoUnitario, row.Subcategoria),
-                    row.Quantidade)
-            elif kind == "CDB":
-                rate = float(row.Taxa[:-1]) / 100.0
-                self.add_security(
-                    CDB(row.Ativo, row.Vencimento, rate, row.Data,
-                        row.PrecoUnitario, row.Subcategoria),
-                    row.Quantidade)
-            elif kind == "LC":
-                rate = float(row.Taxa[:-1]) / 100.0
-                self.add_security(
-                    LC(row.Ativo, row.Vencimento, rate, row.Data,
-                        row.PrecoUnitario, row.Subcategoria),
-                    row.Quantidade)
+                indexer = row.Indexador
+                if indexer == "CDI":
+                    self.add_security(
+                        BankBondCDI(row.Ativo, row.Vencimento, rate, row.Data,
+                                    row.PrecoUnitario, row.Subcategoria),
+                        row.Quantidade)
+                elif indexer == "Prefixado":
+                    self.add_security(
+                        BankBondPre(row.Ativo, row.Vencimento, rate, row.Data,
+                                    row.PrecoUnitario, row.Subcategoria),
+                        row.Quantidade)
+                elif indexer == "IPCA":
+                    self.add_security(
+                        BankBondIPCA(row.Ativo, row.Vencimento, rate, row.Data,
+                                     row.PrecoUnitario, row.Subcategoria),
+                        row.Quantidade)
+                else:
+                    raise Exception("Unknown indexer for %s security: %s" % (kind, indexer))
             elif kind == "Deb":
                 rate = float(row.Taxa[:-1]) / 100.0
                 self.add_security(

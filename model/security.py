@@ -1,19 +1,3 @@
-from abc import ABCMeta
-from datetime import datetime
-
-from .rate import BondRate, FixedRate, CDIRate, SELICRate, IPCARate
-from .category import (
-    MainCategories,
-    StocksCategories,
-    RealEstateCategories,
-    PrivateDebtCategories,
-    PublicDebtCategories,
-)
-
-
-import retriever
-
-
 """
 A security is a tradable financial asset of any kind.
 Securities are broadly categorized into:
@@ -24,6 +8,22 @@ Reference: http://en.wikipedia.org/wiki/Security_(finance)
 
 Fund shares may be categorized as equity securities as well.
 """
+
+
+from abc import ABCMeta
+from datetime import datetime
+
+import retriever
+
+from .rate import BondRate, FixedRate, CDIRate, SELICRate, IPCARate
+from .category import (
+    MainCategories,
+    StocksCategories,
+    RealEstateCategories,
+    PrivateDebtCategories,
+    PublicDebtCategories,
+)
+
 
 
 class Security:
@@ -251,7 +251,6 @@ class BankBond(DebtSecurity):
         DebtSecurity.__init__(self, name, maturity, rate)
         self.issue_date = issue_date
         self.unit_value = unit_value
-        self.retriever = retriever.get_cdi_retriever()
         self.category = MainCategories.PrivateDebt
         self.subcategory = PrivateDebtCategories[subcat]
 
@@ -271,29 +270,47 @@ class BankBond(DebtSecurity):
             daily_rate = (annual_rate + 1.0)**(1.0 / 365.0) - 1.0
             variation = (daily_rate + 1.0)**days - 1.0
             return (1.0 + variation) * self.unit_value
+        elif isinstance(self.rate, IPCARate):
+            begin_date = self.issue_date.strftime("%Y-%m-%d")
+            end_date = date.strftime("%Y-%m-%d")
+
+            ipca_variation = self.retriever.get_variation(
+                "IPCA", begin_date, end_date)
+            adjusted_unit_value = (1.0 + ipca_variation) * self.unit_value
+
+            delta = date - self.issue_date
+            days = delta.days
+            annual_rate = self.rate.rate
+            daily_rate = (annual_rate + 1.0)**(1.0 / 365.0) - 1.0
+            pre_variation = (daily_rate + 1.0)**days - 1.0
+            final_unit_value = (1.0 + pre_variation) * adjusted_unit_value
+
+            return final_unit_value
         else:
             assert False
 
 
-class LCI(BankBond):
+class BankBondCDI(BankBond):
     def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert name.startswith("LCI")
+        assert name.startswith("LCI") or name.startswith("CDB") or name.startswith("LC")
         rate = CDIRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
+        self.retriever = retriever.get_cdi_retriever()
 
 
-class CDB(BankBond):
+class BankBondPre(BankBond):
     def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert name.startswith("CDB")
-        rate = CDIRate(rate_value)
-        BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
-
-
-class LC(BankBond):
-    def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert name.startswith("LC")
+        assert name.startswith("LCI") or name.startswith("CDB") or name.startswith("LC")
         rate = FixedRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
+
+
+class BankBondIPCA(BankBond):
+    def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
+        assert name.startswith("LCI") or name.startswith("CDB") or name.startswith("LC")
+        rate = IPCARate(rate_value)
+        BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
+        self.retriever = retriever.get_ipca_retriever()
 
 
 ##############
