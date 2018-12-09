@@ -18,8 +18,6 @@ read_array() {
 }
 [ -e "./codes.txt" ] && read_array "./codes.txt"
 
-source env/bin/activate
-
 for CNPJ in "${FUNDS[@]}" ; do
     CNPJ_NUMBERS=${CNPJ//[\.\/-]/}
 
