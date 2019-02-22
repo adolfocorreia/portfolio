@@ -141,10 +141,10 @@ class Portfolio:
         print
 
         for cat in sorted(list(MainCategories)):
-            print "%12s: R$ %9.2f  (%5.2f%%)" % (
+            print "%12s: R$ %10.2f  (%5.2f%%)" % (
                 cat.name, self.categories_values[cat],
                 self.categories_values[cat] / self.portfolio_value * 100.0)
-        print "       TOTAL: R$ %9.2f" % self.portfolio_value
+        print "       TOTAL: R$ %10.2f" % self.portfolio_value
 
     def get_allocation(self):
         allocations = [(x[0], x[1] / self.portfolio_value)
