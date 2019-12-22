@@ -21,7 +21,7 @@ read_array() {
 
 #http://www.tesouro.fazenda.gov.br/balanco-e-estatisticas
 
-URL_BASE=http://sisweb.tesouro.gov.br/apex
+URL_BASE=http://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo
 source ./URLs.txt
 
 for BOND in "${BONDS[@]}" ; do

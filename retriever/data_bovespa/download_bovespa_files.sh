@@ -8,9 +8,14 @@ set -e
 [[ -z $YEAR ]] && YEAR=$(date +"%Y")
 
 #http://www.bmfbovespa.com.br/pt-br/cotacoes-historicas/FormSeriesHistoricasArq.asp
-FILENAME=COTAHIST_A${YEAR}.ZIP
-URL=http://bvmf.bmfbovespa.com.br/InstDados/SerHist/${FILENAME}
+BASENAME=COTAHIST_A${YEAR}
+FILENAMEZIP=${BASENAME}.ZIP
+FILENAMETXT=${BASENAME}.TXT
+URL=http://bvmf.bmfbovespa.com.br/InstDados/SerHist/${FILENAMEZIP}
 
-echo "Downloading ${FILENAME}..."
-wget -q --random-wait -O "${FILENAME}" "${URL}"
-unzip -q -o "${FILENAME}"
+echo "Downloading ${FILENAMEZIP}..."
+wget -q --random-wait -O "${FILENAMEZIP}" "${URL}"
+unzip -q -o "${FILENAMEZIP}"
+
+touch "${FILENAMEZIP}"
+touch "${FILENAMETXT}"
