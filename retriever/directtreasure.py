@@ -57,6 +57,7 @@ class DirectTreasureRetriever(ValueRetriever):
                     dayfirst=True,
                     skiprows=1
                 )
+                df.drop_duplicates(subset='Dia', inplace=True)
                 df.set_index('Dia', inplace=True)
 
                 self._data[bond_code] = self._data[bond_code].append(df)

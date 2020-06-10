@@ -92,7 +92,7 @@ today = dt.date.today()
 year = df_proj.iloc[12,1][-3:-1]
 assert year == today.strftime("%y"), "Unexpected projection year: %s" % year
 month = df_proj.iloc[12,1][-7:-4]
-assert MONTHS[month.upper()] == today.month, "Unexpected projection year: %s" % month
+assert MONTHS[month.upper()] == today.month, "Unexpected projection month: %s" % month
 
 
 # Append present month projection rate
