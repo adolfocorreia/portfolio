@@ -292,7 +292,7 @@ class BankBond(DebtSecurity):
 
 class BankBondCDI(BankBond):
     def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert name.startswith("LCI") or name.startswith("CDB") or name.startswith("LC")
+        assert name.startswith("LCI") or name.startswith("LCA") or name.startswith("CDB") or name.startswith("LC")
         rate = CDIRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
         self.retriever = retriever.get_cdi_retriever()
@@ -300,14 +300,14 @@ class BankBondCDI(BankBond):
 
 class BankBondPre(BankBond):
     def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert name.startswith("LCI") or name.startswith("CDB") or name.startswith("LC")
+        assert name.startswith("LCI") or name.startswith("LCA") or name.startswith("CDB") or name.startswith("LC")
         rate = FixedRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
 
 
 class BankBondIPCA(BankBond):
     def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert name.startswith("LCI") or name.startswith("CDB") or name.startswith("LC")
+        assert name.startswith("LCI") or name.startswith("LCA") or name.startswith("CDB") or name.startswith("LC")
         rate = IPCARate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
         self.retriever = retriever.get_ipca_retriever()
