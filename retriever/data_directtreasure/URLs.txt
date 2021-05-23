@@ -1,6 +1,15 @@
-# URLs available at http://www.tesouro.fazenda.gov.br/pt/balanco-e-estatisticas
+# URLs available at:
+# - http://www.tesouro.fazenda.gov.br/pt/balanco-e-estatisticas
+# - https://sisweb.tesouro.gov.br/apex/f?p=2031:2:0::::
 
 declare -A URLS
+
+URLS[LFT_2021]="462:100856"
+URLS[LTN_2021]="461:83786"
+URLS[NTN_C_2021]="463:41358"
+URLS[NTN_B_2021]="466:75189"
+URLS[NTN_B_Principal_2021]="465:866272"
+URLS[NTN_F_2021]="464:18443"
 
 URLS[LFT_2020]="444:79907"
 URLS[LTN_2020]="446:74455"
