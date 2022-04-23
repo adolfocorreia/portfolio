@@ -53,7 +53,7 @@ class DebenturesRetriever(ValueRetriever):
                 index_col=['Data'],
                 names=names,
                 header=0
-            )
+            ).sort_index(kind='stable')
 
             self._data[deb] = self._data[deb].append(df)
 

@@ -30,7 +30,7 @@ class IndexRetriever:
         stocks = []
 
         session = requests.session()
-        content = session.get(url, headers={'Connection': 'close'}).content
+        content = session.get(url, headers={'Connection': 'close'}, verify=False).content
         table_id = "ctl00_contentPlaceHolderConteudo_grdResumoCarteiraTeorica_ctl00"
 
         file_name = self.data_directory + "/" + index + ".html"

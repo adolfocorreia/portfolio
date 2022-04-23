@@ -11,10 +11,10 @@ set -e
 BASENAME=COTAHIST_A${YEAR}
 FILENAMEZIP=${BASENAME}.ZIP
 FILENAMETXT=${BASENAME}.TXT
-URL=http://bvmf.bmfbovespa.com.br/InstDados/SerHist/${FILENAMEZIP}
+URL=https://bvmf.bmfbovespa.com.br/InstDados/SerHist/${FILENAMEZIP}
 
 echo "Downloading ${FILENAMEZIP}..."
-wget -q --random-wait -O "${FILENAMEZIP}" "${URL}"
+wget -q --no-check-certificate --random-wait -O "${FILENAMEZIP}" "${URL}"
 unzip -q -o "${FILENAMEZIP}"
 
 touch "${FILENAMEZIP}"

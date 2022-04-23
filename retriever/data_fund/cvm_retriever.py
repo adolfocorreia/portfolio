@@ -25,8 +25,6 @@ year = int(sys.argv[2])
 assert re.match(r"^(19|20)[0-9]{2}$", str(year))
 
 home_url = "http://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/CPublica/CConsolFdo/FormBuscaParticFdo.aspx"
-base_img_url = "http://cvmweb.cvm.gov.br/SWB/Sistemas/SCW/CPublica"
-captcha_file = "/tmp/captcha.jpg"
 
 # Browser
 br = mechanize.Browser()
@@ -48,26 +46,11 @@ br.set_cookiejar(cj)
 # Open first page
 response = br.open(home_url)
 
-# Find CAPTCHA URL and download the image file
-html1 = response.read()
-page = BeautifulSoup(html1, "lxml")
-end_img_url = page.findAll("img")[0].attrs["src"][2:]
-captcha_url = base_img_url + end_img_url
-br.retrieve(captcha_url, captcha_file)
-
-# Manually solve the captcha
-print "Please enter below the number shown in the viewer window:"
-solver = CaptchaSolver("browser")
-with open(captcha_file, "rb") as f:
-    raw_data = f.read()
-captcha_solution = solver.solve_captcha(raw_data)
-
 # Submit form to search for funds
 br.select_form(nr=0)
 br.set_all_readonly(False)
 br.form["txtCNPJNome"] = cnpj
 br.form["ddlTpFdo"] = 0
-br.form["numRandom"] = captcha_solution
 
 sleep(1)
 response = br.submit()

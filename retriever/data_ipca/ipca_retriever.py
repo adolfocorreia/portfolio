@@ -16,7 +16,7 @@ YEAR = int(sys.argv[1])
 assert re.match(r"^(19|20)[0-9]{2}$", str(YEAR))
 
 
-IPCA_MAIN_URL = "ftp://ftp.ibge.gov.br/Precos_Indices_de_Precos_ao_Consumidor/IPCA/Serie_Historica/ipca_SerieHist.zip"
+IPCA_MAIN_URL = "https://ftp.ibge.gov.br/Precos_Indices_de_Precos_ao_Consumidor/IPCA/Serie_Historica/ipca_SerieHist.zip"
 IPCA_ZIP_FILE = "ipca_SerieHist.zip"
 IPCA_MAIN_FILE = "ipca_SerieHist.xls"
 

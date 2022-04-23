@@ -82,11 +82,14 @@ class BovespaRetriever(ValueRetriever):
                 index_col=['DATA', 'CODNEG'],
                 colspecs=colspecs,
                 skipfooter=1)
+            df = df[df['TPMERC'] == 10]  # Mercado a vista
 
             self._data = self._data.append(df)
 
         for col in prices:
             self._data[col] /= 100.0
+
+        self._data.sort_index(inplace=True, kind='stable')
 
         print "Done loading stocks TXT files."
 

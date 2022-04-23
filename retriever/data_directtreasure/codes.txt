@@ -1,6 +1,6 @@
 LFT
 LTN
-NTN_B
-NTN_B_Principal
-NTN_C
-NTN_F
+NTN-B
+NTN-B_Principal
+NTN-C
+NTN-F

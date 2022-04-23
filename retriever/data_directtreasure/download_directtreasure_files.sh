@@ -19,19 +19,12 @@ read_array() {
 [ -e "./codes.txt" ] && read_array "./codes.txt"
 
 
-#http://www.tesouro.fazenda.gov.br/balanco-e-estatisticas
+#https://www.tesourodireto.com.br/titulos/historico-de-precos-e-taxas.htm
 
-URL_BASE=http://sisweb.tesouro.gov.br/apex/cosis/sistd/obtem_arquivo
-source ./URLs.txt
+URL_BASE=https://cdn.tesouro.gov.br/sistemas-internos/apex/producao/sistemas/sistd
 
 for BOND in "${BONDS[@]}" ; do
     echo "Downloading ${BOND}_${YEAR}.xls..."
-    wget -q --random-wait -O ${BOND}_${YEAR}.xls ${URL_BASE}/${URLS[${BOND}_${YEAR}]}
+    wget -q --random-wait -O ${BOND}_${YEAR}.xls ${URL_BASE}/${YEAR}/${BOND}_${YEAR}.xls
 done
 
-# Old URL
-#URL=http://www.tesouro.fazenda.gov.br/documents/10180/137713
-#for BOND in "${BONDS[@]}" ; do
-#    echo "Downloading ${BOND}_${YEAR}.xls..."
-#    wget -q --random-wait -O ${BOND}_${YEAR}.xls "${URL}/${BOND}_${YEAR}.xls"
-#done
