@@ -39,9 +39,9 @@ cj = http.cookiejar.LWPCookieJar()
 br.set_cookiejar(cj)
 
 # Debugging messages
-#br.set_debug_http(True)
-#br.set_debug_redirects(True)
-#br.set_debug_responses(True)
+# br.set_debug_http(True)
+# br.set_debug_redirects(True)
+# br.set_debug_responses(True)
 
 # Open first page
 response = br.open(home_url)
@@ -78,9 +78,9 @@ response = br.follow_link(text_regex="Dados")
 # Sets months array
 now = datetime.now()
 if year == now.year:
-    months = range(1, now.month+1)
+    months = range(1, now.month + 1)
 else:
-    months = range(1, 12+1)
+    months = range(1, 12 + 1)
 
 # For each month
 translation_map = str.maketrans("", "", "./-")
@@ -100,7 +100,9 @@ for month in months:
     html5 = response.read()
     page = BeautifulSoup(html5.decode("iso-8859-15"), "lxml")
     table = page.find("table", {"id": "dgDocDiario"})
-    csv_file = cnpj.translate(translation_map) + "_" + "{}-{:02d}".format(year, month) + ".csv"
+    csv_file = (
+        cnpj.translate(translation_map) + "_" + "{}-{:02d}".format(year, month) + ".csv"
+    )
     with open(csv_file, "w") as f:
         for tr in table.findChildren(recursive=False):
             values = []

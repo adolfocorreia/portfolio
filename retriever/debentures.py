@@ -6,13 +6,11 @@ from .retriever import ValueRetriever
 
 
 class DebenturesRetriever(ValueRetriever):
-
     def __init__(self):
         ValueRetriever.__init__(self, "debentures")
 
     def _get_data_file_patterns(self):
-        return [self.data_directory + "/" + code + "_NEG_%s.csv"
-                for code in self.codes]
+        return [self.data_directory + "/" + code + "_NEG_%s.csv" for code in self.codes]
 
     def _available_codes(self):
         return self.codes
@@ -42,18 +40,19 @@ class DebenturesRetriever(ValueRetriever):
         for file_name in file_list:
             print("Loading file %s..." % file_name)
 
-            reg_exp = re.search(self.data_directory + r"/(.*)_NEG_\d{4}\.csv",
-                                file_name)
+            reg_exp = re.search(
+                self.data_directory + r"/(.*)_NEG_\d{4}\.csv", file_name
+            )
             deb = reg_exp.groups()[0]
 
             df = pd.read_csv(
                 file_name,
-                parse_dates=['Data'],
+                parse_dates=["Data"],
                 dayfirst=True,
-                index_col=['Data'],
+                index_col=["Data"],
                 names=names,
-                header=0
-            ).sort_index(kind='stable')
+                header=0,
+            ).sort_index(kind="stable")
 
             if len(df) > 0:
                 self._data[deb] = pd.concat([self._data[deb], df])

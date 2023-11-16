@@ -5,7 +5,6 @@ from .retriever import ValueRetriever
 
 
 class BovespaRetriever(ValueRetriever):
-
     def __init__(self):
         ValueRetriever.__init__(self, "bovespa")
 
@@ -18,6 +17,7 @@ class BovespaRetriever(ValueRetriever):
     def _load_data_files(self):
         print("Loading stocks TXT files...")
 
+        # fmt: off
         fields = [
             (  1,   2, "TIPREG"),
             (  3,  10, "DATA"  ),  # Data
@@ -46,8 +46,9 @@ class BovespaRetriever(ValueRetriever):
             (231, 242, "CODISI"),
             (243, 245, "DISMES"),
         ]
+        # fmt: on
 
-        colspecs = [(item[0]-1, item[1]) for item in fields]
+        colspecs = [(item[0] - 1, item[1]) for item in fields]
         names = [item[2] for item in fields]
 
         # filter_CODBDI = [
@@ -78,25 +79,26 @@ class BovespaRetriever(ValueRetriever):
                 file_name,
                 names=names,
                 header=0,
-                parse_dates=['DATA'],
-                index_col=['DATA', 'CODNEG'],
+                parse_dates=["DATA"],
+                index_col=["DATA", "CODNEG"],
                 colspecs=colspecs,
                 skipfooter=1,
-                encoding='windows-1252')
-            df = df[df['TPMERC'] == 10]  # Mercado a vista
+                encoding="windows-1252",
+            )
+            df = df[df["TPMERC"] == 10]  # Mercado a vista
 
             self._data = pd.concat([self._data, df])
 
         for col in prices:
             self._data[col] /= 100.0
 
-        self._data.sort_index(inplace=True, kind='stable')
+        self._data.sort_index(inplace=True, kind="stable")
 
         print("Done loading stocks TXT files.")
 
     def get_value(self, code, date):
         ValueRetriever.get_value(self, code, date)
         ts = pd.Timestamp(date)
-        sub_df = self._data.xs(code, level='CODNEG')
+        sub_df = self._data.xs(code, level="CODNEG")
         asof_ts = sub_df.index.asof(ts)
         return sub_df.loc[asof_ts].PREULT

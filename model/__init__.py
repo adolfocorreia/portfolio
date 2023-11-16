@@ -43,7 +43,6 @@ from .category import (
 )
 
 __all__ = [
-
     "Security",
     "EquitySecurity",
     "Stock",
@@ -74,14 +73,11 @@ __all__ = [
     # "Future",
     # "Option",
     # "Swap",
-
     "Portfolio",
-
     "MainCategories",
     "StocksCategories",
     "RealEstateCategories",
     "PrivateDebtCategories",
     "PublicDebtCategories",
     "CashCategories",
-
 ]

@@ -7,7 +7,6 @@ from .retriever import VariationRetriever
 
 
 class CDIRetriever(VariationRetriever):
-
     def __init__(self):
         VariationRetriever.__init__(self, "cdi")
 
@@ -29,10 +28,10 @@ class CDIRetriever(VariationRetriever):
 
             df = pd.read_csv(
                 file_name,
-                names=['date', 'annual'],
+                names=["date", "annual"],
                 header=0,
-                parse_dates=['date'],
-                index_col=['date']
+                parse_dates=["date"],
+                index_col=["date"],
             )
 
             self._data = pd.concat([self._data, df])
@@ -40,9 +39,9 @@ class CDIRetriever(VariationRetriever):
         self._data.annual /= 10000.0
 
         # http://www.cetip.com.br/astec/di_documentos/metodologia2_i1.htm
-        self._data['daily'] = np.around(
-            (self._data.annual + 1.0)**(1.0 / 252.0) - 1.0,
-            decimals=8)
+        self._data["daily"] = np.around(
+            (self._data.annual + 1.0) ** (1.0 / 252.0) - 1.0, decimals=8
+        )
 
     def get_variation(self, code, begin_date, end_date, percentage=1.0):
         VariationRetriever.get_variation(self, code, begin_date, end_date)
@@ -54,4 +53,4 @@ class CDIRetriever(VariationRetriever):
         end = end - dt.timedelta(days=1)
 
         interval_df = self._data.loc[start:end]
-        return round((interval_df.daily*percentage + 1.0).prod() - 1.0, 8)
+        return round((interval_df.daily * percentage + 1.0).prod() - 1.0, 8)

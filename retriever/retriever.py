@@ -17,8 +17,7 @@ class DataRetriever(metaclass=ABCMeta):
         module_dir = os.path.dirname(os.path.abspath(module_file))
         self.data_directory = module_dir + "/data_" + asset_type.lower()
 
-        self.codes = [line.strip()
-                for line in open(self.data_directory + "/codes.txt")]
+        self.codes = [line.strip() for line in open(self.data_directory + "/codes.txt")]
 
         self._needs_to_be_loaded = True
         self.check_and_update_data()
@@ -34,7 +33,7 @@ class DataRetriever(metaclass=ABCMeta):
 
     def _check_and_download_data_files(self):
         current_year = time.localtime()[0]
-        for year in range(DataRetriever._initial_year, current_year+1):
+        for year in range(DataRetriever._initial_year, current_year + 1):
             for file_pattern in self._get_data_file_patterns():
                 file_name = file_pattern % year
                 if not self._is_file_up_to_date(file_name, year):
@@ -65,15 +64,11 @@ class DataRetriever(metaclass=ABCMeta):
         current_year = time.localtime()[0]
 
         if base_year == current_year:
-            newer_than_1day = (time.time() - os.path.getmtime(file_name)
-                               < 24*60*60)
+            newer_than_1day = time.time() - os.path.getmtime(file_name) < 24 * 60 * 60
             return newer_than_1day
         else:
-            first_day_of_base_year = time.mktime(
-                (base_year, 1, 1, 0, 0, 0, -1, -1, -1)
-            )
-            newer_than_base_year = (os.path.getmtime(file_name)
-                                    > first_day_of_base_year)
+            first_day_of_base_year = time.mktime((base_year, 1, 1, 0, 0, 0, -1, -1, -1))
+            newer_than_base_year = os.path.getmtime(file_name) > first_day_of_base_year
             return newer_than_base_year
 
     @abstractmethod
@@ -90,18 +85,18 @@ class DataRetriever(metaclass=ABCMeta):
 
 
 class ValueRetriever(DataRetriever, metaclass=ABCMeta):
-        def get_today_value(self, code):
-            return self.get_value(code, dt.strftime(dt.today(), "%Y-%m-%d"))
+    def get_today_value(self, code):
+        return self.get_value(code, dt.strftime(dt.today(), "%Y-%m-%d"))
 
-        @abstractmethod
-        def get_value(self, code, date):
-            assert code in self._available_codes()
-            assert DataRetriever._date_regex.match(date)
+    @abstractmethod
+    def get_value(self, code, date):
+        assert code in self._available_codes()
+        assert DataRetriever._date_regex.match(date)
 
 
 class VariationRetriever(DataRetriever, metaclass=ABCMeta):
-        @abstractmethod
-        def get_variation(self, code, begin_date, end_date):
-            assert code in self._available_codes()
-            assert DataRetriever._date_regex.match(begin_date)
-            assert DataRetriever._date_regex.match(end_date)
+    @abstractmethod
+    def get_variation(self, code, begin_date, end_date):
+        assert code in self._available_codes()
+        assert DataRetriever._date_regex.match(begin_date)
+        assert DataRetriever._date_regex.match(end_date)

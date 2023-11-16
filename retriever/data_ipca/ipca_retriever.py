@@ -22,7 +22,9 @@ IPCA_MAIN_FILE = "ipca_SerieHist.xls"
 
 # http://www.anbima.com.br/pt_br/informar/estatisticas/precos-e-indices/projecao-de-inflacao-gp-m.htm
 # http://www.anbima.com.br/pt_br/informar/tabela-de-indicadores.htm
-IPCA_PROJECTION_URL = "http://www.anbima.com.br/informacoes/indicadores/arqs/indicadores.xls"
+IPCA_PROJECTION_URL = (
+    "http://www.anbima.com.br/informacoes/indicadores/arqs/indicadores.xls"
+)
 IPCA_PROJECTION_FILE = "indicadores.xls"
 
 COL_NAMES = [
@@ -33,7 +35,7 @@ COL_NAMES = [
     "Perc3Meses",
     "Perc6Meses",
     "PercNoAno",
-    "Perc12Meses"
+    "Perc12Meses",
 ]
 MONTHS = {
     "JAN": 1,
@@ -47,7 +49,7 @@ MONTHS = {
     "SET": 9,
     "OUT": 10,
     "NOV": 11,
-    "DEZ": 12
+    "DEZ": 12,
 }
 
 TODAY = dt.datetime.combine(dt.date.today(), dt.datetime.min.time())
@@ -62,7 +64,7 @@ except OSError:
 if modification_time < TODAY:
     urllib.request.urlretrieve(IPCA_MAIN_URL, IPCA_ZIP_FILE)
 
-    with zipfile.ZipFile(IPCA_ZIP_FILE, 'r') as myzip:
+    with zipfile.ZipFile(IPCA_ZIP_FILE, "r") as myzip:
         assert len(myzip.namelist()) == 1
         filename = myzip.namelist()[0]
         myzip.extract(filename)
@@ -84,13 +86,18 @@ for i in range(len(df)):
         year = df.iloc[i].Ano
 
 df["Mes"] = df.Mes.apply(lambda x: MONTHS[x])
-df.drop(axis=1, inplace=True,
-        columns=["NumeroIndice", "Perc3Meses", "Perc6Meses", "PercNoAno", "Perc12Meses"])
+df.drop(
+    axis=1,
+    inplace=True,
+    columns=["NumeroIndice", "Perc3Meses", "Perc6Meses", "PercNoAno", "Perc12Meses"],
+)
 
 
 # Download and load projection data
 try:
-    modification_time = dt.datetime.fromtimestamp(os.path.getmtime(IPCA_PROJECTION_FILE))
+    modification_time = dt.datetime.fromtimestamp(
+        os.path.getmtime(IPCA_PROJECTION_FILE)
+    )
 except OSError:
     modification_time = dt.datetime.fromtimestamp(0)
 
@@ -110,18 +117,15 @@ assert MONTHS[month.upper()] == TODAY.month, "Unexpected projection month: %s" %
 
 
 # Append present month projection rate
-rows = {
-    "Ano": [TODAY.year],
-    "Mes": [TODAY.month],
-    "PercNoMes": [df_proj.iloc[12, 2]]
-}
+rows = {"Ano": [TODAY.year], "Mes": [TODAY.month], "PercNoMes": [df_proj.iloc[12, 2]]}
 df = pd.concat([df, pd.DataFrame.from_dict(rows)])
 
 
 # Calculate daily rates
-df["DiasNoMes"] = df.apply(lambda row: calendar.monthrange(row["Ano"], row["Mes"]), axis=1) \
-                    .apply(lambda t: t[1])
-df["TaxaDiaria"] = (1.0 + df.PercNoMes/100.0) ** (1.0/df.DiasNoMes) - 1.0
+df["DiasNoMes"] = df.apply(
+    lambda row: calendar.monthrange(row["Ano"], row["Mes"]), axis=1
+).apply(lambda t: t[1])
+df["TaxaDiaria"] = (1.0 + df.PercNoMes / 100.0) ** (1.0 / df.DiasNoMes) - 1.0
 
 
 # Assemble CSV file
@@ -132,7 +136,7 @@ FIRST_DAY = dt.date(YEAR, 1, 1)
 LAST_DAY = min(dt.date(YEAR, 12, 31), dt.date.today())
 
 csv_file_name = "IPCA_%s.csv" % YEAR
-with open(csv_file_name, 'w') as csv_file:
+with open(csv_file_name, "w") as csv_file:
     csv_file.write("Dia,Taxa\n")
     day = FIRST_DAY
     while day <= LAST_DAY:

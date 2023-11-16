@@ -25,7 +25,6 @@ from .category import (
 )
 
 
-
 class Security(metaclass=ABCMeta):
     def __init__(self, name, issuer=""):
         self.name = name
@@ -42,6 +41,7 @@ class Security(metaclass=ABCMeta):
 #####################
 # EQUITY SECURITIES #
 #####################
+
 
 class EquitySecurity(Security, metaclass=ABCMeta):
     def __init__(self, name):
@@ -60,6 +60,7 @@ class EquitySecurity(Security, metaclass=ABCMeta):
 ##########
 # Stocks #
 ##########
+
 
 class Stock(EquitySecurity):
     def __init__(self, name):
@@ -94,6 +95,7 @@ class SubscriptionRight(EquitySecurity):
 ##########################
 # Investment Fund Shares #
 ##########################
+
 
 class FundShare(EquitySecurity, metaclass=ABCMeta):
     def __init__(self, name):
@@ -143,6 +145,7 @@ class StockFundShare(FundShare):
 # DEBT SECURITIES #
 ###################
 
+
 class DebtSecurity(Security, metaclass=ABCMeta):
     def __init__(self, name, maturity, rate):
         Security.__init__(self, name)
@@ -163,6 +166,7 @@ class DebtSecurity(Security, metaclass=ABCMeta):
 ##################
 # Treasure Bonds #
 ##################
+
 
 class TreasureBond(DebtSecurity, metaclass=ABCMeta):
     def __init__(self, name, rate):
@@ -214,8 +218,7 @@ class NTNF(TreasureBond):
 
 class NTNB(TreasureBond):
     def __init__(self, name, rate_value):
-        assert (name.startswith("NTN-B_") and
-                not name.startswith("NTN-B_Principal_"))
+        assert name.startswith("NTN-B_") and not name.startswith("NTN-B_Principal_")
         rate = IPCARate(rate_value)
         TreasureBond.__init__(self, name, rate)
         self.subcategory = PublicDebtCategories.Inflation
@@ -233,6 +236,7 @@ class NTNBP(TreasureBond):
 # Bank Bond #
 #############
 
+
 class BankBond(DebtSecurity, metaclass=ABCMeta):
     def __init__(self, name, maturity, rate, issue_date, unit_value, subcat):
         assert PrivateDebtCategories[subcat] is not None, "Subcategory: %s" % subcat
@@ -249,28 +253,28 @@ class BankBond(DebtSecurity, metaclass=ABCMeta):
             begin_date = self.issue_date.strftime("%Y-%m-%d")
             end_date = date.strftime("%Y-%m-%d")
             variation = self.retriever.get_variation(
-                "CDI", begin_date, end_date, self.rate.rate)
+                "CDI", begin_date, end_date, self.rate.rate
+            )
             return (1.0 + variation) * self.unit_value
         elif isinstance(self.rate, FixedRate):
             delta = date - self.issue_date
             days = delta.days
             annual_rate = self.rate.rate
-            daily_rate = (annual_rate + 1.0)**(1.0 / 365.0) - 1.0
-            variation = (daily_rate + 1.0)**days - 1.0
+            daily_rate = (annual_rate + 1.0) ** (1.0 / 365.0) - 1.0
+            variation = (daily_rate + 1.0) ** days - 1.0
             return (1.0 + variation) * self.unit_value
         elif isinstance(self.rate, IPCARate):
             begin_date = self.issue_date.strftime("%Y-%m-%d")
             end_date = date.strftime("%Y-%m-%d")
 
-            ipca_variation = self.retriever.get_variation(
-                "IPCA", begin_date, end_date)
+            ipca_variation = self.retriever.get_variation("IPCA", begin_date, end_date)
             adjusted_unit_value = (1.0 + ipca_variation) * self.unit_value
 
             delta = date - self.issue_date
             days = delta.days
             annual_rate = self.rate.rate
-            daily_rate = (annual_rate + 1.0)**(1.0 / 365.0) - 1.0
-            pre_variation = (daily_rate + 1.0)**days - 1.0
+            daily_rate = (annual_rate + 1.0) ** (1.0 / 365.0) - 1.0
+            pre_variation = (daily_rate + 1.0) ** days - 1.0
             final_unit_value = (1.0 + pre_variation) * adjusted_unit_value
 
             return final_unit_value
@@ -280,7 +284,12 @@ class BankBond(DebtSecurity, metaclass=ABCMeta):
 
 class BankBondCDI(BankBond):
     def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert name.startswith("LCI") or name.startswith("LCA") or name.startswith("CDB") or name.startswith("LC")
+        assert (
+            name.startswith("LCI")
+            or name.startswith("LCA")
+            or name.startswith("CDB")
+            or name.startswith("LC")
+        )
         rate = CDIRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
         self.retriever = retriever.get_cdi_retriever()
@@ -288,14 +297,24 @@ class BankBondCDI(BankBond):
 
 class BankBondPre(BankBond):
     def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert name.startswith("LCI") or name.startswith("LCA") or name.startswith("CDB") or name.startswith("LC")
+        assert (
+            name.startswith("LCI")
+            or name.startswith("LCA")
+            or name.startswith("CDB")
+            or name.startswith("LC")
+        )
         rate = FixedRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
 
 
 class BankBondIPCA(BankBond):
     def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert name.startswith("LCI") or name.startswith("LCA") or name.startswith("CDB") or name.startswith("LC")
+        assert (
+            name.startswith("LCI")
+            or name.startswith("LCA")
+            or name.startswith("CDB")
+            or name.startswith("LC")
+        )
         rate = IPCARate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
         self.retriever = retriever.get_ipca_retriever()
@@ -304,6 +323,7 @@ class BankBondIPCA(BankBond):
 ##############
 # Debentures #
 ##############
+
 
 class Debenture(DebtSecurity, metaclass=ABCMeta):
     def __init__(self, name, maturity, rate_value):
@@ -327,6 +347,7 @@ class InfraDebenture(Debenture):
 #########################
 # DERIVATIVE SECURITIES #
 #########################
+
 
 class DerivativeSecurity(Security, metaclass=ABCMeta):
     pass

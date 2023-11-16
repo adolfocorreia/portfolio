@@ -7,19 +7,15 @@ from .retriever import VariationRetriever
 
 
 class IPCARetriever(VariationRetriever):
-
     def __init__(self):
         self._data = None
         VariationRetriever.__init__(self, "ipca")
 
-
     def _get_data_file_patterns(self):
         return [self.data_directory + "/IPCA_%s.csv"]
 
-
     def _available_codes(self):
         return ["IPCA"]
-
 
     def _load_data_files(self):
         print("Loading IPCA CSV files...")
@@ -33,14 +29,13 @@ class IPCARetriever(VariationRetriever):
 
             df = pd.read_csv(
                 file_name,
-                names=['date', 'daily'],
+                names=["date", "daily"],
                 header=0,
-                parse_dates=['date'],
-                index_col=['date']
+                parse_dates=["date"],
+                index_col=["date"],
             )
 
             self._data = pd.concat([self._data, df])
-
 
     def get_variation(self, code, begin_date, end_date):
         VariationRetriever.get_variation(self, code, begin_date, end_date)

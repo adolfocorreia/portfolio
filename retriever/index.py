@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 
 
 class IndexRetriever:
-
     __base_URL = "http://bvmf.bmfbovespa.com.br/indices/ResumoCarteiraTeorica.aspx?idioma=en-us&Indice="
     _index_URLs = {
         "Ibovespa": __base_URL + "Ibovespa",
@@ -30,7 +29,7 @@ class IndexRetriever:
         stocks = []
 
         session = requests.session()
-        content = str(session.get(url, headers={'Connection': 'close'}).content)
+        content = str(session.get(url, headers={"Connection": "close"}).content)
         table_id = "ctl00_contentPlaceHolderConteudo_grdResumoCarteiraTeorica_ctl00"
 
         file_name = self.data_directory + "/" + index + ".html"
@@ -52,7 +51,7 @@ class IndexRetriever:
             td = td.find_next_sibling("td")
             stock["stockType"] = td.span.string
             td = td.find_next_sibling("td")
-            stock["quantity"] = td.span.string.replace(',', '')
+            stock["quantity"] = td.span.string.replace(",", "")
             td = td.find_next_sibling("td")
             stock["part"] = float(td.span.string) / 100.0
             row = row.find_next_sibling("tr")

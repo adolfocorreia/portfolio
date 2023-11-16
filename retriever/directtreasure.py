@@ -6,14 +6,12 @@ from .retriever import ValueRetriever
 
 
 class DirectTreasureRetriever(ValueRetriever):
-
     def __init__(self):
         self._complete_codes = []
         ValueRetriever.__init__(self, "directtreasure")
 
     def _get_data_file_patterns(self):
-        return [self.data_directory + "/" + code + "_%s.xls"
-                for code in self.codes]
+        return [self.data_directory + "/" + code + "_%s.xls" for code in self.codes]
 
     def _available_codes(self):
         return self._complete_codes
@@ -29,7 +27,7 @@ class DirectTreasureRetriever(ValueRetriever):
             "Taxa_Venda_Manha",
             "PU_Compra_Manha",
             "PU_Venda_Manha",
-            "PU_Base_Manha"
+            "PU_Base_Manha",
         ]
 
         regex = re.compile(r"NTN-B_Princ_([0-9]{6})")
@@ -52,12 +50,12 @@ class DirectTreasureRetriever(ValueRetriever):
                 df = excel.parse(
                     sheet_name,
                     names=names,
-                    parse_dates=['Dia'],
+                    parse_dates=["Dia"],
                     dayfirst=True,
-                    skiprows=1
+                    skiprows=1,
                 )
-                df.drop_duplicates(subset='Dia', inplace=True)
-                df.set_index('Dia', inplace=True)
+                df.drop_duplicates(subset="Dia", inplace=True)
+                df.set_index("Dia", inplace=True)
 
                 self._data[bond_code] = pd.concat([self._data[bond_code], df])
 

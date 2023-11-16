@@ -5,7 +5,6 @@ from functools import reduce
 
 
 class SecuritySelector:
-
     def __init__(self, num_of_secs=0, ignore_secs=[], regex_rules=[]):
         self.num_of_secs = num_of_secs
         self.ignore_secs = ignore_secs
@@ -32,11 +31,11 @@ class SecuritySelector:
         # 3. Sort and remove least significant securities
         secs = sorted(secs, key=operator.itemgetter(1), reverse=True)
         if self.num_of_secs != 0:
-            secs = secs[:self.num_of_secs]
+            secs = secs[: self.num_of_secs]
 
         # 4. Normalize percentages
-        total = reduce(lambda x, y: x+y, map(lambda x: x[1], secs))
-        secs = [(x[0], x[1]/total) for x in secs]
+        total = reduce(lambda x, y: x + y, map(lambda x: x[1], secs))
+        secs = [(x[0], x[1] / total) for x in secs]
 
         return dict(secs)
 
@@ -60,7 +59,7 @@ def join_securities(securitiesA, securitiesB, num_of_secs=20):
         secs = secs[:num_of_secs]
 
     # 3. Normalize percentages
-    total = reduce(lambda x, y: x+y, map(lambda x: x[1], secs))
-    secs = [(x[0], x[1]/total) for x in secs]
+    total = reduce(lambda x, y: x + y, map(lambda x: x[1], secs))
+    secs = [(x[0], x[1] / total) for x in secs]
 
     return dict(secs)

@@ -7,7 +7,6 @@ Allocation = namedtuple("Allocation", ["cat", "perc"])
 
 
 class AllocationSet:
-
     def __init__(self, allocations):
         self.map = dict(allocations)
         assert approx_equal.approx_equal(sum(self.map.values()), 1.0)
@@ -20,12 +19,15 @@ def compare_allocation_sets(goal, real, total_value=100.0):
 
         g = goal.map[cat]
         r = real.map[cat]
-        d = r-g
-        nd = d/g if g != 0.0 else 0.0
+        d = r - g
+        nd = d / g if g != 0.0 else 0.0
         v = abs(d) * total_value
+        action = "Remove" if d > 0.0 else "Add"
 
-        print("%-20s Goal: %5.1f%% | Real: %5.1f%% | Diff: %7.2f%%    %6s R$ %8.2f" \
-            % (cat.name, g*100.0, r*100.0, nd*100.0, "Remove" if d>0.0 else "Add", v))
+        print(
+            "%-20s Goal: %5.1f%% | Real: %5.1f%% | Diff: %7.2f%%    %6s R$ %8.2f"
+            % (cat.name, g * 100.0, r * 100.0, nd * 100.0, action, v)
+        )
 
 
 def compare_securities_allocation(goal, real, total_value=100.0):
@@ -44,18 +46,21 @@ def compare_securities_allocation(goal, real, total_value=100.0):
     for sec in goal:
         g = goal[sec]
         r = real[sec]
-        d = r-g
-        nd = d/g if g != 0.0 else 0.0
+        d = r - g
+        nd = d / g if g != 0.0 else 0.0
         v = abs(d) * total_value
 
-        tuple_list.append((sec,g,r,d,nd,v))
+        tuple_list.append((sec, g, r, d, nd, v))
 
-    sorted_tuples = sorted(tuple_list, reverse=True,
-        key=lambda x: (abs(x[4]),abs(x[5])))
+    sorted_tuples = sorted(
+        tuple_list, reverse=True, key=lambda x: (abs(x[4]), abs(x[5]))
+    )
 
     for i in sorted_tuples:
-        (sec,g,r,d,nd,v) = i
+        (sec, g, r, d, nd, v) = i
         if g == 0.0 and r == 0.0:
             continue
-        print("%-15s Goal: %5.2f%% | Real: %5.2f%% | Diff: %7.2f%%    %4s R$ %8.2f" \
-            % (sec, g*100.0, r*100.0, nd*100.0, "Sell" if d>0.0 else "Buy", v))
+        print(
+            "%-15s Goal: %5.2f%% | Real: %5.2f%% | Diff: %7.2f%%    %4s R$ %8.2f"
+            % (sec, g * 100.0, r * 100.0, nd * 100.0, "Sell" if d > 0.0 else "Buy", v)
+        )
