@@ -1,6 +1,7 @@
 import re
 import operator
 from collections import defaultdict
+from functools import reduce
 
 
 class SecuritySelector:
@@ -11,7 +12,7 @@ class SecuritySelector:
         self.regex_rules = regex_rules
 
     def select_securities(self, securities):
-        # 0. Convert securities dict to a list of 2-tuples
+        # 0. Get key-value tuples iterator from securities dict
         secs = securities.items()
 
         # 1. Remove ignored securities
@@ -26,7 +27,7 @@ class SecuritySelector:
         joined_secs = defaultdict(float)
         for sec in secs:
             joined_secs[sec[0]] += sec[1]
-        secs = joined_secs.items()
+        secs = list(joined_secs.items())
 
         # 3. Sort and remove least significant securities
         secs = sorted(secs, key=operator.itemgetter(1), reverse=True)
@@ -41,7 +42,7 @@ class SecuritySelector:
 
 
 def join_securities(securitiesA, securitiesB, num_of_secs=20):
-    # 0. Convert securities dict to a list of 2-tuples
+    # 0. Get key-value tuples iterators from securities dicts
     secsA = securitiesA.items()
     secsB = securitiesB.items()
 

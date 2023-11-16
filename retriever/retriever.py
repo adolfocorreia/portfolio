@@ -6,9 +6,7 @@ import inspect
 from datetime import datetime as dt
 
 
-class DataRetriever:
-    __metaclass__ = ABCMeta
-
+class DataRetriever(metaclass=ABCMeta):
     _initial_year = 2014
     _date_regex = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -47,7 +45,7 @@ class DataRetriever:
                         raise Exception("File %s was not updated!" % file_name)
 
     def _download_data_files(self, year):
-        print "Downloading %s data files..." % self.asset_type
+        print("Downloading %s data files..." % self.asset_type)
         old_path = os.getcwd()
         os.chdir(self.data_directory)
         os.system("./download_%s_files.sh %s" % (self.asset_type, year))
@@ -91,9 +89,7 @@ class DataRetriever:
         pass
 
 
-class ValueRetriever(DataRetriever):
-        __metaclass__ = ABCMeta
-
+class ValueRetriever(DataRetriever, metaclass=ABCMeta):
         def get_today_value(self, code):
             return self.get_value(code, dt.strftime(dt.today(), "%Y-%m-%d"))
 
@@ -103,9 +99,7 @@ class ValueRetriever(DataRetriever):
             assert DataRetriever._date_regex.match(date)
 
 
-class VariationRetriever(DataRetriever):
-        __metaclass__ = ABCMeta
-
+class VariationRetriever(DataRetriever, metaclass=ABCMeta):
         @abstractmethod
         def get_variation(self, code, begin_date, end_date):
             assert code in self._available_codes()

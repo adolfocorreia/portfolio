@@ -132,19 +132,19 @@ class Portfolio:
         self.subcategories_values[cat][subcat] = subcat_value + total_value
 
     def print_portfolio(self):
-        for name, (security, amount) in sorted(self.securities.iteritems()):
+        for name, (security, amount) in sorted(self.securities.items()):
             unit_value = security.get_value(self.at_day)
             value = unit_value * amount
-            print "%30s: %8.2f * %8.2f  =  R$ %9.2f" % (
-                name, unit_value, amount, value)
+            print("%30s: %8.2f * %8.2f  =  R$ %9.2f" % (
+                name, unit_value, amount, value))
 
-        print
+        print()
 
-        for cat in sorted(list(MainCategories)):
-            print "%12s: R$ %10.2f  (%5.2f%%)" % (
+        for cat in sorted(MainCategories):
+            print("%12s: R$ %10.2f  (%5.2f%%)" % (
                 cat.name, self.categories_values[cat],
-                self.categories_values[cat] / self.portfolio_value * 100.0)
-        print "       TOTAL: R$ %10.2f" % self.portfolio_value
+                self.categories_values[cat] / self.portfolio_value * 100.0))
+        print("       TOTAL: R$ %10.2f" % self.portfolio_value)
 
     def get_allocation(self):
         allocations = [(x[0], x[1] / self.portfolio_value)
@@ -159,11 +159,11 @@ class Portfolio:
 
     def get_category_securities_allocation(self, category):
         assert category in self.categories_values
-        filtered_securities = {k: v for (k, v) in self.securities.iteritems()
+        filtered_securities = {k: v for (k, v) in self.securities.items()
                                if v.sec.category == category}
         total = self.categories_values[category]
         alloc = {k: v.sec.get_value(self.at_day) * v.amount / total
-                 for (k, v) in filtered_securities.iteritems()}
+                 for (k, v) in filtered_securities.items()}
 
         return alloc
 
@@ -178,11 +178,11 @@ class Portfolio:
         elif category == MainCategories.PublicDebt:
             assert PublicDebtCategories[subcategory.name] is not None
 
-        filtered_securities = {k: v for (k, v) in self.securities.iteritems()
+        filtered_securities = {k: v for (k, v) in self.securities.items()
                                if v.sec.category == category and
                                   v.sec.subcategory == subcategory}
         total = self.subcategories_values[category][subcategory]
         alloc = {k: v.sec.get_value(self.at_day) * v.amount / total
-                 for (k, v) in filtered_securities.iteritems()}
+                 for (k, v) in filtered_securities.items()}
 
         return alloc

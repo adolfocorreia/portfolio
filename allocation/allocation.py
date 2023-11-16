@@ -24,8 +24,8 @@ def compare_allocation_sets(goal, real, total_value=100.0):
         nd = d/g if g != 0.0 else 0.0
         v = abs(d) * total_value
 
-        print "%-20s Goal: %5.1f%% | Real: %5.1f%% | Diff: %7.2f%%    %6s R$ %8.2f" \
-            % (cat.name, g*100.0, r*100.0, nd*100.0, "Remove" if d>0.0 else "Add", v)
+        print("%-20s Goal: %5.1f%% | Real: %5.1f%% | Diff: %7.2f%%    %6s R$ %8.2f" \
+            % (cat.name, g*100.0, r*100.0, nd*100.0, "Remove" if d>0.0 else "Add", v))
 
 
 def compare_securities_allocation(goal, real, total_value=100.0):
@@ -57,5 +57,5 @@ def compare_securities_allocation(goal, real, total_value=100.0):
         (sec,g,r,d,nd,v) = i
         if g == 0.0 and r == 0.0:
             continue
-        print "%-15s Goal: %5.2f%% | Real: %5.2f%% | Diff: %7.2f%%    %4s R$ %8.2f" \
-            % (sec, g*100.0, r*100.0, nd*100.0, "Sell" if d>0.0 else "Buy", v)
+        print("%-15s Goal: %5.2f%% | Real: %5.2f%% | Diff: %7.2f%%    %4s R$ %8.2f" \
+            % (sec, g*100.0, r*100.0, nd*100.0, "Sell" if d>0.0 else "Buy", v))

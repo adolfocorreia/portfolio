@@ -5,7 +5,7 @@ import datetime as dt
 import os
 import re
 import sys
-import urllib
+import urllib.request
 import zipfile
 
 import pandas as pd
@@ -60,7 +60,7 @@ except OSError:
     modification_time = dt.datetime.fromtimestamp(0)
 
 if modification_time < TODAY:
-    urllib.urlretrieve(IPCA_MAIN_URL, IPCA_ZIP_FILE)
+    urllib.request.urlretrieve(IPCA_MAIN_URL, IPCA_ZIP_FILE)
 
     with zipfile.ZipFile(IPCA_ZIP_FILE, 'r') as myzip:
         assert len(myzip.namelist()) == 1
@@ -95,7 +95,7 @@ except OSError:
     modification_time = dt.datetime.fromtimestamp(0)
 
 if modification_time < TODAY:
-    urllib.urlretrieve(IPCA_PROJECTION_URL, IPCA_PROJECTION_FILE)
+    urllib.request.urlretrieve(IPCA_PROJECTION_URL, IPCA_PROJECTION_FILE)
 
 df_proj = pd.read_excel(IPCA_PROJECTION_FILE, index_col=None)
 
@@ -115,7 +115,7 @@ rows = {
     "Mes": [TODAY.month],
     "PercNoMes": [df_proj.iloc[12, 2]]
 }
-df = df.append(pd.DataFrame.from_dict(rows))
+df = pd.concat([df, pd.DataFrame.from_dict(rows)])
 
 
 # Calculate daily rates

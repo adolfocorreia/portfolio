@@ -18,14 +18,14 @@ class CDIRetriever(VariationRetriever):
         return ["CDI"]
 
     def _load_data_files(self):
-        print "Loading CDI CSV files..."
+        print("Loading CDI CSV files...")
 
         file_list = sorted(glob.glob(self.data_directory + "/CDI_*.csv"))
 
         self._data = pd.DataFrame()
 
         for file_name in file_list:
-            print "Loading file %s..." % file_name
+            print("Loading file %s..." % file_name)
 
             df = pd.read_csv(
                 file_name,
@@ -35,7 +35,7 @@ class CDIRetriever(VariationRetriever):
                 index_col=['date']
             )
 
-            self._data = self._data.append(df)
+            self._data = pd.concat([self._data, df])
 
         self._data.annual /= 10000.0
 
@@ -53,5 +53,5 @@ class CDIRetriever(VariationRetriever):
         # Last day is not considered
         end = end - dt.timedelta(days=1)
 
-        interval_df = self._data.ix[start:end]
+        interval_df = self._data.loc[start:end]
         return round((interval_df.daily*percentage + 1.0).prod() - 1.0, 8)

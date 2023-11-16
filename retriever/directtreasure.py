@@ -1,4 +1,3 @@
-import string
 import glob
 import pandas as pd
 import re
@@ -20,7 +19,7 @@ class DirectTreasureRetriever(ValueRetriever):
         return self._complete_codes
 
     def _load_data_files(self):
-        print "Loading Direct Treasure XLS files..."
+        print("Loading Direct Treasure XLS files...")
 
         self._data = {}
 
@@ -37,12 +36,12 @@ class DirectTreasureRetriever(ValueRetriever):
 
         file_list = sorted(glob.glob(self.data_directory + "/*.xls"))
         for file_name in file_list:
-            print "Loading file %s..." % file_name
+            print("Loading file %s..." % file_name)
 
             excel = pd.ExcelFile(file_name)
 
             for sheet_name in excel.sheet_names:
-                bond_code = string.replace(sheet_name, " ", "_")
+                bond_code = sheet_name.replace(" ", "_")
                 if regex.match(bond_code):
                     bond_code = regex.sub(r"NTN-B_Principal_\g<1>", bond_code)
 
@@ -60,10 +59,10 @@ class DirectTreasureRetriever(ValueRetriever):
                 df.drop_duplicates(subset='Dia', inplace=True)
                 df.set_index('Dia', inplace=True)
 
-                self._data[bond_code] = self._data[bond_code].append(df)
+                self._data[bond_code] = pd.concat([self._data[bond_code], df])
 
     def get_value(self, code, date):
         ValueRetriever.get_value(self, code, date)
         ts = pd.Timestamp(date)
         asof_ts = self._data[code].index.asof(ts)
-        return self._data[code].ix[asof_ts].PU_Base_Manha
+        return self._data[code].loc[asof_ts].PU_Base_Manha

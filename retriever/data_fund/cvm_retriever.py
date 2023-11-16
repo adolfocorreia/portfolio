@@ -11,7 +11,7 @@ import re
 import sys
 import os
 import mechanize
-import cookielib
+import http.cookiejar
 from datetime import datetime
 from time import sleep
 from bs4 import BeautifulSoup
@@ -35,7 +35,7 @@ br.set_handle_robots(False)
 br.addheaders = [("User-agent", "Mozilla/5.0")]
 
 # Cookie Jar
-cj = cookielib.LWPCookieJar()
+cj = http.cookiejar.LWPCookieJar()
 br.set_cookiejar(cj)
 
 # Debugging messages
@@ -60,7 +60,7 @@ response = br.submit()
 # parameters and use them as the values for the inputs __EVENTTARGET and __EVENTARGUMENT
 html2 = response.read()
 page = BeautifulSoup(html2, "lxml")
-link = str(page.find("a", text=cnpj))
+link = str(page.find("a", string=cnpj))
 match = re.search("""href="javascript:__doPostBack\('(.*?)','(.*?)'\)".""", link)
 
 br.select_form(nr=0)
@@ -83,6 +83,7 @@ else:
     months = range(1, 12+1)
 
 # For each month
+translation_map = str.maketrans("", "", "./-")
 for month in months:
     # Select desired month/year in combobox and simulate _doPostBack call
     combobox_value = "{:02d}/{}".format(month, year)
@@ -99,11 +100,12 @@ for month in months:
     html5 = response.read()
     page = BeautifulSoup(html5.decode("iso-8859-15"), "lxml")
     table = page.find("table", {"id": "dgDocDiario"})
-    csv_file = cnpj.translate(None, "./-") + "_" + "{}-{:02d}".format(year, month) + ".csv"
+    csv_file = cnpj.translate(translation_map) + "_" + "{}-{:02d}".format(year, month) + ".csv"
     with open(csv_file, "w") as f:
         for tr in table.findChildren(recursive=False):
+            values = []
             for td in tr.findChildren("td"):
                 text = td.text.translate({ord("."): None}).replace(",", ".")
-                f.write(text.encode("utf-8") + ",")
-            f.seek(-1, os.SEEK_CUR)  # Goes back one character so that the last "," is erased on the next f.write
+                values.append(text)
+            f.write(",".join(values))
             f.write("\n")

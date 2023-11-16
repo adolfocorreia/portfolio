@@ -18,7 +18,7 @@ class DebenturesRetriever(ValueRetriever):
         return self.codes
 
     def _load_data_files(self):
-        print "Loading debentures CSV files..."
+        print("Loading debentures CSV files...")
 
         names = [
             "Data",
@@ -40,7 +40,7 @@ class DebenturesRetriever(ValueRetriever):
         file_list = sorted(glob.glob(self.data_directory + "/*_NEG_*.csv"))
 
         for file_name in file_list:
-            print "Loading file %s..." % file_name
+            print("Loading file %s..." % file_name)
 
             reg_exp = re.search(self.data_directory + r"/(.*)_NEG_\d{4}\.csv",
                                 file_name)
@@ -55,10 +55,11 @@ class DebenturesRetriever(ValueRetriever):
                 header=0
             ).sort_index(kind='stable')
 
-            self._data[deb] = self._data[deb].append(df)
+            if len(df) > 0:
+                self._data[deb] = pd.concat([self._data[deb], df])
 
     def get_value(self, code, date):
         ValueRetriever.get_value(self, code, date)
         ts = pd.Timestamp(date)
         asof_ts = self._data[code].index.asof(ts)
-        return self._data[code].ix[asof_ts].PU_Medio
+        return self._data[code].loc[asof_ts].PU_Medio

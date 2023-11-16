@@ -16,7 +16,7 @@ class BovespaRetriever(ValueRetriever):
         return self._data.index.levels[1].values
 
     def _load_data_files(self):
-        print "Loading stocks TXT files..."
+        print("Loading stocks TXT files...")
 
         fields = [
             (  1,   2, "TIPREG"),
@@ -72,7 +72,7 @@ class BovespaRetriever(ValueRetriever):
         file_list = sorted(glob.glob(self.data_directory + "/COTAHIST_A*.TXT"))
 
         for file_name in file_list:
-            print "Loading file %s..." % file_name
+            print("Loading file %s..." % file_name)
 
             df = pd.read_fwf(
                 file_name,
@@ -81,21 +81,22 @@ class BovespaRetriever(ValueRetriever):
                 parse_dates=['DATA'],
                 index_col=['DATA', 'CODNEG'],
                 colspecs=colspecs,
-                skipfooter=1)
+                skipfooter=1,
+                encoding='windows-1252')
             df = df[df['TPMERC'] == 10]  # Mercado a vista
 
-            self._data = self._data.append(df)
+            self._data = pd.concat([self._data, df])
 
         for col in prices:
             self._data[col] /= 100.0
 
         self._data.sort_index(inplace=True, kind='stable')
 
-        print "Done loading stocks TXT files."
+        print("Done loading stocks TXT files.")
 
     def get_value(self, code, date):
         ValueRetriever.get_value(self, code, date)
         ts = pd.Timestamp(date)
         sub_df = self._data.xs(code, level='CODNEG')
         asof_ts = sub_df.index.asof(ts)
-        return sub_df.ix[asof_ts].PREULT
+        return sub_df.loc[asof_ts].PREULT
