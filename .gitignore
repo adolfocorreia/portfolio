@@ -1,4 +1,4 @@
-env
-.vscode
+.venv
 *.pyc
 *.csv
+tags
