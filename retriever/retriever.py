@@ -6,6 +6,26 @@ import inspect
 from datetime import datetime as dt
 
 
+def is_file_up_to_date(file_name, base_year=None):
+    # Check if file exists
+    if not os.path.isfile(file_name):
+        return False
+
+    # Check if file is not empty
+    if os.stat(file_name).st_size == 0:
+        return False
+
+    current_year = time.localtime()[0]
+
+    if base_year is None or base_year == current_year:
+        newer_than_1day = time.time() - os.path.getmtime(file_name) < 24 * 60 * 60
+        return newer_than_1day
+    else:
+        first_day_of_base_year = time.mktime((base_year, 1, 1, 0, 0, 0, -1, -1, -1))
+        newer_than_base_year = os.path.getmtime(file_name) > first_day_of_base_year
+        return newer_than_base_year
+
+
 class DataRetriever(metaclass=ABCMeta):
     _initial_year = 2014
     _date_regex = re.compile(r"^\d{4}-\d{2}-\d{2}$")
@@ -36,11 +56,11 @@ class DataRetriever(metaclass=ABCMeta):
         for year in range(DataRetriever._initial_year, current_year + 1):
             for file_pattern in self._get_data_file_patterns():
                 file_name = file_pattern % year
-                if not self._is_file_up_to_date(file_name, year):
+                if not is_file_up_to_date(file_name, year):
                     self._download_data_files(year)
                     self._needs_to_be_loaded = True
                     # Check again to see if file was downloaded
-                    if not self._is_file_up_to_date(file_name, year):
+                    if not is_file_up_to_date(file_name, year):
                         raise Exception("File %s was not updated!" % file_name)
 
     def _download_data_files(self, year):
@@ -50,26 +70,6 @@ class DataRetriever(metaclass=ABCMeta):
         os.system("./download_%s_files.sh %s" % (self.asset_type, year))
         os.chdir(old_path)
         time.sleep(5)
-
-    @staticmethod
-    def _is_file_up_to_date(file_name, base_year):
-        # Check if file exists
-        if not os.path.isfile(file_name):
-            return False
-
-        # Check if file is not empty
-        if os.stat(file_name).st_size == 0:
-            return False
-
-        current_year = time.localtime()[0]
-
-        if base_year == current_year:
-            newer_than_1day = time.time() - os.path.getmtime(file_name) < 24 * 60 * 60
-            return newer_than_1day
-        else:
-            first_day_of_base_year = time.mktime((base_year, 1, 1, 0, 0, 0, -1, -1, -1))
-            newer_than_base_year = os.path.getmtime(file_name) > first_day_of_base_year
-            return newer_than_base_year
 
     @abstractmethod
     def _get_data_file_patterns(self):

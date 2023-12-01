@@ -1,21 +1,14 @@
 import inspect
 import os
-import requests
-from bs4 import BeautifulSoup
+
+import pandas as pd
+from playwright.sync_api import sync_playwright
+
+from .retriever import is_file_up_to_date
 
 
 class IndexRetriever:
-    __base_URL = "http://bvmf.bmfbovespa.com.br/indices/ResumoCarteiraTeorica.aspx?idioma=en-us&Indice="
-    _index_URLs = {
-        "Ibovespa": __base_URL + "Ibovespa",
-        "IBrX100": __base_URL + "IBrX",
-        "IBrX50": __base_URL + "IBrX50",
-        "IFIX": __base_URL + "IFIX",
-        "SMLL": __base_URL + "SMLL",
-        "IDIV": __base_URL + "IDIV",
-        "IGCX": __base_URL + "IGC",
-        "ISEE": __base_URL + "ISE",
-    }
+    __base_URL = "https://sistemaswebb3-listados.b3.com.br/indexPage/day"
 
     def __init__(self):
         module_file = inspect.getfile(inspect.currentframe())
@@ -23,40 +16,30 @@ class IndexRetriever:
         self.data_directory = module_dir + "/data_index"
 
     def get_composition(self, index):
-        assert index in IndexRetriever._index_URLs
-        url = IndexRetriever._index_URLs[index]
+        assert isinstance(index, str)
+        assert len(index) == 4
 
-        stocks = []
+        url = f"{IndexRetriever.__base_URL}/{index}?language=en-us"
+        file_name = os.path.join(self.data_directory, f"{index}.csv")
 
-        session = requests.session()
-        content = str(session.get(url, headers={"Connection": "close"}).content)
-        table_id = "ctl00_contentPlaceHolderConteudo_grdResumoCarteiraTeorica_ctl00"
+        if not is_file_up_to_date(file_name):
+            with sync_playwright() as p:
+                page = p.firefox.launch().new_page()
+                page.goto(url)
+                with page.expect_download() as download:
+                    page.get_by_text("Download").click()
+                download.value.save_as(file_name)
+            assert is_file_up_to_date(file_name)
 
-        file_name = self.data_directory + "/" + index + ".html"
-        if table_id in content:
-            with open(file_name, "w") as f:
-                f.write(content)
-        else:
-            with open(file_name, "r") as f:
-                content = f.read()
+        columns = ["code", "name", "stockType", "quantity", "part"]
+        df = pd.read_csv(
+            file_name,
+            engine="python",
+            header=0,
+            names=columns + [""],
+            skiprows=2,
+            skipfooter=2,
+        ).iloc[:, :-1]
+        df["part"] /= 100.0
 
-        page = BeautifulSoup(content, "lxml")
-        row = page.find(id=table_id).tbody.tr
-        while row:
-            stock = {}
-            td = row.td
-            stock["code"] = td.span.string
-            td = td.find_next_sibling("td")
-            stock["name"] = td.span.string
-            td = td.find_next_sibling("td")
-            stock["stockType"] = td.span.string
-            td = td.find_next_sibling("td")
-            stock["quantity"] = td.span.string.replace(",", "")
-            td = td.find_next_sibling("td")
-            stock["part"] = float(td.span.string) / 100.0
-            row = row.find_next_sibling("tr")
-            stocks.append(stock)
-
-        session.close()
-
-        return stocks
+        return df.to_dict("records")
