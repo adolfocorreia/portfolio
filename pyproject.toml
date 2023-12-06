@@ -19,6 +19,7 @@ playwright = "^1.40.0"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.18.1"
+refurb = "^1.25.0"
 
 [build-system]
 requires = ["poetry-core"]

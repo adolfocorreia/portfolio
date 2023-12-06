@@ -58,7 +58,7 @@ def compare_securities_allocation(goal, real, total_value=100.0):
 
     for i in sorted_tuples:
         (sec, g, r, d, nd, v) = i
-        if g == 0.0 and r == 0.0:
+        if g == r == 0.0:
             continue
         print(
             "%-15s Goal: %5.2f%% | Real: %5.2f%% | Diff: %7.2f%%    %4s R$ %8.2f"

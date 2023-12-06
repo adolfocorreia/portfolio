@@ -1,7 +1,7 @@
-from abc import ABCMeta
+from abc import ABC
 
 
-class BondRate(metaclass=ABCMeta):
+class BondRate(ABC):
     def __init__(self, rate):
         self.rate = rate
 
@@ -10,7 +10,7 @@ class FixedRate(BondRate):
     pass
 
 
-class FloatingRate(BondRate, metaclass=ABCMeta):
+class FloatingRate(BondRate, ABC):
     pass
 
 
@@ -22,7 +22,7 @@ class SELICRate(FloatingRate):
     pass
 
 
-class InflationIndexedRate(BondRate, metaclass=ABCMeta):
+class InflationIndexedRate(BondRate, ABC):
     pass
 
 

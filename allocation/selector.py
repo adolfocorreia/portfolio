@@ -34,7 +34,7 @@ class SecuritySelector:
             secs = secs[: self.num_of_secs]
 
         # 4. Normalize percentages
-        total = reduce(lambda x, y: x + y, map(lambda x: x[1], secs))
+        total = reduce(operator.add, map(lambda x: x[1], secs))
         secs = [(x[0], x[1] / total) for x in secs]
 
         return dict(secs)
@@ -59,7 +59,7 @@ def join_securities(securitiesA, securitiesB, num_of_secs=20):
         secs = secs[:num_of_secs]
 
     # 3. Normalize percentages
-    total = reduce(lambda x, y: x + y, map(lambda x: x[1], secs))
+    total = reduce(operator.add, map(lambda x: x[1], secs))
     secs = [(x[0], x[1] / total) for x in secs]
 
     return dict(secs)

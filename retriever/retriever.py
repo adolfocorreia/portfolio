@@ -1,9 +1,10 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 import os
 import time
 import re
 import inspect
 from datetime import datetime as dt
+from pathlib import Path
 
 
 def is_file_up_to_date(file_name, base_year=None):
@@ -26,7 +27,7 @@ def is_file_up_to_date(file_name, base_year=None):
         return newer_than_base_year
 
 
-class DataRetriever(metaclass=ABCMeta):
+class DataRetriever(ABC):
     _initial_year = 2014
     _date_regex = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -65,7 +66,7 @@ class DataRetriever(metaclass=ABCMeta):
 
     def _download_data_files(self, year):
         print("Downloading %s data files..." % self.asset_type)
-        old_path = os.getcwd()
+        old_path = Path.cwd()
         os.chdir(self.data_directory)
         os.system("./download_%s_files.sh %s" % (self.asset_type, year))
         os.chdir(old_path)
@@ -84,7 +85,7 @@ class DataRetriever(metaclass=ABCMeta):
         pass
 
 
-class ValueRetriever(DataRetriever, metaclass=ABCMeta):
+class ValueRetriever(DataRetriever, ABC):
     def get_today_value(self, code):
         return self.get_value(code, dt.strftime(dt.today(), "%Y-%m-%d"))
 
@@ -94,7 +95,7 @@ class ValueRetriever(DataRetriever, metaclass=ABCMeta):
         assert DataRetriever._date_regex.match(date)
 
 
-class VariationRetriever(DataRetriever, metaclass=ABCMeta):
+class VariationRetriever(DataRetriever, ABC):
     @abstractmethod
     def get_variation(self, code, begin_date, end_date):
         assert code in self._available_codes()

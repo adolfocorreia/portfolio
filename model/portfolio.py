@@ -69,7 +69,7 @@ class Portfolio:
                 self.add_security(EquitySecurity.create(row.Ativo), row.Quantidade)
             elif kind == "FII":
                 self.add_security(RealEstateFundShare(row.Ativo), row.Quantidade)
-            elif kind == "LCI" or kind == "LCA" or kind == "CDB" or kind == "LC":
+            elif kind in ("LCI", "LCA", "CDB", "LC"):
                 rate = float(row.Taxa[:-1]) / 100.0
                 indexer = row.Indexador
                 if indexer == "CDI":

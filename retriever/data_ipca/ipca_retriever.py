@@ -7,6 +7,7 @@ import re
 import sys
 import urllib.request
 import zipfile
+from pathlib import Path
 
 import pandas as pd
 
@@ -57,7 +58,7 @@ TODAY = dt.datetime.combine(dt.date.today(), dt.datetime.min.time())
 
 # Download and extract main data file
 try:
-    modification_time = dt.datetime.fromtimestamp(os.path.getmtime(IPCA_MAIN_FILE))
+    modification_time = dt.datetime.fromtimestamp(Path(IPCA_MAIN_FILE).stat().st_mtime)
 except OSError:
     modification_time = dt.datetime.fromtimestamp(0)
 
@@ -96,7 +97,7 @@ df.drop(
 # Download and load projection data
 try:
     modification_time = dt.datetime.fromtimestamp(
-        os.path.getmtime(IPCA_PROJECTION_FILE)
+        Path(IPCA_PROJECTION_FILE).stat().st_mtime
     )
 except OSError:
     modification_time = dt.datetime.fromtimestamp(0)

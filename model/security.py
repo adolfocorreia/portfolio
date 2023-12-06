@@ -10,7 +10,7 @@ Fund shares may be categorized as equity securities as well.
 """
 
 
-from abc import ABCMeta
+from abc import ABC
 from datetime import datetime
 
 import retriever
@@ -25,7 +25,7 @@ from .category import (
 )
 
 
-class Security(metaclass=ABCMeta):
+class Security(ABC):
     def __init__(self, name, issuer=""):
         self.name = name
         self.issuer = issuer
@@ -43,7 +43,7 @@ class Security(metaclass=ABCMeta):
 #####################
 
 
-class EquitySecurity(Security, metaclass=ABCMeta):
+class EquitySecurity(Security, ABC):
     def __init__(self, name):
         Security.__init__(self, name)
 
@@ -53,8 +53,7 @@ class EquitySecurity(Security, metaclass=ABCMeta):
             name = name[:-1]
         if name.endswith("11"):
             return StockUnit(name)
-        else:
-            return Stock(name)
+        return Stock(name)
 
 
 ##########
@@ -84,7 +83,7 @@ class StockUnit(EquitySecurity):
 class SubscriptionRight(EquitySecurity):
     def __init__(self, name, stock):
         code = int(name[-1])
-        assert code == 1 or code == 2
+        assert code in (1, 2)
         self.stock = stock
         EquitySecurity.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
@@ -97,7 +96,7 @@ class SubscriptionRight(EquitySecurity):
 ##########################
 
 
-class FundShare(EquitySecurity, metaclass=ABCMeta):
+class FundShare(EquitySecurity, ABC):
     def __init__(self, name):
         EquitySecurity.__init__(self, name)
 
@@ -146,7 +145,7 @@ class StockFundShare(FundShare):
 ###################
 
 
-class DebtSecurity(Security, metaclass=ABCMeta):
+class DebtSecurity(Security, ABC):
     def __init__(self, name, maturity, rate):
         Security.__init__(self, name)
         self.maturity = maturity
@@ -159,8 +158,7 @@ class DebtSecurity(Security, metaclass=ABCMeta):
     def get_value(self, date):
         if self.is_expired():
             return 0.0
-        else:
-            return Security.get_value(self, date)
+        return Security.get_value(self, date)
 
 
 ##################
@@ -168,7 +166,7 @@ class DebtSecurity(Security, metaclass=ABCMeta):
 ##################
 
 
-class TreasureBond(DebtSecurity, metaclass=ABCMeta):
+class TreasureBond(DebtSecurity, ABC):
     def __init__(self, name, rate):
         maturity = datetime.strptime(name[-6:], "%d%m%y")
         DebtSecurity.__init__(self, name, maturity, rate)
@@ -237,7 +235,7 @@ class NTNBP(TreasureBond):
 #############
 
 
-class BankBond(DebtSecurity, metaclass=ABCMeta):
+class BankBond(DebtSecurity, ABC):
     def __init__(self, name, maturity, rate, issue_date, unit_value, subcat):
         assert PrivateDebtCategories[subcat] is not None, "Subcategory: %s" % subcat
         DebtSecurity.__init__(self, name, maturity, rate)
@@ -325,7 +323,7 @@ class BankBondIPCA(BankBond):
 ##############
 
 
-class Debenture(DebtSecurity, metaclass=ABCMeta):
+class Debenture(DebtSecurity, ABC):
     def __init__(self, name, maturity, rate_value):
         rate = IPCARate(rate_value)
         DebtSecurity.__init__(self, name, maturity, rate)
@@ -349,7 +347,7 @@ class InfraDebenture(Debenture):
 #########################
 
 
-class DerivativeSecurity(Security, metaclass=ABCMeta):
+class DerivativeSecurity(Security, ABC):
     pass
 
 
