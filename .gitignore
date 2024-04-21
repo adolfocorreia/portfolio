@@ -1,4 +1,6 @@
-.venv
-*.pyc
 *.csv
+*.pyc
+.idea
+.venv
+__pycache__
 tags

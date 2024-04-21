@@ -156,9 +156,11 @@ class Portfolio:
         for name, (security, amount) in sorted(self.securities.items()):
             unit_value = security.get_value(self.at_day)
             value = unit_value * amount
-            print(
-                "%30s: %8.2f * %8.2f  =  R$ %9.2f" % (name, unit_value, amount, value)
-            )
+            if value > 0.0:
+                print(
+                    "%30s: %8.2f * %8.2f  =  R$ %9.2f"
+                    % (name, unit_value, amount, value)
+                )
 
         print()
 

@@ -41,6 +41,7 @@ StocksCategories = OrderedEnum(
         "NationalIndex",
         "NationalSmall",
         "Foreign",
+        "Active",
     ],
 )
 

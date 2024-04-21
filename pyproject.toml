@@ -4,6 +4,7 @@ version = "0.1.0"
 description = ""
 authors = []
 readme = "README.md"
+package-mode = false
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -16,10 +17,10 @@ requests = "^2.31.0"
 xlrd = "^2.0.1"
 playwright = "^1.40.0"
 
-
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.18.1"
 refurb = "^1.25.0"
+pandas-stubs = "^2.2.1.240316"
 
 [build-system]
 requires = ["poetry-core"]
