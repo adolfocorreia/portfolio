@@ -25,7 +25,7 @@ def compare_allocation_sets(goal, real, total_value=100.0):
         action = "Remove" if d > 0.0 else "Add"
 
         print(
-            "%-20s Goal: %5.1f%% | Real: %5.1f%% | Diff: %7.2f%%    %6s R$ %8.2f"
+            "%-20s Goal: %5.1f%% | Real: %5.1f%% | Diff: %7.2f%%    %6s R$ %9.2f"
             % (cat.name, g * 100.0, r * 100.0, nd * 100.0, action, v)
         )
 

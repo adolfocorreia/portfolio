@@ -1,21 +1,12 @@
 #!/usr/bin/env python
 
-# virtualenv env
-# source env/bin/activate
-# pip install mechanize
-# pip install captcha_solver
-# pip install bs4
-# pip install lxml
-
 import re
 import sys
-import os
 import mechanize
 import http.cookiejar
 from datetime import datetime
 from time import sleep
 from bs4 import BeautifulSoup
-from captcha_solver import CaptchaSolver
 
 
 assert len(sys.argv) == 3
@@ -39,9 +30,11 @@ cj = http.cookiejar.LWPCookieJar()
 br.set_cookiejar(cj)
 
 # Debugging messages
-# br.set_debug_http(True)
-# br.set_debug_redirects(True)
-# br.set_debug_responses(True)
+DEBUG = False
+if DEBUG:
+    br.set_debug_http(True)
+    br.set_debug_redirects(True)
+    br.set_debug_responses(True)
 
 # Open first page
 response = br.open(home_url)
@@ -61,7 +54,7 @@ response = br.submit()
 html2 = response.read()
 page = BeautifulSoup(html2, "lxml")
 link = str(page.find("a", string=cnpj))
-match = re.search("""href="javascript:__doPostBack\('(.*?)','(.*?)'\)".""", link)
+match = re.search("""href="javascript:__doPostBack[(]'(.*?)','(.*?)'[)]".""", link)
 
 br.select_form(nr=0)
 br.set_all_readonly(False)
