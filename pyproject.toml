@@ -13,12 +13,12 @@ captcha-solver = "^0.1"
 lxml = "^4.9"
 mechanize = "^0.4"
 pandas = "^2.2"
-requests = "^2.31"
+requests = "^2.32"
 xlrd = "^2.0"
-playwright = "^1.43"
+playwright = "^1.44"
 
 [tool.poetry.group.dev.dependencies]
-ipython = "^8.24"
+ipython = "^8.25"
 refurb = "^1.28"
 pandas-stubs = "^2.2"
 
