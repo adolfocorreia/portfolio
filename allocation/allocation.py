@@ -2,7 +2,6 @@ from collections import namedtuple
 
 import utils.approx_equal as approx_equal
 
-
 Allocation = namedtuple("Allocation", ["cat", "perc"])
 
 
@@ -25,8 +24,9 @@ def compare_allocation_sets(goal, real, total_value=100.0):
         action = "Remove" if d > 0.0 else "Add"
 
         print(
-            "%-20s Goal: %5.1f%% | Real: %5.1f%% | Diff: %7.2f%%    %6s R$ %9.2f"
-            % (cat.name, g * 100.0, r * 100.0, nd * 100.0, action, v)
+            "{:20s} Goal: {:5.1f}% | Real: {:5.1f}% | Diff: {:7.2f}%    {:>6s} $ {:10,.2f}".format(
+                cat.name, g * 100.0, r * 100.0, nd * 100.0, action, v
+            )
         )
 
 
@@ -56,11 +56,11 @@ def compare_securities_allocation(goal, real, total_value=100.0):
         tuple_list, reverse=True, key=lambda x: (abs(x[4]), abs(x[5]))
     )
 
-    for i in sorted_tuples:
-        (sec, g, r, d, nd, v) = i
+    for sec, g, r, d, nd, v in sorted_tuples:
         if g == r == 0.0:
             continue
         print(
-            "%-15s Goal: %6.2f%% | Real: %6.2f%% | Diff: %7.2f%%    %4s R$ %9.2f"
-            % (sec, g * 100.0, r * 100.0, nd * 100.0, "Sell" if d > 0.0 else "Buy", v)
+            "{:15s} Goal: {:6.2f}% | Real: {:6.2f}% | Diff: {:7.2f}%    {:>4s} $ {:10,.2f}".format(
+                sec, g * 100.0, r * 100.0, nd * 100.0, "Sell" if d > 0.0 else "Buy", v
+            )
         )

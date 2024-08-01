@@ -5,27 +5,25 @@ import pandas as pd
 
 from allocation import AllocationSet
 
+from .category import (
+    CashCategories,
+    MainCategories,
+    PrivateDebtCategories,
+    PublicDebtCategories,
+    RealEstateCategories,
+    StocksCategories,
+)
 from .security import (
-    EquitySecurity,
-    InfraDebenture,
     BankBondCDI,
-    BankBondPre,
     BankBondIPCA,
-    RealEstateFundShare,
+    BankBondPre,
+    EquitySecurity,
     ExchangeTradedFundShare,
+    InfraDebenture,
+    RealEstateFundShare,
     StockFundShare,
     TreasureBond,
 )
-
-from .category import (
-    MainCategories,
-    StocksCategories,
-    RealEstateCategories,
-    PrivateDebtCategories,
-    PublicDebtCategories,
-    CashCategories,
-)
-
 
 PortfolioItem = namedtuple("PortfolioItem", ["sec", "amount"])
 
@@ -158,22 +156,22 @@ class Portfolio:
             value = unit_value * amount
             if value > 0.0:
                 print(
-                    "%30s: %8.2f * %8.2f  =  R$ %9.2f"
-                    % (name, unit_value, amount, value)
+                    "{:>30s}: {:8.2f} * {:8.2f}  =  $ {:10,.2f}".format(
+                        name, unit_value, amount, value
+                    )
                 )
 
         print()
 
         for cat in sorted(MainCategories):
             print(
-                "%12s: R$ %10.2f  (%5.2f%%)"
-                % (
+                "{:>12s}: $  {:11,.2f}  ({:5.2f}%)".format(
                     cat.name,
                     self.categories_values[cat],
                     self.categories_values[cat] / self.portfolio_value * 100.0,
                 )
             )
-        print("       TOTAL: R$ %10.2f" % self.portfolio_value)
+        print("       TOTAL: $ {:11,.2f}".format(self.portfolio_value))
 
     def get_allocation(self):
         allocations = [
