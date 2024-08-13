@@ -138,8 +138,9 @@ class Portfolio:
             old_amount = self.securities[security.name].amount
         else:
             old_amount = 0.0
+        new_amount = old_amount + amount
 
-        self.securities[security.name] = PortfolioItem(security, old_amount + amount)
+        self.securities[security.name] = PortfolioItem(security, new_amount)
         self.portfolio_value += total_value
 
         cat = security.category
@@ -214,7 +215,9 @@ class Portfolio:
         filtered_securities = {
             k: v
             for (k, v) in self.securities.items()
-            if v.sec.category == category and v.sec.subcategory == subcategory
+            if v.sec.category == category
+            and v.sec.subcategory == subcategory
+            and abs(v.sec.get_value(self.at_day) * v.amount) > 1e-6
         }
         total = self.subcategories_values[category][subcategory]
         alloc = {
