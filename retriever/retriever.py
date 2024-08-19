@@ -1,10 +1,13 @@
-from abc import ABC, abstractmethod
-import os
-import time
-import re
+import glob
 import inspect
+import os
+import re
+import time
+from abc import ABC, abstractmethod
 from datetime import datetime as dt
 from pathlib import Path
+
+import pandas as pd
 
 
 def is_file_up_to_date(file_name, base_year=None):
@@ -38,7 +41,11 @@ class DataRetriever(ABC):
         module_dir = os.path.dirname(os.path.abspath(module_file))
         self.data_directory = module_dir + "/data_" + asset_type.lower()
 
-        self.codes = [line.strip() for line in open(self.data_directory + "/codes.txt")]
+        self.codes = sorted(
+            line.strip() for line in open(self.data_directory + "/codes.txt")
+        )
+
+        self._data = None
 
         self._needs_to_be_loaded = True
         self.check_and_update_data()
@@ -47,22 +54,21 @@ class DataRetriever(ABC):
         self._check_and_download_data_files()
         self._check_and_load_data_files()
 
-    def _check_and_load_data_files(self):
-        if self._needs_to_be_loaded:
-            self._load_data_files()
-            self._needs_to_be_loaded = False
-
     def _check_and_download_data_files(self):
-        current_year = time.localtime()[0]
-        for year in range(DataRetriever._initial_year, current_year + 1):
-            for file_pattern in self._get_data_file_patterns():
-                file_name = file_pattern % year
-                if not is_file_up_to_date(file_name, year):
-                    self._download_data_files(year)
-                    self._needs_to_be_loaded = True
-                    # Check again to see if file was downloaded
-                    if not is_file_up_to_date(file_name, year):
-                        raise Exception("File %s was not updated!" % file_name)
+        years = range(DataRetriever._initial_year, time.localtime()[0] + 1)
+        patterns = self._get_data_file_patterns()
+        tuples = [(p % y, y) for p in patterns for y in years]
+
+        for file_name, year in tuples:
+            if is_file_up_to_date(file_name, year):
+                continue
+
+            self._download_data_files(year)
+            # Check again to see if file was sucessfully updated
+            assert is_file_up_to_date(file_name, year), (
+                "File %s was not updated!" % file_name
+            )
+            self._needs_to_be_loaded = True
 
     def _download_data_files(self, year):
         print("Downloading %s data files..." % self.asset_type)
@@ -71,6 +77,57 @@ class DataRetriever(ABC):
         os.system("./download_%s_files.sh %s" % (self.asset_type, year))
         os.chdir(old_path)
         time.sleep(5)
+
+    def _check_and_load_data_files(self):
+        if not self._needs_to_be_loaded:
+            return
+
+        if self._check_cache_files():
+            print("Loading %s from cache files..." % self.asset_type)
+            self._load_data_from_cache()
+        else:
+            print("Loading %s data files..." % self.asset_type)
+            self._load_data_files()
+            self._write_data_to_cache()
+            assert self._check_cache_files(), "Cache files not updated!"
+
+        print("Done loading %s..." % self.asset_type)
+        self._needs_to_be_loaded = False
+
+    def _check_cache_files(self):
+        # Check if cache files exist
+        cache_files = sorted(glob.glob(self.data_directory + "/*.cache"))
+        if not cache_files:
+            return False
+
+        # Get oldest cache file timestamp
+        cache_ts = min(map(os.path.getmtime, cache_files))
+
+        # Ignore cache if it is older than 6 hours
+        if time.time() - cache_ts > 6 * 60 * 60:
+            return False
+
+        # Get newest data file timestamp
+        years = range(DataRetriever._initial_year, time.localtime()[0] + 1)
+        patterns = self._get_data_file_patterns()
+        file_list = [p % y for p in patterns for y in years]
+        data_ts = max(map(os.path.getmtime, file_list))
+
+        return data_ts < cache_ts
+
+    def _load_data_from_cache(self):
+        self._data = {}
+        cache_files = sorted(glob.glob(self.data_directory + "/*.cache"))
+        for cache_file in cache_files:
+            name = Path(cache_file).stem
+            self._data[name] = pd.read_feather(cache_file)
+
+    def _write_data_to_cache(self):
+        assert isinstance(self._data, dict)
+        for key, df in self._data.items():
+            assert isinstance(df, pd.DataFrame)
+            file_name = os.path.join(self.data_directory, key + ".cache")
+            df.to_feather(file_name)
 
     @abstractmethod
     def _get_data_file_patterns(self):

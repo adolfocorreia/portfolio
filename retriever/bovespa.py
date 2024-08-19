@@ -72,8 +72,8 @@ def _read_file(file_name):
         skipfooter=1,
         encoding="windows-1252",
     ).query(
-        "TPMERC == 10"
-    )  # Mercado a vista
+        "TPMERC == 10"  # Mercado a vista
+    )
 
     return df
 
@@ -86,28 +86,26 @@ class BovespaRetriever(ValueRetriever):
         return [self.data_directory + "/COTAHIST_A%s.ZIP"]
 
     def _available_codes(self):
-        return self._data.index.levels[1].values
+        return self._data["bovespa"].index.levels[1].values
 
     def _load_data_files(self):
-        print("Loading stocks TXT files...")
-
         file_list = sorted(glob.glob(self.data_directory + "/COTAHIST_A*.TXT"))
 
+        # Load TXT files in parallel
         with Pool(processes=16) as pool:
             df_list = pool.map(_read_file, file_list)
+        data = pd.concat(df_list)
 
-        self._data = pd.concat(df_list)
-
+        # Adjust dataframe
         for col in set(PRICES) & set(COLS):
-            self._data[col] /= 100.0
+            data[col] /= 100.0
+        data.sort_index(inplace=True, kind="stable")
 
-        self._data.sort_index(inplace=True, kind="stable")
-
-        print("Done loading stocks TXT files.")
+        self._data = {"bovespa": data}
 
     def get_value(self, code, date):
         ValueRetriever.get_value(self, code, date)
         ts = pd.Timestamp(date)
-        sub_df = self._data.xs(code, level="CODNEG")
+        sub_df = self._data["bovespa"].xs(code, level="CODNEG")
         asof_ts = sub_df.index.asof(ts)
         return sub_df.loc[asof_ts]["PREULT"]

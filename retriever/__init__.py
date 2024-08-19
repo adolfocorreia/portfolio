@@ -1,13 +1,11 @@
-from .retriever import DataRetriever
-
 from .bovespa import BovespaRetriever
 from .cdi import CDIRetriever
 from .debentures import DebenturesRetriever
 from .directtreasure import DirectTreasureRetriever
 from .fund import FundRetriever
-from .ipca import IPCARetriever
-
 from .index import IndexRetriever
+from .ipca import IPCARetriever
+from .retriever import DataRetriever
 
 
 def get_bovespa_retriever():

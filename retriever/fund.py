@@ -1,5 +1,6 @@
 import glob
 import re
+
 import pandas as pd
 
 from .retriever import ValueRetriever
@@ -21,8 +22,6 @@ class FundRetriever(ValueRetriever):
         return [FundRetriever._regex.sub("", code) for code in self.codes]
 
     def _load_data_files(self):
-        print("Loading Fund CSV files...")
-
         self._data = {}
 
         names = [

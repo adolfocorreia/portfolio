@@ -1,5 +1,6 @@
 import glob
 import re
+
 import pandas as pd
 
 from .retriever import ValueRetriever
@@ -16,8 +17,6 @@ class DebenturesRetriever(ValueRetriever):
         return self.codes
 
     def _load_data_files(self):
-        print("Loading debentures CSV files...")
-
         names = [
             "Data",
             "Emissor",

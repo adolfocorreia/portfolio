@@ -1,24 +1,22 @@
 import glob
-import pandas as pd
 import re
+
+import pandas as pd
 
 from .retriever import ValueRetriever
 
 
 class DirectTreasureRetriever(ValueRetriever):
     def __init__(self):
-        self._complete_codes = []
         ValueRetriever.__init__(self, "directtreasure")
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/" + code + "_%s.xls" for code in self.codes]
 
     def _available_codes(self):
-        return self._complete_codes
+        return self._data.keys()
 
     def _load_data_files(self):
-        print("Loading Direct Treasure XLS files...")
-
         self._data = {}
 
         names = [
@@ -43,7 +41,6 @@ class DirectTreasureRetriever(ValueRetriever):
                 if regex.match(bond_code):
                     bond_code = regex.sub(r"NTN-B_Principal_\g<1>", bond_code)
 
-                self._complete_codes.append(bond_code)
                 if bond_code not in self._data:
                     self._data[bond_code] = pd.DataFrame()
 

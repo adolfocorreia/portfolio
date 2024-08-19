@@ -18,11 +18,9 @@ class IPCARetriever(VariationRetriever):
         return ["IPCA"]
 
     def _load_data_files(self):
-        print("Loading IPCA CSV files...")
-
         file_list = sorted(glob.glob(self.data_directory + "/IPCA_*.csv"))
 
-        self._data = pd.DataFrame()
+        data = pd.DataFrame()
 
         for file_name in file_list:
             print("Loading file %s..." % file_name)
@@ -35,7 +33,9 @@ class IPCARetriever(VariationRetriever):
                 index_col=["date"],
             )
 
-            self._data = pd.concat([self._data, df])
+            data = pd.concat([data, df])
+
+        self._data = {"ipca": data}
 
     def get_variation(self, code, begin_date, end_date):
         VariationRetriever.get_variation(self, code, begin_date, end_date)

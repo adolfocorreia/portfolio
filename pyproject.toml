@@ -16,6 +16,7 @@ pandas = "^2.2"
 requests = "^2.32"
 xlrd = "^2.0"
 playwright = "^1.44"
+pyarrow = "^17.0.0"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.25"
