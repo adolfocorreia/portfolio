@@ -64,7 +64,7 @@ class DataRetriever(ABC):
                 continue
 
             self._download_data_files(year)
-            # Check again to see if file was sucessfully updated
+            # Check again to see if file was successfully updated
             assert is_file_up_to_date(file_name, year), (
                 "File %s was not updated!" % file_name
             )
@@ -74,7 +74,9 @@ class DataRetriever(ABC):
         print("Downloading %s data files..." % self.asset_type)
         old_path = Path.cwd()
         os.chdir(self.data_directory)
-        os.system("./download_%s_files.sh %s" % (self.asset_type, year))
+        wait_status = os.system("./download_%s_files.sh %s" % (self.asset_type, year))
+        exit_code = os.waitstatus_to_exitcode(wait_status)
+        assert exit_code == 0
         os.chdir(old_path)
         time.sleep(5)
 

@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-set -e
+set -eET
+echo_error_line() {
+	local lineno=$1
+	local line=$2
+	echo "Error at line ${lineno}: ${line}"
+}
+trap 'echo_error_line ${LINENO} "${BASH_COMMAND}"' ERR
 
 # Check if argument ($1) is a valid year (4 digits starting with 19 or 20)
 [[ $1 =~ ^(19|20)[0-9]{2}$ ]] && YEAR=$1
@@ -10,7 +16,7 @@ set -e
 BONDS=()
 read_array() {
     i=0
-    while read line
+    while read -r line
     do
         BONDS[i]=$line
         i=$((i + 1))
@@ -25,6 +31,6 @@ URL_BASE=https://cdn.tesouro.gov.br/sistemas-internos/apex/producao/sistemas/sis
 
 for BOND in "${BONDS[@]}" ; do
     echo "Downloading ${BOND}_${YEAR}.xls..."
-    wget -q --random-wait -O ${BOND}_${YEAR}.xls ${URL_BASE}/${YEAR}/${BOND}_${YEAR}.xls
+    wget -q --random-wait -O "${BOND}_${YEAR}.xls" "${URL_BASE}/${YEAR}/${BOND}_${YEAR}.xls"
 done
 

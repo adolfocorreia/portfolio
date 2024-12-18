@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-set -e
+set -eET
+echo_error_line() {
+	local lineno=$1
+	local line=$2
+	echo "Error at line ${lineno}: ${line}"
+}
+trap 'echo_error_line ${LINENO} "${BASH_COMMAND}"' ERR
 
 # Check if argument ($1) is a valid year (4 digits starting with 19 or 20)
 [[ $1 =~ ^(19|20)[0-9]{2}$ ]] && YEAR=$1
@@ -27,7 +33,7 @@ fi
 
 END_TS=$((MINIMAL_TS + OFFSET))
 
-echo "Date,CDI" > ${CSV_FILE}
+echo "Date,CDI" > "${CSV_FILE}"
 
 CURRENT_TS=$INITIAL_TS
 while [[ "${CURRENT_TS}" -le "${END_TS}" ]] ; do
@@ -35,11 +41,13 @@ while [[ "${CURRENT_TS}" -le "${END_TS}" ]] ; do
     FILENAME=${CURRENT_DATE}.txt
 
     # Download file only if it does not exist and if day is not Saturday (6) nor Sunday (7)
-    [[ ! -e ${FILENAME} && $(date --date="@${CURRENT_TS}" "+%u") -lt 6 ]] && wget -q --random-wait "${URL}/${FILENAME}" || true
+    if [[ ! -e ${FILENAME} && $(date --date="@${CURRENT_TS}" "+%u") -lt 6 ]] ; then
+        wget -q --random-wait "${URL}/${FILENAME}" || true
+    fi
 
     if [[ -e ${FILENAME} ]] ; then
-        echo -n "${CURRENT_DATE}," >> ${CSV_FILE}
-        cat "${FILENAME}" >> ${CSV_FILE}
+        echo -n "${CURRENT_DATE}," >> "${CSV_FILE}"
+        cat "${FILENAME}" >> "${CSV_FILE}"
     fi
 
     CURRENT_TS=$((CURRENT_TS + OFFSET))

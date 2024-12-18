@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-set -e
+set -eET
+echo_error_line() {
+	local lineno=$1
+	local line=$2
+	echo "Error at line ${lineno}: ${line}"
+}
+trap 'echo_error_line ${LINENO} "${BASH_COMMAND}"' ERR
 
 # Check if argument ($1) is a valid year (4 digits starting with 19 or 20)
 [[ $1 =~ ^(19|20)[0-9]{2}$ ]] && YEAR=$1
@@ -10,7 +16,7 @@ set -e
 FUNDS=()
 read_array() {
     i=0
-    while read LINE
+    while read -r LINE
     do
         FUNDS[i]=${LINE}
         i=$((i + 1))
@@ -22,7 +28,7 @@ for CNPJ in "${FUNDS[@]}" ; do
     CNPJ_NUMBERS=${CNPJ//[\.\/-]/}
 
     echo "Downloading ${CNPJ_NUMBERS}_${YEAR}-MM.csv files..."
-    ./cvm_retriever.py "${CNPJ}" "${YEAR}"
+    python cvm_retriever.py "${CNPJ}" "${YEAR}"
 
     YEAR_FILE="${CNPJ_NUMBERS}_${YEAR}.csv"
     echo "Assembling ${YEAR_FILE} file..."
@@ -30,7 +36,7 @@ for CNPJ in "${FUNDS[@]}" ; do
 
     for MONTH in $(seq -f "%02g" 1 12) ; do
         MONTH_FILE="${CNPJ_NUMBERS}_${YEAR}-${MONTH}.csv"
-        [ -e "${MONTH_FILE}" ] && tail -n +2 "${MONTH_FILE}" | while read LINE
+        [ -e "${MONTH_FILE}" ] && tail -n +2 "${MONTH_FILE}" | while read -r LINE
         do
             [[ $LINE =~ ", , , , , , ," ]] && continue
             echo -n "${YEAR}-${MONTH}-" >> "${YEAR_FILE}"
@@ -38,3 +44,6 @@ for CNPJ in "${FUNDS[@]}" ; do
         done
     done
 done
+
+# Return with success code if this line is reached
+true
