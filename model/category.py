@@ -76,6 +76,6 @@ CashCategories = OrderedEnum(
     [
         "Gold",
         "Dollar",
-        "Euro",
+        "Cripto",
     ],
 )

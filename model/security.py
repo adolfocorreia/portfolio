@@ -22,6 +22,7 @@ from .category import (
     RealEstateCategories,
     PrivateDebtCategories,
     PublicDebtCategories,
+    CashCategories,
 )
 
 
@@ -108,11 +109,22 @@ class MutualFundShare(FundShare):
 class ExchangeTradedFundShare(FundShare):
     def __init__(self, name, subcat):
         assert name.endswith("11")
-        assert StocksCategories[subcat] is not None, "Subcategory: %s" % subcat
+
+        is_stock = subcat in StocksCategories._member_names_
+        is_cash = subcat in CashCategories._member_names_
+        assert is_stock ^ is_cash, "Not stock nor cash: %s" % subcat
+
         FundShare.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
-        self.category = MainCategories.Stocks
-        self.subcategory = StocksCategories[subcat]
+
+        if is_stock:
+            self.category = MainCategories.Stocks
+            self.subcategory = StocksCategories[subcat]
+        elif is_cash:
+            self.category = MainCategories.Cash
+            self.subcategory = CashCategories[subcat]
+        else:
+            raise Exception("Invalid ETF!")
 
 
 class HedgeFundShare(FundShare):
