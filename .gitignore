@@ -1,6 +1,9 @@
 *.csv
-*.pyc
-.idea
+
 .venv
+*.pyc
 __pycache__
+
+.idea
+.Rproj.user
 tags
