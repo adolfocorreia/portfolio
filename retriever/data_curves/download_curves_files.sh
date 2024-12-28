@@ -13,6 +13,5 @@ trap 'echo_error_line ${LINENO} "${BASH_COMMAND}"' ERR
 # If argument is not present or is invalid, use current year
 [[ -z $YEAR ]] && YEAR=$(date +"%Y")
 
-
 echo "Downloading yield curve files for year ${YEAR}..."
 Rscript download_curves.R "${YEAR}"
