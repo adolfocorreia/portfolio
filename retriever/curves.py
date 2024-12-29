@@ -42,4 +42,6 @@ class B3CurveRetriever(CurveRetriever):
         CurveRetriever.get_curve_vertices(self, code, base_date)
         df = self._data[code]
         df = df[df["refdate"] == base_date]
-        return df
+        ts = pd.Timestamp(base_date)
+        row_df = pd.DataFrame({"refdate": [ts], "forward_date": [ts], "r_252": [0.0]})
+        return pd.concat([row_df, df], ignore_index=True)

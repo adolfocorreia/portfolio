@@ -17,6 +17,7 @@ requests = "^2.32"
 xlrd = "^2.0"
 playwright = "^1.49"
 pyarrow = "^17.0"
+quantlib = "^1.36"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.31"

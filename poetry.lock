@@ -947,6 +947,29 @@ files = [
 ]
 
 [[package]]
+name = "quantlib"
+version = "1.36"
+description = "Python bindings for the QuantLib library"
+optional = false
+python-versions = "*"
+files = [
+    {file = "QuantLib-1.36-cp38-abi3-macosx_10_9_x86_64.whl", hash = "sha256:b8555e3358a2856a14978f39cee43ce83c6c0e41e4976e5788ae9b1f47f8a575"},
+    {file = "QuantLib-1.36-cp38-abi3-macosx_11_0_arm64.whl", hash = "sha256:6c4a65bed9a3409d798e7e6f27bf01109c41f7ce0f9790d370ff92c0526465b9"},
+    {file = "QuantLib-1.36-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:faa9ff3d6a22f9c4c76faf164609949460561229b52606bc010be286803dd750"},
+    {file = "QuantLib-1.36-cp38-abi3-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:1c779960042832c08ebb3808991abcf01eac30072ac19be7dde6819d1a061464"},
+    {file = "QuantLib-1.36-cp38-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:7bbeb8d0676d2d57793a8f3b0f06bf5bcd989cb8e2d907dc3b74211861256c17"},
+    {file = "QuantLib-1.36-cp38-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:f3e193116699c38dbd6edd0c8371b0153960c9c00e65e63656f710824b7566e6"},
+    {file = "QuantLib-1.36-cp38-abi3-musllinux_1_2_i686.whl", hash = "sha256:650bf50fcf8deb70fe25e9077be22653986f08b966b843999431e213d3c27f15"},
+    {file = "QuantLib-1.36-cp38-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:ba028f24eeb1d9ca93c1150f92b83a988c79e760778fa7f0b447896876b15a20"},
+    {file = "QuantLib-1.36-cp38-abi3-win32.whl", hash = "sha256:acc47181e9d5aef17c4fcfc36b5a0849880213d37e635fcc60e330cd26e95922"},
+    {file = "QuantLib-1.36-cp38-abi3-win_amd64.whl", hash = "sha256:3486a4935c8a6673e12d6e944c48a2c6952acbef011307c31c3baf6c37235d75"},
+    {file = "QuantLib-1.36-pp310-pypy310_pp73-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:e5e712c8bbb7cf3c7cc57d71eb23abe574de73ad02d66bcecc6a2934df9407ad"},
+    {file = "QuantLib-1.36-pp310-pypy310_pp73-manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:64a49487cc1689796d1a6d4579c32fe6b76e74a360be0c2a62f81193cd8fd89c"},
+    {file = "QuantLib-1.36-pp310-pypy310_pp73-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:9cc84a475120d8fa4567f11e75a7ea299c07a377ab631c15913f87443ae8271d"},
+    {file = "QuantLib-1.36-pp310-pypy310_pp73-win_amd64.whl", hash = "sha256:921637613af7e4d171adad00eda54f448dd37b7629e69a9224251ce5affd9d34"},
+]
+
+[[package]]
 name = "refurb"
 version = "1.28.0"
 description = "A tool for refurbish and modernize Python codebases"
@@ -1128,4 +1151,4 @@ test = ["pytest", "pytest-cov"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "45992c38cb5719d22dd4d945e8e83773b14ad0b3eb08f1b94750804922daf8c7"
+content-hash = "8c51bcb45376f54c3f3306f24b70d5ac5b08bdcd3b3e59ee3c39723ffd6ac775"
