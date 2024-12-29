@@ -160,3 +160,10 @@ class VariationRetriever(DataRetriever, ABC):
         assert code in self._available_codes()
         assert DataRetriever._date_regex.match(begin_date)
         assert DataRetriever._date_regex.match(end_date)
+
+
+class CurveRetriever(DataRetriever, ABC):
+    @abstractmethod
+    def get_curve_vertices(self, code, base_date):
+        assert code in self._available_codes()
+        assert DataRetriever._date_regex.match(base_date)

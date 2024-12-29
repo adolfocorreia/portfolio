@@ -1,5 +1,6 @@
 from .bovespa import BovespaRetriever
 from .cdi import CDIRetriever
+from .curves import B3CurveRetriever
 from .debentures import DebenturesRetriever
 from .directtreasure import DirectTreasureRetriever
 from .fund import FundRetriever
@@ -71,13 +72,23 @@ def get_index_retriever():
 get_index_retriever.instance = None
 
 
+def get_curve_retriever():
+    if get_curve_retriever.instance is None:
+        get_curve_retriever.instance = B3CurveRetriever()
+    return get_curve_retriever.instance
+
+
+get_curve_retriever.instance = None
+
+
 __all__ = [
     "DataRetriever",
     "get_bovespa_retriever",
     "get_cdi_retriever",
+    "get_curve_retriever",
     "get_debentures_retriever",
-    "get_dt_retriever",
+    "get_directtreasure_retriever",
     "get_fund_retriever",
-    "get_ipca_retriever",
     "get_index_retriever",
+    "get_ipca_retriever",
 ]

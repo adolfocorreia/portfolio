@@ -3,3 +3,5 @@
 
 rb3-cache/
 renv/
+
+*.txt
