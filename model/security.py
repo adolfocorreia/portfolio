@@ -9,21 +9,20 @@ Reference: http://en.wikipedia.org/wiki/Security_(finance)
 Fund shares may be categorized as equity securities as well.
 """
 
-
 from abc import ABC
 from datetime import datetime
 
 import retriever
 
-from .rate import BondRate, FixedRate, CDIRate, SELICRate, IPCARate
 from .category import (
+    CashCategories,
     MainCategories,
-    StocksCategories,
-    RealEstateCategories,
     PrivateDebtCategories,
     PublicDebtCategories,
-    CashCategories,
+    RealEstateCategories,
+    StocksCategories,
 )
+from .rate import BondRate, CDIPercentualRate, FixedRate, IPCARate, SELICRate
 
 
 class Security(ABC):
@@ -259,7 +258,7 @@ class BankBond(DebtSecurity, ABC):
     def get_value(self, date):
         if self.is_expired():
             return 0.0
-        elif isinstance(self.rate, CDIRate):
+        elif isinstance(self.rate, CDIPercentualRate):
             begin_date = self.issue_date.strftime("%Y-%m-%d")
             end_date = date.strftime("%Y-%m-%d")
             variation = self.retriever.get_variation(
@@ -300,7 +299,7 @@ class BankBondCDI(BankBond):
             or name.startswith("CDB")
             or name.startswith("LC")
         )
-        rate = CDIRate(rate_value)
+        rate = CDIPercentualRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
         self.retriever = retriever.get_cdi_retriever()
 

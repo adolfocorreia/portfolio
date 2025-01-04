@@ -149,14 +149,15 @@ class ValueRetriever(DataRetriever, ABC):
         return self.get_value(code, dt.strftime(dt.today(), "%Y-%m-%d"))
 
     @abstractmethod
-    def get_value(self, code, date):
+    def get_value(self, code, date) -> float:
         assert code in self._available_codes()
         assert DataRetriever._date_regex.match(date)
 
 
 class VariationRetriever(DataRetriever, ABC):
     @abstractmethod
-    def get_variation(self, code, begin_date, end_date):
+    def get_variation(self, code:str, begin_date:str, end_date:str, percentage:float=1.0) -> float:
+        assert code is not None
         assert code in self._available_codes()
         assert DataRetriever._date_regex.match(begin_date)
         assert DataRetriever._date_regex.match(end_date)
