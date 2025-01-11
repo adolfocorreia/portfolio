@@ -19,6 +19,7 @@ playwright = "^1.49"
 pyarrow = "^17.0"
 quantlib = "^1.36"
 bizdays = "^1.0"
+python-bcb = "^0.3"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.31"
