@@ -35,5 +35,5 @@ print('Downloading DI x Pre and DI x IPCA curves...')
 df_pre <- yc_mget(first_date = first_date, last_date = last_date)
 df_ipca <- yc_ipca_mget(first_date = first_date, last_date = last_date)
 
-readr::write_csv(df_pre,  file.path(here::here(), paste0('yc_pre_di_', YEAR, '.csv')))
-readr::write_csv(df_ipca, file.path(here::here(), paste0('yc_ipca_di_', YEAR, '.csv')))
+readr::write_csv(df_pre,  file.path(here::here(), paste0('yc_di_pre_', YEAR, '.csv')))
+readr::write_csv(df_ipca, file.path(here::here(), paste0('yc_di_ipca_', YEAR, '.csv')))
