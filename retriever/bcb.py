@@ -1,21 +1,28 @@
-import pandas as pd
 import datetime as dt
 import glob
+from typing import override
+
+import pandas as pd
 
 from .retriever import VariationRetriever
+
 
 class BCBRetriever(VariationRetriever):
     def __init__(self):
         VariationRetriever.__init__(self, "bcb")
 
+    @override
     def _get_data_file_patterns(self):
-        return [self.data_directory + "/BCB_%s.csv"]
+        return [self.data_directory + "/sgs_daily_%s.csv"]
 
+    @override
     def _available_codes(self):
-        return ["CDI",'SELIC','IPCA']
+        return ["CDI", "SELIC", "IPCA"]
 
+    @override
     def _load_data_files(self):
-        file_list = sorted(glob.glob(self.data_directory + "/BCB_*.csv"))
+        file_list = sorted(glob.glob(self.data_directory + "/sgs_daily_*.csv"))
+        assert len(file_list) > 0
 
         data = pd.DataFrame()
 
@@ -24,22 +31,15 @@ class BCBRetriever(VariationRetriever):
 
             df = pd.read_csv(
                 file_name,
-                names=["date", "annual"],
-                header=0,
-                parse_dates=["date"],
-                index_col=["date"],
+                index_col=0,
+                parse_dates=True,
             )
 
             data = pd.concat([data, df])
 
-        data["annual"] /= 10000.0
+        data /= 100.0
 
-        # http://www.cetip.com.br/astec/di_documentos/metodologia2_i1.htm
-        data["daily"] = np.around(
-            (data["annual"] + 1.0) ** (1.0 / 252.0) - 1.0, decimals=8
-        )
-
-        self._data =  data
+        self._data = {"bcb": data}
 
     def get_variation(self, code, begin_date, end_date, percentage=1.0):
         VariationRetriever.get_variation(self, code, begin_date, end_date)
@@ -50,5 +50,6 @@ class BCBRetriever(VariationRetriever):
         # Last day is not considered
         end = end - dt.timedelta(days=1)
 
-        interval_df = self._data[code].loc[start:end]
-        return round((interval_df.daily * percentage + 1.0).prod() - 1.0, 8)
+        interval_df = self._data["bcb"].loc[start:end]
+        assert len(interval_df) > 0
+        return round((interval_df[code] * percentage + 1.0).prod() - 1.0, 8)
