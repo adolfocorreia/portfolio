@@ -14,4 +14,4 @@ trap 'echo_error_line ${LINENO} "${BASH_COMMAND}"' ERR
 [[ -z $YEAR ]] && YEAR=$(date +"%Y")
 
 echo "Downloading IPCA_${YEAR}.csv file..."
-./ipca_retriever.py "${YEAR}"
+python ipca_retriever.py "${YEAR}"

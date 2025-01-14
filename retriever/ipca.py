@@ -46,5 +46,5 @@ class IPCARetriever(VariationRetriever):
         # Last day is not considered
         end = end - dt.timedelta(days=1)
 
-        interval_df = self._data.loc[start:end]
+        interval_df = self._data["ipca"].loc[start:end]
         return round((interval_df.daily + 1.0).prod() - 1.0, 8)

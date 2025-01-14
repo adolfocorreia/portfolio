@@ -28,6 +28,7 @@ library(rb3)
 options(rb3.clear.cache = TRUE)
 options(rb3.silent = TRUE)
 
+# TODO: set first date as last date (+1) in CSV file
 first_date <- make_date(YEAR, 1, 1)
 last_date <- min(make_date(YEAR, 12, 31), NOW)
 

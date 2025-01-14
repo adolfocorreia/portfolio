@@ -123,6 +123,7 @@ df = pd.concat([df, pd.DataFrame.from_dict(rows)])
 
 
 # Calculate daily rates
+# TODO: use business day / 252 day count convention
 df["DiasNoMes"] = df.apply(
     lambda row: calendar.monthrange(row["Ano"], row["Mes"]), axis=1
 ).apply(lambda t: t[1])
