@@ -33,6 +33,10 @@ class Frequency:
             return False
         return self._name == other._name
 
+    @override
+    def __repr__(self) -> str:
+        return f"{self.__class__!r}({self.__dict__!r})"
+
     @property
     def name(self):
         return self._name
@@ -100,6 +104,10 @@ class GenericPeriod(ABC):
     def __str__(self):
         return "%.1f %s%s" % (self.size(), self.unit, ("", "s")[self.size() > 1])
 
+    @override
+    def __repr__(self) -> str:
+        return f"{self.__class__!r}({self.__dict__!r})"
+
 
 class FixedTimePeriod(GenericPeriod):
     """
@@ -129,10 +137,10 @@ class DateRangePeriod(GenericPeriod):
     period((d1, d2))
     period('2012-07-12:2012-07-16')
 
-    For now we can consider only the *day* time unit but we should be completely
+    For now, we can consider only the *day* time unit, but we should be completely
     open to other time units such as *month* and *year* or even *quarter*.
     For example:
-    period('2012-04:2012-12') -> from april, 2012 to december, 2012: 9 months
+    period('2012-04:2012-12') -> from April 2012 to December 2012: 9 months
     period('2012:2012') -> from 2012 to 2012: 1 year
     period('2012-1:2012-3') -> from 2012 first quarter to 2012 third one: 3 quarters
 
@@ -142,6 +150,7 @@ class DateRangePeriod(GenericPeriod):
     """
 
     def __init__(self, dates: list[date], unit: str = "day"):
+        assert all(isinstance(d, date) and not isinstance(d, datetime) for d in dates)
         super(DateRangePeriod, self).__init__(unit)
         if dates[0] > dates[1]:
             raise Exception(
@@ -167,7 +176,7 @@ class CalendarRangePeriod(DateRangePeriod):
 
     @override
     def size(self) -> float:
-        "Return the amount of working days into period."
+        """Return the amount of working days into period."""
         d1 = self.dates[0].isoformat()
         d2 = self.dates[1].isoformat()
         days = self.calendar.bizdays(  # pyright: ignore[reportUnknownMemberType, reportUnknownVariableType]
@@ -196,7 +205,7 @@ class DayCount:
     """
 
     # TODO: test implementation of each convention
-    _daycounts: dict[str, int] = {
+    _day_counts: dict[str, int] = {
         "30/360": -1,
         "30/360 US": -1,
         "30E/360 ISDA": -1,
@@ -207,45 +216,45 @@ class DayCount:
         "actual/365L": 365,
         "business/252": 252,
     }
-    names: tuple[str, ...] = tuple(_daycounts.keys())
+    names: tuple[str, ...] = tuple(_day_counts.keys())
 
     def __init__(self, dc: str):
         if dc not in self.names:
             raise Exception("Invalid day count: %s" % dc)
         self._name: str = dc
-        self._daycount: str = dc
-        self._daysinbase: int = self._daycounts[dc]
-        self._unitsize: dict[str, int] = {  # frequency multiplier
+        self._day_count: str = dc
+        self._days_in_base: int = self._day_counts[dc]
+        self._unit_size: dict[str, int] = {  # frequency multiplier
             "year": 1,
             "half-year": 2,
             "quarter": 4,
             "month": 12,
-            "day": self._daysinbase,
+            "day": self._days_in_base,
         }
         self._unit_convert: dict[str, dict[str, float]] = {
             "year": {
-                "day": self._daysinbase,
+                "day": self._days_in_base,
                 "month": 12.0,
                 "quarter": 4.0,
                 "half-year": 2.0,
                 "year": 1.0,
             },
             "half-year": {
-                "day": self._daysinbase / 2.0,
+                "day": self._days_in_base / 2.0,
                 "month": 6.0,
                 "quarter": 2.0,
                 "half-year": 1.0,
                 "year": 0.5,
             },
             "quarter": {
-                "day": self._daysinbase / 4.0,
+                "day": self._days_in_base / 4.0,
                 "month": 3.0,
                 "quarter": 1.0,
                 "half-year": 0.5,
                 "year": 1.0 / 4.0,
             },
             "month": {
-                "day": self._daysinbase / 12.0,
+                "day": self._days_in_base / 12.0,
                 "month": 1.0,
                 "quarter": 3.0,
                 "half-year": 6.0,
@@ -253,16 +262,16 @@ class DayCount:
             },
             "day": {
                 "day": 1.0,
-                "month": 12.0 / self._daysinbase,
-                "quarter": 4.0 / self._daysinbase,
-                "half-year": 2.0 / self._daysinbase,
-                "year": 1.0 / self._daysinbase,
+                "month": 12.0 / self._days_in_base,
+                "quarter": 4.0 / self._days_in_base,
+                "half-year": 2.0 / self._days_in_base,
+                "year": 1.0 / self._days_in_base,
             },
         }
 
     @property
-    def daysinbase(self):
-        return self._daysinbase
+    def days_in_base(self):
+        return self._days_in_base
 
     @property
     def name(self):
@@ -272,7 +281,7 @@ class DayCount:
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, DayCount):
             return False
-        return self._daycount == other._daycount
+        return self._day_count == other._day_count
 
     def in_unit(self, period: GenericPeriod, unit: str) -> float:
         """
@@ -310,44 +319,44 @@ class DayCount:
         """
         return period.size() * self._unit_convert[period.unit]["year"]
 
-    def daysinunit(self, unit: str) -> float:
+    def days_in_unit(self, unit: str) -> float:
         """
         Returns the amount of days in base, for a given time
         unit (year, month, day, ...). For example, the business/252 day count
         rule has 252 days in base, so if you have a period of time with a time
         unit of month then you use 21 days for each month.
         """
-        return float(self.daysinbase) / self.unitsize(unit)
+        return float(self.days_in_base) / self.unit_size(unit)
 
-    def unitsize(self, unit: str) -> float:
+    def unit_size(self, unit: str) -> float:
         """
         Returns the amount of time for one year related to a unit and
-        to this daycount rule.
+        to this day count rule.
         """
-        return self._unitsize[unit]
+        return self._unit_size[unit]
 
-    def timefactor(self, period: GenericPeriod) -> float:
+    def time_factor(self, period: GenericPeriod) -> float:
         """
-        Returns an year fraction regarding period definition.
+        Returns a year fraction regarding period definition.
         This function always returns year's fraction.
         """
-        days = period.size() * self.daysinunit(period.unit)
-        return float(days) / self.daysinbase
+        days = period.size() * self.days_in_unit(period.unit)
+        return float(days) / self.days_in_base
 
-    def timefreq(self, period: GenericPeriod, frequency: Frequency) -> float:
+    def time_freq(self, period: GenericPeriod, frequency: Frequency) -> float:
         """
         Returns the amount of time contained into the period adjusted
         to the given frequency.
         """
-        tf = self.timefactor(period)
-        return tf * self.unitsize(frequency.unit())
+        tf = self.time_factor(period)
+        return tf * self.unit_size(frequency.unit())
 
 
 class InterestRate:
     """
     This class receives a calendar instance in its constructor's parameter list
     because in some cases it's fairly common to user provide that information.
-    Despite of having a default calendar set either into the system or for a
+    Despite having a default calendar set either into the system or for a
     given market, we are likely to handle the situation where interest rate
     has its own calendar and that calendar must be used to discount the
     cashflows.
@@ -359,16 +368,16 @@ class InterestRate:
         rate: float,
         frequency: Frequency,
         compounding: Compounding,
-        daycount: DayCount,
+        day_count: DayCount,
         calendar: Calendar | None = None,
     ):
         self.rate: float = rate
         self.frequency: Frequency = frequency
         self.compounding: Compounding = compounding
-        self.daycount: DayCount = daycount
+        self.day_count: DayCount = day_count
         self.calendar: Calendar | None = calendar
-        if self.calendar and not self.daycount.name.startswith("business"):
-            raise Exception("%s DayCount cannot accept calendar" % self.daycount.name)
+        if self.calendar and not self.day_count.name.startswith("business"):
+            raise Exception("%s DayCount cannot accept calendar" % self.day_count.name)
 
     def discount(self, period: DateRangePeriod) -> float:
         """Return the discount factor"""
@@ -379,11 +388,15 @@ class InterestRate:
         if self.calendar:
             period = CalendarRangePeriod(period, self.calendar)
 
-        t = self.daycount.timefreq(period, self.frequency)
+        t = self.day_count.time_freq(period, self.frequency)
         return self.compounding(self.rate, t)
 
+    @override
+    def __repr__(self) -> str:
+        return f"{self.__class__!r}({self.__dict__!r})"
 
-def ir(irspec: str) -> InterestRate:
+
+def ir(ir_spec: str) -> InterestRate:
     """
     Return a InterestRate object for a given interest rate specification.
     The interest rate specification is a string like:
@@ -397,12 +410,12 @@ def ir(irspec: str) -> InterestRate:
     - rate
     - frequency
     - compounding
-    - daycount
-    and depending on which daycount is used the calendar must be set. Otherwise,
+    - day count
+    and depending on which day count is used the calendar must be set. Otherwise,
     it defaults to None.
     """
-    rate = frequency = compounding = daycount = calendar = None
-    tokens = irspec.split()
+    rate = frequency = compounding = day_count = calendar = None
+    tokens = ir_spec.split()
     for tok in tokens:
         m = re.match(r"^(\d+)(\.\d+)?$", tok)
         if m:
@@ -410,7 +423,7 @@ def ir(irspec: str) -> InterestRate:
         elif tok in Compounding.names:
             compounding = Compounding(tok)
         elif tok in DayCount.names:
-            daycount = DayCount(tok)
+            day_count = DayCount(tok)
         elif tok in Frequency.names:
             frequency = Frequency(tok)
         elif tok.startswith("cal"):
@@ -421,9 +434,9 @@ def ir(irspec: str) -> InterestRate:
     assert rate is not None
     assert frequency is not None
     assert compounding is not None
-    assert daycount is not None
+    assert day_count is not None
 
-    return InterestRate(rate, frequency, compounding, daycount, calendar)
+    return InterestRate(rate, frequency, compounding, day_count, calendar)
 
 
 def compound(ir: InterestRate, period: DateRangePeriod) -> float:
@@ -461,14 +474,14 @@ def period(pspec: str) -> GenericPeriod:
     w = "|".join(Frequency.time_units)
     m = re.match(r"^(\d+)(\.\d+)? (%s)s?$" % w, pspec)
     if m:
-        istimerange = False
+        is_time_range = False
     elif len(pspec.split(":")) == 2:
         (start, end) = pspec.split(":")
-        istimerange = True
+        is_time_range = True
     else:
         raise Exception("Invalid period specification")
 
-    if istimerange:
+    if is_time_range:
         assert start is not None
         assert end is not None
         dates = [
