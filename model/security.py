@@ -64,7 +64,7 @@ class EquitySecurity(Security, ABC):
 class Stock(EquitySecurity):
     def __init__(self, name):
         code = int(name[-1])
-        assert code >= 1 and code <= 8, "Invalid stock: %s" % name
+        assert 1 <= code <= 8, "Invalid stock: %s" % name
         EquitySecurity.__init__(self, name)
         self.retriever = retriever.get_bovespa_retriever()
         self.category = MainCategories.Stocks
@@ -258,37 +258,12 @@ class BankBond(DebtSecurity, ABC):
     def get_value(self, date):
         if self.is_expired():
             return 0.0
-        elif isinstance(self.rate, CDIPercentualRate):
-            begin_date = self.issue_date.strftime("%Y-%m-%d")
-            end_date = date.strftime("%Y-%m-%d")
-            variation = self.retriever.get_variation(
-                "CDI", begin_date, end_date, self.rate.rate
-            )
-            return (1.0 + variation) * self.unit_value
-        elif isinstance(self.rate, FixedRate):
-            delta = date - self.issue_date
-            days = delta.days
-            annual_rate = self.rate.rate
-            daily_rate = (annual_rate + 1.0) ** (1.0 / 365.0) - 1.0
-            variation = (daily_rate + 1.0) ** days - 1.0
-            return (1.0 + variation) * self.unit_value
-        elif isinstance(self.rate, IPCARate):
-            begin_date = self.issue_date.strftime("%Y-%m-%d")
-            end_date = date.strftime("%Y-%m-%d")
 
-            ipca_variation = self.retriever.get_variation("IPCA", begin_date, end_date)
-            adjusted_unit_value = (1.0 + ipca_variation) * self.unit_value
-
-            delta = date - self.issue_date
-            days = delta.days
-            annual_rate = self.rate.rate
-            daily_rate = (annual_rate + 1.0) ** (1.0 / 365.0) - 1.0
-            pre_variation = (daily_rate + 1.0) ** days - 1.0
-            final_unit_value = (1.0 + pre_variation) * adjusted_unit_value
-
-            return final_unit_value
-        else:
-            assert False
+        begin_date = self.issue_date.strftime("%Y-%m-%d")
+        end_date = date.strftime("%Y-%m-%d")
+        indexer = self.rate.get_indexer()
+        variation = indexer.get_variation(begin_date, end_date)
+        return (1.0 + variation) * self.unit_value
 
 
 class BankBondCDI(BankBond):
@@ -301,7 +276,7 @@ class BankBondCDI(BankBond):
         )
         rate = CDIPercentualRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
-        self.retriever = retriever.get_cdi_retriever()
+        self.retriever = retriever.get_bcb_retriever()
 
 
 class BankBondPre(BankBond):
@@ -326,7 +301,7 @@ class BankBondIPCA(BankBond):
         )
         rate = IPCARate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
-        self.retriever = retriever.get_ipca_retriever()
+        self.retriever = retriever.get_bcb_retriever()
 
 
 ##############

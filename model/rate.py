@@ -1,10 +1,17 @@
+import datetime as dt
 from abc import ABC, abstractmethod
 from typing import override
 
 from bizdays import Calendar
 
-from retriever.cdi import CDIRetriever
-from retriever.ipca import IPCARetriever
+from model.fixedincome import (
+    Compounding,
+    DateRangePeriod,
+    DayCount,
+    Frequency,
+    InterestRate,
+)
+from retriever import get_bcb_retriever
 from retriever.retriever import VariationRetriever
 
 
@@ -16,12 +23,22 @@ class Indexer:
         percent: float = 1.0,
         code: str | None = None,
     ):
+        self.cal: Calendar = Calendar.load("ANBIMA")
         assert pre != 0.0 or post is not None
-        self.pre: float = pre
-        self.post: VariationRetriever | None = None
+        self.pre: InterestRate | None = (
+            InterestRate(
+                rate=pre,
+                frequency=Frequency("annual"),
+                compounding=Compounding("exponential"),
+                day_count=DayCount("business/252"),
+                calendar=self.cal,
+            )
+            if pre != 0.0
+            else None
+        )
+        self.post: VariationRetriever | None = post
         self.percent: float = percent
         self.code: str | None = code
-        self.cal: Calendar = Calendar.load("ANBIMA")
 
     def get_variation(self, begin_date: str, end_date: str) -> float:
         assert self.cal is not None
@@ -35,9 +52,17 @@ class Indexer:
                 self.code, begin_date, end_date, self.percent
             )
 
-        pre_factor: float = (1.0 + self.pre) ** (days / 252)
+        pre_factor = 1.0
+        if self.pre is not None:
+            period = DateRangePeriod(
+                [
+                    dt.datetime.strptime(d, "%Y-%m-%d").date()
+                    for d in (begin_date, end_date)
+                ]
+            )
+            pre_factor = self.pre.compound(period)
 
-        return post_factor * pre_factor
+        return post_factor * pre_factor - 1.0
 
 
 class BondRate(ABC):
@@ -64,7 +89,7 @@ class CDIPercentualRate(FloatingRate):
     def __init__(self, percent: float):
         self.percent: float = percent
         self.indexer: Indexer = Indexer(
-            post=CDIRetriever(), percent=percent, code="CDI"
+            post=get_bcb_retriever(), percent=percent, code="CDI"
         )
 
     @override
@@ -88,7 +113,7 @@ class InflationIndexedRate(BondRate, ABC):
 class IPCARate(InflationIndexedRate):
     def __init__(self, rate: float):
         self.rate: float = rate
-        self.indexer: Indexer = Indexer(pre=rate, post=IPCARetriever(), code="IPCA")
+        self.indexer: Indexer = Indexer(pre=rate, post=get_bcb_retriever(), code="IPCA")
 
     @override
     def get_indexer(self) -> Indexer:
