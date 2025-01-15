@@ -35,7 +35,7 @@ MONTHLY_SERIES = {
 }
 
 
-def get_expectation(period: dt.datetime, index: str) -> float:
+def get_expectation(period: dt.date, index: str) -> float:
     ref_date = period.strftime("%m/%Y")
     ep = Expectativas().get_endpoint("ExpectativaMercadoMensais")
     df_exp = (
@@ -50,7 +50,7 @@ def get_expectation(period: dt.datetime, index: str) -> float:
     return df_exp.iloc[0]["Mediana"]
 
 
-def replace_na_with_expectation(df: pd.DataFrame, period: dt.datetime) -> None:
+def replace_na_with_expectation(df: pd.DataFrame, period: dt.date) -> None:
     ts = pd.Timestamp(period).to_period("M")
     for index in MONTHLY_SERIES.keys():
         if df.isna().loc[ts, index]:
@@ -58,32 +58,49 @@ def replace_na_with_expectation(df: pd.DataFrame, period: dt.datetime) -> None:
             df.loc[ts, index] = get_expectation(period, index)
 
 
-def main():
-    current_month = dt.date.today()
-    previous_month = current_month - rd.relativedelta(months=1)
+def try_sgs_get(series: dict[str, int], start: dt.date, end: dt.date) -> pd.DataFrame:
+    for i in range(5):
+        try:
+            return sgs.get(series, start, end)
+        except ValueError:
+            print(f"sgs.get error ({i}/5)")
+    return sgs.get(series, start, end)
 
+
+def main():
+    cal = bizdays.Calendar.load(name="ANBIMA")
+    today = dt.date.today()
+
+    # First day of year being retrieved
     start = dt.date(YEAR, 1, 1)
-    end = min(dt.date(YEAR, 12, 31), dt.date.today())
+    # Last day of year being retrieved (or previous business day if considering current year)
+    end = min(dt.date(YEAR, 12, 31), cal.offset(today, -1).date())
     assert start < end
+
+    # First day of current month
+    current_month = today.replace(day=1)
+    # First day of previous month
+    previous_month = current_month - rd.relativedelta(months=1)
+    assert current_month.day == previous_month.day == 1
 
     # Retrieve historical series
     print("Retrieving historical series data...")
-    df_daily = sgs.get(DAILY_SERIES, start, end)
+    df_daily = try_sgs_get(DAILY_SERIES, start, end)
 
-    df_monthly = sgs.get(MONTHLY_SERIES, min(start, previous_month), end)
+    # Monthly data may not be available for the current period, therefore we ensure the call includes past periods
+    df_monthly = try_sgs_get(MONTHLY_SERIES, min(start, previous_month), end)
     df_monthly = df_monthly.reindex(pd.date_range(start, end, freq="MS"))
     df_monthly.index = df_monthly.index.to_period("M")
 
     # Replace NA values with market expectation
-    for period in (current_month, previous_month):
+    for period in (previous_month, current_month):
         if start <= period <= end:
             replace_na_with_expectation(df_monthly, period)
     assert not df_monthly.isna().any(axis=None)
 
     # Convert rates from monthly to daily
-    cal = bizdays.Calendar.load(name="ANBIMA")
     days = cal.seq(start, end)
-    assert all(days == df_daily.index)
+    assert (days == df_daily.index).all()
 
     index = df_monthly.index
     days_per_month = pd.Series([cal.getbizdays(x.year, x.month) for x in index], index)
