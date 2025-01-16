@@ -56,18 +56,18 @@ RealEstateCategories = OrderedEnum(
 PrivateDebtCategories = OrderedEnum(
     "PrivateDebtCategories",
     [
+        "Floating",
         "Inflation",
         "Fixed",
-        "Floating",
     ],
 )
 
 PublicDebtCategories = OrderedEnum(
     "PublicDebtCategories",
     [
+        "Floating",
         "Inflation",
         "Fixed",
-        "Floating",
     ],
 )
 
