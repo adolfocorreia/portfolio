@@ -4,7 +4,7 @@ import os
 import re
 import time
 from abc import ABC, abstractmethod
-from datetime import datetime as dt
+from datetime import date
 from pathlib import Path
 
 import pandas as pd
@@ -146,7 +146,7 @@ class DataRetriever(ABC):
 
 class ValueRetriever(DataRetriever, ABC):
     def get_today_value(self, code):
-        return self.get_value(code, dt.strftime(dt.today(), "%Y-%m-%d"))
+        return self.get_value(code, date.today().strftime("%Y-%m-%d"))
 
     @abstractmethod
     def get_value(self, code, date) -> float:

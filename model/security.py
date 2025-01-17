@@ -10,7 +10,7 @@ Fund shares may be categorized as equity securities as well.
 """
 
 from abc import ABC
-from datetime import datetime
+from datetime import datetime, date
 
 import retriever
 
@@ -33,8 +33,8 @@ class Security(ABC):
         self.category = None
         self.subcategory = None
 
-    def get_value(self, date):
-        date_str = date.strftime("%Y-%m-%d")
+    def get_value(self, day):
+        date_str = day.strftime("%Y-%m-%d")
         return self.retriever.get_value(self.name, date_str)
 
 
@@ -166,10 +166,10 @@ class DebtSecurity(Security, ABC):
     def is_expired(self):
         return self.maturity < datetime.now()
 
-    def get_value(self, date):
+    def get_value(self, day):
         if self.is_expired():
             return 0.0
-        return Security.get_value(self, date)
+        return Security.get_value(self, day)
 
 
 ##################
@@ -255,12 +255,12 @@ class BankBond(DebtSecurity, ABC):
         self.category = MainCategories.PrivateDebt
         self.subcategory = PrivateDebtCategories[subcat]
 
-    def get_value(self, date):
+    def get_value(self, day):
         if self.is_expired():
             return 0.0
 
         begin_date = self.issue_date.strftime("%Y-%m-%d")
-        end_date = date.strftime("%Y-%m-%d")
+        end_date = day.strftime("%Y-%m-%d")
         indexer = self.rate.get_indexer()
         variation = indexer.get_variation(begin_date, end_date)
         return (1.0 + variation) * self.unit_value

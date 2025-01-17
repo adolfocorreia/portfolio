@@ -1,16 +1,15 @@
 #!/usr/bin/env python
 
 import calendar
-import datetime as dt
 import os
 import re
 import sys
 import urllib.request
 import zipfile
+from datetime import date, datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
-
 
 assert len(sys.argv) == 2
 YEAR = int(sys.argv[1])
@@ -53,14 +52,14 @@ MONTHS = {
     "DEZ": 12,
 }
 
-TODAY = dt.datetime.combine(dt.date.today(), dt.datetime.min.time())
+TODAY = datetime.combine(date.today(), datetime.min.time())
 
 
 # Download and extract main data file
 try:
-    modification_time = dt.datetime.fromtimestamp(Path(IPCA_MAIN_FILE).stat().st_mtime)
+    modification_time = datetime.fromtimestamp(Path(IPCA_MAIN_FILE).stat().st_mtime)
 except OSError:
-    modification_time = dt.datetime.fromtimestamp(0)
+    modification_time = datetime.fromtimestamp(0)
 
 if modification_time < TODAY:
     urllib.request.urlretrieve(IPCA_MAIN_URL, IPCA_ZIP_FILE)
@@ -96,11 +95,11 @@ df.drop(
 
 # Download and load projection data
 try:
-    modification_time = dt.datetime.fromtimestamp(
+    modification_time = datetime.fromtimestamp(
         Path(IPCA_PROJECTION_FILE).stat().st_mtime
     )
 except OSError:
-    modification_time = dt.datetime.fromtimestamp(0)
+    modification_time = datetime.fromtimestamp(0)
 
 if modification_time < TODAY:
     urllib.request.urlretrieve(IPCA_PROJECTION_URL, IPCA_PROJECTION_FILE)
@@ -133,9 +132,9 @@ df["TaxaDiaria"] = (1.0 + df.PercNoMes / 100.0) ** (1.0 / df.DiasNoMes) - 1.0
 # Assemble CSV file
 df.set_index(["Ano", "Mes"], inplace=True)
 
-DELTA = dt.timedelta(days=1)
-FIRST_DAY = dt.date(YEAR, 1, 1)
-LAST_DAY = min(dt.date(YEAR, 12, 31), dt.date.today())
+DELTA = timedelta(days=1)
+FIRST_DAY = date(YEAR, 1, 1)
+LAST_DAY = min(date(YEAR, 12, 31), date.today())
 
 csv_file_name = "IPCA_%s.csv" % YEAR
 with open(csv_file_name, "w") as csv_file:

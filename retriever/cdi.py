@@ -1,5 +1,5 @@
-import datetime as dt
 import glob
+from datetime import datetime, timedelta
 
 import numpy as np
 import pandas as pd
@@ -47,11 +47,11 @@ class CDIRetriever(VariationRetriever):
     def get_variation(self, code, begin_date, end_date, percentage=1.0):
         VariationRetriever.get_variation(self, code, begin_date, end_date)
 
-        start = dt.datetime.strptime(begin_date, "%Y-%m-%d")
-        end = dt.datetime.strptime(end_date, "%Y-%m-%d")
+        start = datetime.strptime(begin_date, "%Y-%m-%d")
+        end = datetime.strptime(end_date, "%Y-%m-%d")
 
         # Last day is not considered
-        end = end - dt.timedelta(days=1)
+        end = end - timedelta(days=1)
 
         interval_df = self._data["cdi"].loc[start:end]
         return round((interval_df.daily * percentage + 1.0).prod() - 1.0, 8)

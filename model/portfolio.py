@@ -1,5 +1,5 @@
 from collections import namedtuple
-from datetime import datetime as dt
+from datetime import date
 
 import pandas as pd
 
@@ -30,7 +30,7 @@ PortfolioItem = namedtuple("PortfolioItem", ["sec", "amount"])
 
 class Portfolio:
     def __init__(self):
-        self.at_day = dt.today()
+        self.at_day = date.today()
         self.securities = {}
         self.portfolio_value = 0.0
         self.categories_values = dict.fromkeys(list(MainCategories), 0.0)

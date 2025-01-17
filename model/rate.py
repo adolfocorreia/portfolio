@@ -1,5 +1,5 @@
-import datetime as dt
 from abc import ABC, abstractmethod
+from datetime import date, datetime
 from typing import override
 
 from bizdays import Calendar
@@ -56,7 +56,7 @@ class Indexer:
         if self.pre is not None:
             period = DateRangePeriod(
                 [
-                    dt.datetime.strptime(d, "%Y-%m-%d").date()
+                    datetime.strptime(d, "%Y-%m-%d").date()
                     for d in (begin_date, end_date)
                 ]
             )

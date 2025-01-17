@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import datetime as dt
 import inspect
 import os
 import re
 import sys
 import warnings
+from datetime import date
 
 import bizdays
 import pandas as pd
@@ -35,7 +35,7 @@ MONTHLY_SERIES = {
 }
 
 
-def get_expectation(period: dt.date, index: str) -> float:
+def get_expectation(period: date, index: str) -> float:
     ref_date = period.strftime("%m/%Y")
     ep = Expectativas().get_endpoint("ExpectativaMercadoMensais")
     df_exp = (
@@ -50,7 +50,7 @@ def get_expectation(period: dt.date, index: str) -> float:
     return df_exp.iloc[0]["Mediana"]
 
 
-def replace_na_with_expectation(df: pd.DataFrame, period: dt.date) -> None:
+def replace_na_with_expectation(df: pd.DataFrame, period: date) -> None:
     ts = pd.Timestamp(period).to_period("M")
     for index in MONTHLY_SERIES.keys():
         if df.isna().loc[ts, index]:
@@ -58,7 +58,7 @@ def replace_na_with_expectation(df: pd.DataFrame, period: dt.date) -> None:
             df.loc[ts, index] = get_expectation(period, index)
 
 
-def try_sgs_get(series: dict[str, int], start: dt.date, end: dt.date) -> pd.DataFrame:
+def try_sgs_get(series: dict[str, int], start: date, end: date) -> pd.DataFrame:
     for i in range(5):
         try:
             return sgs.get(series, start, end)
@@ -69,12 +69,12 @@ def try_sgs_get(series: dict[str, int], start: dt.date, end: dt.date) -> pd.Data
 
 def main():
     cal = bizdays.Calendar.load(name="ANBIMA")
-    today = dt.date.today()
+    today = date.today()
 
     # First day of year being retrieved
-    start = dt.date(YEAR, 1, 1)
+    start = date(YEAR, 1, 1)
     # Last day of year being retrieved (or previous business day if considering current year)
-    end = min(dt.date(YEAR, 12, 31), cal.offset(today, -1).date())
+    end = min(date(YEAR, 12, 31), cal.offset(today, -1).date())
     assert start < end
 
     # First day of current month

@@ -1,5 +1,5 @@
-import datetime as dt
 import glob
+from datetime import datetime, timedelta
 from typing import override
 
 import pandas as pd
@@ -44,11 +44,11 @@ class BCBRetriever(VariationRetriever):
     def get_variation(self, code, begin_date, end_date, percentage=1.0):
         VariationRetriever.get_variation(self, code, begin_date, end_date)
 
-        start = dt.datetime.strptime(begin_date, "%Y-%m-%d")
-        end = dt.datetime.strptime(end_date, "%Y-%m-%d")
+        start = datetime.strptime(begin_date, "%Y-%m-%d")
+        end = datetime.strptime(end_date, "%Y-%m-%d")
 
         # Last day is not considered
-        end = end - dt.timedelta(days=1)
+        end = end - timedelta(days=1)
 
         interval_df = self._data["bcb"].loc[start:end]
         assert len(interval_df) > 0
