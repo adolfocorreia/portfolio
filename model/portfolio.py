@@ -17,9 +17,9 @@ from .security import (
     BankBondCDI,
     BankBondIPCA,
     BankBondPre,
+    Debenture,
     EquitySecurity,
     ExchangeTradedFundShare,
-    InfraDebenture,
     RealEstateFundShare,
     StockFundShare,
     TreasureBond,
@@ -113,7 +113,7 @@ class Portfolio:
             elif kind == "Deb":
                 rate = float(row.Taxa[:-1]) / 100.0
                 self.add_security(
-                    InfraDebenture(row.Ativo, row.Vencimento, rate), row.Quantidade
+                    Debenture(row.Ativo, row.Vencimento, rate), row.Quantidade
                 )
             elif kind == "ETF":
                 self.add_security(

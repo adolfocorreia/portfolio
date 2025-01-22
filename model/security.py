@@ -10,13 +10,16 @@ Fund shares may be categorized as equity securities as well.
 """
 
 from abc import ABC
-from datetime import datetime, date
+from datetime import date, datetime
+from typing import override
 
 import retriever
+from retriever.retriever import ValueRetriever
 
 from .category import (
     CashCategories,
     MainCategories,
+    OrderedEnum,
     PrivateDebtCategories,
     PublicDebtCategories,
     RealEstateCategories,
@@ -26,16 +29,23 @@ from .rate import BondRate, CDIPercentualRate, FixedRate, IPCARate, SELICRate
 
 
 class Security(ABC):
-    def __init__(self, name, issuer=""):
-        self.name = name
-        self.issuer = issuer
-        self.retriever = None
-        self.category = None
-        self.subcategory = None
+    def __init__(
+        self,
+        name: str,
+        retriever: ValueRetriever,
+        category: OrderedEnum,
+        subcategory: OrderedEnum,
+        issuer: str = "",
+    ):
+        self.name: str = name
+        self.retriever: ValueRetriever = retriever
+        self.category: OrderedEnum = category
+        self.subcategory: OrderedEnum = subcategory
+        self.issuer: str = issuer
 
-    def get_value(self, day):
-        date_str = day.strftime("%Y-%m-%d")
-        return self.retriever.get_value(self.name, date_str)
+    def get_value(self, day: str | date) -> float:
+        assert self.retriever is not None
+        return self.retriever.get_value(self.name, day)
 
 
 #####################
@@ -44,11 +54,17 @@ class Security(ABC):
 
 
 class EquitySecurity(Security, ABC):
-    def __init__(self, name):
-        Security.__init__(self, name)
+    def __init__(
+        self,
+        name: str,
+        retriever: ValueRetriever,
+        category: OrderedEnum,
+        subcategory: OrderedEnum,
+    ):
+        Security.__init__(self, name, retriever, category, subcategory)
 
     @staticmethod
-    def create(name):
+    def create(name: str):
         if name.endswith("F"):
             name = name[:-1]
         if name.endswith("11"):
@@ -62,33 +78,42 @@ class EquitySecurity(Security, ABC):
 
 
 class Stock(EquitySecurity):
-    def __init__(self, name):
+    def __init__(self, name: str):
         code = int(name[-1])
         assert 1 <= code <= 8, "Invalid stock: %s" % name
-        EquitySecurity.__init__(self, name)
-        self.retriever = retriever.get_bovespa_retriever()
-        self.category = MainCategories.Stocks
-        self.subcategory = StocksCategories.NationalIndex
+        EquitySecurity.__init__(
+            self,
+            name,
+            retriever.get_bovespa_retriever(),
+            MainCategories.Stocks,
+            StocksCategories.NationalIndex,
+        )
 
 
 class StockUnit(EquitySecurity):
-    def __init__(self, name):
+    def __init__(self, name: str):
         assert name.endswith("11")
-        EquitySecurity.__init__(self, name)
-        self.retriever = retriever.get_bovespa_retriever()
-        self.category = MainCategories.Stocks
-        self.subcategory = StocksCategories.NationalIndex
+        EquitySecurity.__init__(
+            self,
+            name,
+            retriever.get_bovespa_retriever(),
+            MainCategories.Stocks,
+            StocksCategories.NationalIndex,
+        )
 
 
 class SubscriptionRight(EquitySecurity):
-    def __init__(self, name, stock):
+    def __init__(self, name: str, stock: Stock):
         code = int(name[-1])
         assert code in (1, 2)
-        self.stock = stock
-        EquitySecurity.__init__(self, name)
-        self.retriever = retriever.get_bovespa_retriever()
-        self.category = MainCategories.Stocks
-        self.subcategory = StocksCategories.NationalIndex
+        self.stock: Stock = stock
+        EquitySecurity.__init__(
+            self,
+            name,
+            retriever.get_bovespa_retriever(),
+            MainCategories.Stocks,
+            StocksCategories.NationalIndex,
+        )
 
 
 ##########################
@@ -97,8 +122,14 @@ class SubscriptionRight(EquitySecurity):
 
 
 class FundShare(EquitySecurity, ABC):
-    def __init__(self, name):
-        EquitySecurity.__init__(self, name)
+    def __init__(
+        self,
+        name: str,
+        retriever: ValueRetriever,
+        category: OrderedEnum,
+        subcategory: OrderedEnum,
+    ):
+        EquitySecurity.__init__(self, name, retriever, category, subcategory)
 
 
 class MutualFundShare(FundShare):
@@ -106,49 +137,56 @@ class MutualFundShare(FundShare):
 
 
 class ExchangeTradedFundShare(FundShare):
-    def __init__(self, name, subcat):
+    def __init__(self, name: str, subcat: str):
         assert name.endswith("11")
 
         is_stock = subcat in StocksCategories._member_names_
         is_cash = subcat in CashCategories._member_names_
         assert is_stock ^ is_cash, "Not stock nor cash: %s" % subcat
 
-        FundShare.__init__(self, name)
-        self.retriever = retriever.get_bovespa_retriever()
-
         if is_stock:
-            self.category = MainCategories.Stocks
-            self.subcategory = StocksCategories[subcat]
+            category = MainCategories.Stocks
+            subcategory = StocksCategories[subcat]
         elif is_cash:
-            self.category = MainCategories.Cash
-            self.subcategory = CashCategories[subcat]
+            category = MainCategories.Cash
+            subcategory = CashCategories[subcat]
         else:
             raise Exception("Invalid ETF!")
 
+        FundShare.__init__(
+            self, name, retriever.get_bovespa_retriever(), category, subcategory
+        )
+
 
 class HedgeFundShare(FundShare):
-    def __init__(self, name):
-        FundShare.__init__(self, name)
-        self.retriever = retriever.get_fund_retriever()
-        self.category = MainCategories.Other
+    def __init__(self, name: str):
+        FundShare.__init__(
+            self, name, retriever.get_fund_retriever(), MainCategories.Other, None
+        )
 
 
 class RealEstateFundShare(FundShare):
-    def __init__(self, name):
+    def __init__(self, name: str):
         assert name.endswith("11") or name.endswith("11B")
-        FundShare.__init__(self, name)
-        self.retriever = retriever.get_bovespa_retriever()
-        self.category = MainCategories.RealEstate
-        self.subcategory = RealEstateCategories.Brick
+        FundShare.__init__(
+            self,
+            name,
+            retriever.get_bovespa_retriever(),
+            MainCategories.RealEstate,
+            RealEstateCategories.Brick,
+        )
 
 
 class StockFundShare(FundShare):
-    def __init__(self, name, subcat):
+    def __init__(self, name: str, subcat: str):
         assert StocksCategories[subcat] is not None, "Subcategory: %s" % subcat
-        FundShare.__init__(self, name)
-        self.retriever = retriever.get_fund_retriever()
-        self.category = MainCategories.Stocks
-        self.subcategory = StocksCategories[subcat]
+        FundShare.__init__(
+            self,
+            name,
+            retriever.get_fund_retriever(),
+            MainCategories.Stocks,
+            StocksCategories[subcat],
+        )
 
 
 ###################
@@ -157,16 +195,29 @@ class StockFundShare(FundShare):
 
 
 class DebtSecurity(Security, ABC):
-    def __init__(self, name, maturity, rate):
-        Security.__init__(self, name)
-        self.maturity = maturity
-        assert isinstance(rate, BondRate)
-        self.rate = rate
+    def __init__(
+        self,
+        name: str,
+        retriever: ValueRetriever,
+        category: OrderedEnum,
+        subcategory: OrderedEnum,
+        maturity: str | date,
+        rate: BondRate,
+        issuer: str = "",
+    ):
+        Security.__init__(self, name, retriever, category, subcategory, issuer)
+        self.maturity: date = (
+            datetime.strptime(maturity, "%Y-%m-%d").date()
+            if isinstance(maturity, str)
+            else date(maturity.year, maturity.month, maturity.day)
+        )
+        self.rate: BondRate = rate
 
-    def is_expired(self):
-        return self.maturity < datetime.now()
+    def is_expired(self) -> bool:
+        return self.maturity < date.today()
 
-    def get_value(self, day):
+    @override
+    def get_value(self, day: str | date) -> float:
         if self.is_expired():
             return 0.0
         return Security.get_value(self, day)
@@ -178,15 +229,21 @@ class DebtSecurity(Security, ABC):
 
 
 class TreasureBond(DebtSecurity, ABC):
-    def __init__(self, name, rate):
-        maturity = datetime.strptime(name[-6:], "%d%m%y")
-        DebtSecurity.__init__(self, name, maturity, rate)
-        self.issuer = "Tesouro Nacional"
-        self.retriever = retriever.get_directtreasure_retriever()
-        self.category = MainCategories.PublicDebt
+    def __init__(self, name: str, subcategory: OrderedEnum, rate: BondRate):
+        maturity = datetime.strptime(name[-6:], "%d%m%y").date()
+        DebtSecurity.__init__(
+            self,
+            name,
+            retriever.get_directtreasure_retriever(),
+            MainCategories.PublicDebt,
+            subcategory,
+            maturity,
+            rate,
+            "Tesouro Nacional",
+        )
 
     @staticmethod
-    def create(name, rate_value):
+    def create(name: str, rate_value: float):
         if name.startswith("LTN_"):
             return LTN(name, rate_value)
         elif name.startswith("LFT_"):
@@ -202,43 +259,38 @@ class TreasureBond(DebtSecurity, ABC):
 
 
 class LTN(TreasureBond):
-    def __init__(self, name, rate_value):
+    def __init__(self, name: str, rate_value: float):
         assert name.startswith("LTN_")
         rate = FixedRate(rate_value)
-        TreasureBond.__init__(self, name, rate)
-        self.subcategory = PublicDebtCategories.Fixed
+        TreasureBond.__init__(self, name, PublicDebtCategories.Fixed, rate)
 
 
 class LFT(TreasureBond):
-    def __init__(self, name, rate_value):
+    def __init__(self, name: str, rate_value: float):
         assert name.startswith("LFT_")
         rate = SELICRate(rate_value)
-        TreasureBond.__init__(self, name, rate)
-        self.subcategory = PublicDebtCategories.Floating
+        TreasureBond.__init__(self, name, PublicDebtCategories.Floating, rate)
 
 
 class NTNF(TreasureBond):
-    def __init__(self, name, rate_value):
+    def __init__(self, name: str, rate_value: float):
         assert name.startswith("NTN-F_")
         rate = FixedRate(rate_value)
-        TreasureBond.__init__(self, name, rate)
-        self.subcategory = PublicDebtCategories.Fixed
+        TreasureBond.__init__(self, name, PublicDebtCategories.Fixed, rate)
 
 
 class NTNB(TreasureBond):
-    def __init__(self, name, rate_value):
+    def __init__(self, name: str, rate_value: float):
         assert name.startswith("NTN-B_") and not name.startswith("NTN-B_Principal_")
         rate = IPCARate(rate_value)
-        TreasureBond.__init__(self, name, rate)
-        self.subcategory = PublicDebtCategories.Inflation
+        TreasureBond.__init__(self, name, PublicDebtCategories.Inflation, rate)
 
 
 class NTNBP(TreasureBond):
-    def __init__(self, name, rate_value):
+    def __init__(self, name: str, rate_value: float):
         assert name.startswith("NTN-B_Principal_")
         rate = FixedRate(rate_value)
-        TreasureBond.__init__(self, name, rate)
-        self.subcategory = PublicDebtCategories.Inflation
+        TreasureBond.__init__(self, name, PublicDebtCategories.Inflation, rate)
 
 
 #############
@@ -247,61 +299,86 @@ class NTNBP(TreasureBond):
 
 
 class BankBond(DebtSecurity, ABC):
-    def __init__(self, name, maturity, rate, issue_date, unit_value, subcat):
+    def __init__(
+        self,
+        name: str,
+        maturity: date,
+        rate: BondRate,
+        issue_date: date,
+        unit_value: float,
+        subcat: str,
+    ):
         assert PrivateDebtCategories[subcat] is not None, "Subcategory: %s" % subcat
-        DebtSecurity.__init__(self, name, maturity, rate)
-        self.issue_date = issue_date
-        self.unit_value = unit_value
-        self.category = MainCategories.PrivateDebt
-        self.subcategory = PrivateDebtCategories[subcat]
+        assert (
+            name.startswith("LCI")
+            or name.startswith("LCA")
+            or name.startswith("CDB")
+            or name.startswith("LC")
+        )
+        assert isinstance(maturity, date)
+        DebtSecurity.__init__(
+            self,
+            name,
+            None,
+            MainCategories.PrivateDebt,
+            PrivateDebtCategories[subcat],
+            maturity,
+            rate,
+        )
+        assert isinstance(issue_date, date)
+        self.issue_date: date = date(issue_date.year, issue_date.month, issue_date.day)
+        self.unit_value: float = unit_value
 
-    def get_value(self, day):
+    @override
+    def get_value(self, day: str | date) -> float:
         if self.is_expired():
             return 0.0
 
-        begin_date = self.issue_date.strftime("%Y-%m-%d")
-        end_date = day.strftime("%Y-%m-%d")
         indexer = self.rate.get_indexer()
-        variation = indexer.get_variation(begin_date, end_date)
+        variation = indexer.get_variation(self.issue_date, day)
         return (1.0 + variation) * self.unit_value
 
 
 class BankBondCDI(BankBond):
-    def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert (
-            name.startswith("LCI")
-            or name.startswith("LCA")
-            or name.startswith("CDB")
-            or name.startswith("LC")
-        )
+    def __init__(
+        self,
+        name: str,
+        maturity: date,
+        rate_value: float,
+        issue_date: date,
+        unit_value: float,
+        subcat: str,
+    ):
         rate = CDIPercentualRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
-        self.retriever = retriever.get_bcb_retriever()
 
 
 class BankBondPre(BankBond):
-    def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert (
-            name.startswith("LCI")
-            or name.startswith("LCA")
-            or name.startswith("CDB")
-            or name.startswith("LC")
-        )
+    def __init__(
+        self,
+        name: str,
+        maturity: date,
+        rate_value: float,
+        issue_date: date,
+        unit_value: float,
+        subcat: str,
+    ):
         rate = FixedRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
 
 
 class BankBondIPCA(BankBond):
-    def __init__(self, name, maturity, rate_value, issue_date, unit_value, subcat):
-        assert (
-            name.startswith("LCI")
-            or name.startswith("LCA")
-            or name.startswith("CDB")
-            or name.startswith("LC")
-        )
+    def __init__(
+        self,
+        name: str,
+        maturity: date,
+        rate_value: float,
+        issue_date: date,
+        unit_value: float,
+        subcat: str,
+    ):
         rate = IPCARate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
-        self.retriever = retriever.get_bcb_retriever()
 
 
 ##############
@@ -309,23 +386,18 @@ class BankBondIPCA(BankBond):
 ##############
 
 
-class Debenture(DebtSecurity, ABC):
-    def __init__(self, name, maturity, rate_value):
+class Debenture(DebtSecurity):
+    def __init__(self, name: str, maturity: date, rate_value: float):
         rate = IPCARate(rate_value)
-        DebtSecurity.__init__(self, name, maturity, rate)
-        self.retriever = retriever.get_debentures_retriever()
-        self.category = MainCategories.PrivateDebt
-        self.subcategory = PrivateDebtCategories.Inflation
-
-
-class RegularDebenture(Debenture):
-    def __init__(self, name, maturity, rate_value):
-        Debenture.__init__(self, name, maturity, rate_value)
-
-
-class InfraDebenture(Debenture):
-    def __init__(self, name, maturity, rate_value):
-        Debenture.__init__(self, name, maturity, rate_value)
+        DebtSecurity.__init__(
+            self,
+            name,
+            retriever.get_debentures_retriever(),
+            MainCategories.PrivateDebt,
+            PrivateDebtCategories.Inflation,
+            maturity,
+            rate,
+        )
 
 
 #########################
