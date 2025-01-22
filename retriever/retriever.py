@@ -4,13 +4,14 @@ import os
 import re
 import time
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 from datetime import date
 from pathlib import Path
 
 import pandas as pd
 
 
-def is_file_up_to_date(file_name, base_year=None):
+def is_file_up_to_date(file_name: str, base_year: int | None = None):
     # Check if file exists
     if not os.path.isfile(file_name):
         return False
@@ -31,23 +32,23 @@ def is_file_up_to_date(file_name, base_year=None):
 
 
 class DataRetriever(ABC):
-    _initial_year = 2014
+    _initial_year: int = 2014
     _date_regex = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
-    def __init__(self, asset_type):
-        self.asset_type = asset_type.lower()
+    def __init__(self, asset_type: str):
+        self.asset_type: str = asset_type.lower()
 
         module_file = inspect.getfile(inspect.currentframe())
         module_dir = os.path.dirname(os.path.abspath(module_file))
-        self.data_directory = module_dir + "/data_" + asset_type.lower()
+        self.data_directory: str = module_dir + "/data_" + asset_type.lower()
 
-        self.codes = sorted(
+        self.codes: list[str] = sorted(
             line.strip() for line in open(self.data_directory + "/codes.txt")
         )
 
-        self._data = None
+        self._data: dict[str, pd.DataFrame] | None = None
 
-        self._needs_to_be_loaded = True
+        self._needs_to_be_loaded: bool = True
         self.check_and_update_data()
 
     def check_and_update_data(self):
@@ -55,9 +56,11 @@ class DataRetriever(ABC):
         self._check_and_load_data_files()
 
     def _check_and_download_data_files(self):
-        years = range(DataRetriever._initial_year, time.localtime()[0] + 1)
+        years: Iterable[int] = range(
+            DataRetriever._initial_year, time.localtime()[0] + 1
+        )
         patterns = self._get_data_file_patterns()
-        tuples = [(p % y, y) for p in patterns for y in years]
+        tuples: list[tuple[str, int]] = [(p % y, y) for p in patterns for y in years]
 
         for file_name, year in tuples:
             if is_file_up_to_date(file_name, year):
@@ -70,7 +73,7 @@ class DataRetriever(ABC):
             )
             self._needs_to_be_loaded = True
 
-    def _download_data_files(self, year):
+    def _download_data_files(self, year: int) -> None:
         print("Downloading %s data files..." % self.asset_type)
         old_path = Path.cwd()
         os.chdir(self.data_directory)
@@ -117,54 +120,75 @@ class DataRetriever(ABC):
 
         return data_ts < cache_ts
 
-    def _load_data_from_cache(self):
+    def _load_data_from_cache(self) -> None:
         self._data = {}
         cache_files = sorted(glob.glob(self.data_directory + "/*.cache"))
         for cache_file in cache_files:
             name = Path(cache_file).stem
             self._data[name] = pd.read_feather(cache_file)
 
-    def _write_data_to_cache(self):
+    def _write_data_to_cache(self) -> None:
+        assert self._data is not None
         assert isinstance(self._data, dict)
         for key, df in self._data.items():
             assert isinstance(df, pd.DataFrame)
             file_name = os.path.join(self.data_directory, key + ".cache")
-            df.to_feather(file_name)
+            df.to_feather(str(file_name))
+
+    @property
+    def data(self) -> dict[str, pd.DataFrame]:
+        assert self._data is not None
+        return self._data
+
+    @data.setter
+    def data(self, data: dict[str, pd.DataFrame]):
+        assert data is not None
+        self._data = data
 
     @abstractmethod
-    def _get_data_file_patterns(self):
+    def _get_data_file_patterns(self) -> list[str]:
         pass
 
     @abstractmethod
-    def _available_codes(self):
+    def _available_codes(self) -> list[str]:
         pass
 
     @abstractmethod
-    def _load_data_files(self):
+    def _load_data_files(self) -> None:
         pass
 
 
 class ValueRetriever(DataRetriever, ABC):
-    def get_today_value(self, code):
+    def get_today_value(self, code: str):
         return self.get_value(code, date.today().strftime("%Y-%m-%d"))
 
     @abstractmethod
-    def get_value(self, code, date) -> float:
+    def get_value(self, code: str, day: str | date) -> float:
         assert code in self._available_codes()
-        assert DataRetriever._date_regex.match(date)
+        if isinstance(day, str):
+            assert DataRetriever._date_regex.match(day)
 
 
 class VariationRetriever(DataRetriever, ABC):
     @abstractmethod
-    def get_variation(self, code:str, begin_date:str, end_date:str, percentage:float=1.0) -> float:
+    def get_variation(
+        self,
+        code: str,
+        begin_date: str | date,
+        end_date: str | date,
+        percentage: float = 1.0,
+    ) -> float:
         assert code is not None
         assert code in self._available_codes()
-        assert DataRetriever._date_regex.match(begin_date)
-        assert DataRetriever._date_regex.match(end_date)
+        if isinstance(begin_date, str):
+            assert DataRetriever._date_regex.match(begin_date)
+        if isinstance(end_date, str):
+            assert DataRetriever._date_regex.match(end_date)
 
 
 class CurveRetriever(DataRetriever, ABC):
     @abstractmethod
-    def get_curve_vertices(self, code, base_date):
+    def get_curve_vertices(self, code: str, base_date: str | date) -> pd.DataFrame:
         assert code in self._available_codes()
-        assert DataRetriever._date_regex.match(base_date)
+        if isinstance(base_date, str):
+            assert DataRetriever._date_regex.match(base_date)

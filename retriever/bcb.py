@@ -1,5 +1,5 @@
 import glob
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from typing import override
 
 import pandas as pd
@@ -39,17 +39,30 @@ class BCBRetriever(VariationRetriever):
 
         data /= 100.0
 
-        self._data = {"bcb": data}
+        self.data: dict[str, pd.DataFrame] = {"bcb": data}
 
-    def get_variation(self, code, begin_date, end_date, percentage=1.0):
-        VariationRetriever.get_variation(self, code, begin_date, end_date)
+    @override
+    def get_variation(
+        self,
+        code: str,
+        begin_date: str | date,
+        end_date: str | date,
+        percentage: float = 1.0,
+    ) -> float:
+        _ = VariationRetriever.get_variation(self, code, begin_date, end_date)
 
-        start = datetime.strptime(begin_date, "%Y-%m-%d")
-        end = datetime.strptime(end_date, "%Y-%m-%d")
+        if isinstance(begin_date, str):
+            start = datetime.strptime(begin_date, "%Y-%m-%d").date()
+        else:
+            start = date(begin_date.year, begin_date.month, begin_date.day)
+        if isinstance(end_date, str):
+            end = datetime.strptime(end_date, "%Y-%m-%d")
+        else:
+            end = date(end_date.year, end_date.month, end_date.day)
 
         # Last day is not considered
         end = end - timedelta(days=1)
 
-        interval_df = self._data["bcb"].loc[start:end]
+        interval_df = self.data["bcb"].loc[start:end]
         assert len(interval_df) > 0
         return round((interval_df[code] * percentage + 1.0).prod() - 1.0, 8)

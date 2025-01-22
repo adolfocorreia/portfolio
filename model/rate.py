@@ -40,10 +40,15 @@ class Indexer:
         self.percent: float = percent
         self.code: str | None = code
 
-    def get_variation(self, begin_date: str, end_date: str) -> float:
+    def get_variation(self, begin_date: str | date, end_date: str | date) -> float:
         assert self.cal is not None
         days: int = self.cal.bizdays(begin_date, end_date)
         assert days >= 0
+
+        if isinstance(begin_date, str):
+            begin_date = datetime.strptime(begin_date, "%Y-%m-%d").date()
+        if isinstance(end_date, str):
+            end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
 
         post_factor = 1.0
         if self.post is not None:
@@ -54,12 +59,7 @@ class Indexer:
 
         pre_factor = 1.0
         if self.pre is not None:
-            period = DateRangePeriod(
-                [
-                    datetime.strptime(d, "%Y-%m-%d").date()
-                    for d in (begin_date, end_date)
-                ]
-            )
+            period = DateRangePeriod([begin_date, end_date])
             pre_factor = self.pre.compound(period)
 
         return post_factor * pre_factor - 1.0

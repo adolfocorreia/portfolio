@@ -1,3 +1,4 @@
+from .bcb import BCBRetriever
 from .bovespa import BovespaRetriever
 from .cdi import CDIRetriever
 from .curves import B3CurveRetriever
@@ -6,7 +7,6 @@ from .directtreasure import DirectTreasureRetriever
 from .fund import FundRetriever
 from .index import IndexRetriever
 from .ipca import IPCARetriever
-from .bcb import BCBRetriever
 from .retriever import DataRetriever
 
 
@@ -90,8 +90,19 @@ def get_bcb_retriever():
 
 get_bcb_retriever.instance = None
 
+
+def get_b3_curve_retriever():
+    if get_b3_curve_retriever.instance is None:
+        get_b3_curve_retriever.instance = B3CurveRetriever()
+    return get_b3_curve_retriever.instance
+
+
+get_b3_curve_retriever.instance = None
+
+
 __all__ = [
     "DataRetriever",
+    "get_b3_curve_retriever",
     "get_bcb_retriever",
     "get_bovespa_retriever",
     "get_cdi_retriever",
