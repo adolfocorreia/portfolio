@@ -64,6 +64,10 @@ def try_sgs_get(series: dict[str, int], start: date, end: date) -> pd.DataFrame:
             return sgs.get(series, start, end)
         except ValueError:
             print(f"sgs.get error ({i}/5)")
+        except Exception as e:
+            # Exception('Download error: code = 433')
+            code = int(repr(e)[:-2].split(' ')[-1])
+            print(f"sgs.get error ({i}/5) - Series code: {code}")
     return sgs.get(series, start, end)
 
 
@@ -79,21 +83,24 @@ def main():
 
     # First day of current month
     current_month = today.replace(day=1)
-    # First day of previous month
-    previous_month = current_month - rd.relativedelta(months=1)
-    assert current_month.day == previous_month.day == 1
+    # First day of middle month
+    middle_month = current_month - rd.relativedelta(months=1)
+    # First day of 2nd last month
+    oldest_month = current_month - rd.relativedelta(months=2)
+    assert current_month.day == middle_month.day == oldest_month.day == 1
 
     # Retrieve historical series
     print("Retrieving historical series data...")
     df_daily = try_sgs_get(DAILY_SERIES, start, end)
 
-    # Monthly data may not be available for the current period, therefore we ensure the call includes past periods
-    df_monthly = try_sgs_get(MONTHLY_SERIES, min(start, previous_month), end)
+    # Monthly data may not be available for the current period,
+    # therefore we ensure the call includes past periods to avoid errors
+    df_monthly = try_sgs_get(MONTHLY_SERIES, min(start, oldest_month), end)
     df_monthly = df_monthly.reindex(pd.date_range(start, end, freq="MS"))
     df_monthly.index = df_monthly.index.to_period("M")
 
     # Replace NA values with market expectation
-    for period in (previous_month, current_month):
+    for period in (oldest_month, middle_month, current_month):
         if start <= period <= end:
             replace_na_with_expectation(df_monthly, period)
     assert not df_monthly.isna().any(axis=None)
