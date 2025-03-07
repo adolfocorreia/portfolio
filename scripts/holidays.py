@@ -3,12 +3,12 @@ from datetime import date
 
 import pandas as pd
 
-YEAR = 2014
+YEAR = date.today().year
 
 URL = "http://www.anbima.com.br/feriados/arqs/feriados_nacionais.xls"
 FILE = "feriados_nacionais.xls"
 
-urllib.request.urlretrieve(URL, FILE)
+_ = urllib.request.urlretrieve(URL, FILE)
 
 df = pd.read_excel(FILE, skipfooter=9, names=["Data", "DiaDaSemana", "Feriado"])
 df = df.set_index("Data")
