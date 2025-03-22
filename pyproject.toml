@@ -5,19 +5,19 @@ description = ""
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "beautifulsoup4>=4.12.3",
+    "beautifulsoup4>=4.13.3",
     "bizdays>=1.0.16",
     "mechanize>=0.4.10",
     "pandas>=2.2.3",
-    "playwright>=1.49.1",
-    "pyarrow>=19.0.0",
-    "python-bcb>=0.3.0",
+    "playwright>=1.51.0",
+    "pyarrow>=19.0.1",
+    "python-bcb>=0.3.2",
     "quantlib>=1.37",
     "xlrd>=2.0.1",
 ]
 
 [dependency-groups]
 dev = [
-    "ipython>=8.31.0",
-    "pandas-stubs>=2.2.3.241126",
+    "ipython>=9.0.2",
+    "pandas-stubs>=2.2.3.250308",
 ]
