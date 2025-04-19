@@ -142,5 +142,5 @@ with open(csv_file_name, "w") as csv_file:
     day = FIRST_DAY
     while day <= LAST_DAY:
         rate = df.loc[day.year, day.month].TaxaDiaria
-        csv_file.write("%s,%s\n" % (day, rate))
+        csv_file.write("{},{}\n".format(day, rate))
         day += DELTA

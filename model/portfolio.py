@@ -108,7 +108,7 @@ class Portfolio:
                     )
                 else:
                     raise Exception(
-                        "Unknown indexer for %s security: %s" % (kind, indexer)
+                        "Unknown indexer for {} security: {}".format(kind, indexer)
                     )
             elif kind == "Deb":
                 rate = float(row.Taxa[:-1]) / 100.0

@@ -102,7 +102,7 @@ class GenericPeriod(ABC):
 
     @override
     def __str__(self):
-        return "%.1f %s%s" % (self.size(), self.unit, ("", "s")[self.size() > 1])
+        return "{:.1f} {}{}".format(self.size(), self.unit, ("", "s")[self.size() > 1])
 
     @override
     def __repr__(self) -> str:
@@ -120,7 +120,7 @@ class FixedTimePeriod(GenericPeriod):
     """
 
     def __init__(self, size: float, unit: str):
-        super(FixedTimePeriod, self).__init__(unit)
+        super().__init__(unit)
         self._size: float = size
 
     @override
@@ -151,7 +151,7 @@ class DateRangePeriod(GenericPeriod):
 
     def __init__(self, dates: list[date], unit: str = "day"):
         assert all(isinstance(d, date) and not isinstance(d, datetime) for d in dates)
-        super(DateRangePeriod, self).__init__(unit)
+        super().__init__(unit)
         if dates[0] > dates[1]:
             raise Exception(
                 "Invalid period: the starting date must be greater than the ending date."
@@ -171,7 +171,7 @@ class CalendarRangePeriod(DateRangePeriod):
     """
 
     def __init__(self, period: DateRangePeriod, calendar: Calendar):
-        super(CalendarRangePeriod, self).__init__(period.dates, unit="day")
+        super().__init__(period.dates, unit="day")
         self.calendar: Calendar = calendar
 
     @override

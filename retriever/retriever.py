@@ -77,7 +77,9 @@ class DataRetriever(ABC):
         print("Downloading %s data files..." % self.asset_type)
         old_path = Path.cwd()
         os.chdir(self.data_directory)
-        wait_status = os.system("./download_%s_files.sh %s" % (self.asset_type, year))
+        wait_status = os.system(
+            "./download_{}_files.sh {}".format(self.asset_type, year)
+        )
         exit_code = os.waitstatus_to_exitcode(wait_status)
         assert exit_code == 0
         os.chdir(old_path)

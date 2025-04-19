@@ -66,7 +66,7 @@ def try_sgs_get(series: dict[str, int], start: date, end: date) -> pd.DataFrame:
             print(f"sgs.get error ({i}/5)")
         except Exception as e:
             # Exception('Download error: code = 433')
-            code = int(repr(e)[:-2].split(' ')[-1])
+            code = int(repr(e)[:-2].split(" ")[-1])
             print(f"sgs.get error ({i}/5) - Series code: {code}")
     return sgs.get(series, start, end)
 
