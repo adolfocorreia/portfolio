@@ -97,9 +97,9 @@ for month in months:
         cnpj.translate(translation_map) + "_" + "{}-{:02d}".format(year, month) + ".csv"
     )
     with open(csv_file, "w") as f:
-        for tr in table.findChildren(recursive=False):
+        for tr in table.find_all(recursive=False):
             values = []
-            for td in tr.findChildren("td"):
+            for td in tr.find_all("td"):
                 text = td.text.translate({ord("."): None}).replace(",", ".")
                 values.append(text)
             f.write(",".join(values))
