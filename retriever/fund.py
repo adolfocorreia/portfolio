@@ -25,14 +25,14 @@ class FundRetriever(ValueRetriever):
         self._data = {}
 
         names = [
-            "Dia",
-            "Quota",
-            "CaptacaoDia",
-            "ResgateDia",
-            "Patrimonio",
-            "TotalCarteira",
-            "NumCotistas",
-            "ProxData",
+            "CNPJ_FUNDO",
+            "DT_COMPTC",
+            "VL_TOTAL",
+            "VL_QUOTA",
+            "VL_PATRIM_LIQ",
+            "CAPTC_DIA",
+            "RESG_DIA",
+            "NR_COTST",
         ]
 
         file_list = sorted(glob.glob(self.data_directory + "/??????????????_????.csv"))
@@ -49,8 +49,8 @@ class FundRetriever(ValueRetriever):
                 names=names,
                 header=0,
                 skiprows=1,
-                parse_dates=["Dia"],
-                index_col=0,
+                parse_dates=["DT_COMPTC"],
+                index_col=1,
             )
 
             self._data[fund_cnpj] = pd.concat([self._data[fund_cnpj], df])
@@ -59,4 +59,4 @@ class FundRetriever(ValueRetriever):
         ValueRetriever.get_value(self, code, date)
         ts = pd.Timestamp(date)
         asof_ts = self._data[code].index.asof(ts)
-        return self._data[code].loc[asof_ts].Quota
+        return self._data[code].loc[asof_ts]["VL_QUOTA"]
