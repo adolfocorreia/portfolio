@@ -56,6 +56,7 @@ class Portfolio:
         df = pd.read_csv(
             file_name, parse_dates=["Data", "Vencimento"], header=0, comment="#"
         )
+        assert df["Data"].is_monotonic_increasing
 
         for _, row in df.iterrows():
             kind = row.Categoria
