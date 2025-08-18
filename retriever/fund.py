@@ -52,8 +52,10 @@ class FundRetriever(ValueRetriever):
                 parse_dates=["DT_COMPTC"],
                 index_col=1,
             )
+            df.drop_duplicates(inplace=True)
 
-            self._data[fund_cnpj] = pd.concat([self._data[fund_cnpj], df])
+            if len(df) > 0:
+                self._data[fund_cnpj] = pd.concat([self._data[fund_cnpj], df])
 
     def get_value(self, code, date):
         ValueRetriever.get_value(self, code, date)
