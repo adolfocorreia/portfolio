@@ -59,10 +59,14 @@ class BCBRetriever(VariationRetriever):
             end = datetime.strptime(end_date, "%Y-%m-%d")
         else:
             end = date(end_date.year, end_date.month, end_date.day)
+        assert begin_date <= end_date
 
         # Last day is not considered
         end = end - timedelta(days=1)
 
-        interval_df = self.data["bcb"].loc[start:end]
-        assert len(interval_df) > 0
-        return round((interval_df[code] * percentage + 1.0).prod() - 1.0, 8)
+        if end > start:
+            interval_df = self.data["bcb"].loc[start:end]
+            assert len(interval_df) > 0
+            return round((interval_df[code] * percentage + 1.0).prod() - 1.0, 8)
+        else:
+            return 0.0
