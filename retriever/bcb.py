@@ -70,3 +70,6 @@ class BCBRetriever(VariationRetriever):
             return round((interval_df[code] * percentage + 1.0).prod() - 1.0, 8)
         else:
             return 0.0
+
+    def __repr__(self):
+        return "BCBRetriever()"

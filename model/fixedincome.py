@@ -35,7 +35,7 @@ class Frequency:
 
     @override
     def __repr__(self) -> str:
-        return f"{self.__class__!r}({self.__dict__!r})"
+        return f"Frequency({self._name})"
 
     @property
     def name(self):
@@ -86,6 +86,10 @@ class Compounding:
     @property
     def name(self):
         return self._name
+
+    @override
+    def __repr__(self) -> str:
+        return f"Compounding({self._name})"
 
 
 class GenericPeriod(ABC):
@@ -283,6 +287,10 @@ class DayCount:
             return False
         return self._day_count == other._day_count
 
+    @override
+    def __repr__(self) -> str:
+        return f"DayCount({self._day_count})"
+
     def in_unit(self, period: GenericPeriod, unit: str) -> float:
         """
         Returns the size of the period converted to the given unit.
@@ -393,7 +401,7 @@ class InterestRate:
 
     @override
     def __repr__(self) -> str:
-        return f"{self.__class__!r}({self.__dict__!r})"
+        return f"InterestRate(rate={self.rate:.4f}, frequency={self.frequency}, compounding={self.compounding}, day_count={self.day_count}, calendar={self.calendar.name})"
 
 
 def ir(ir_spec: str) -> InterestRate:
