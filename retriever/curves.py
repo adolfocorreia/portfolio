@@ -1,5 +1,6 @@
 import glob
 import re
+from datetime import date
 
 import pandas as pd
 
@@ -38,10 +39,16 @@ class B3CurveRetriever(CurveRetriever):
             if len(df) > 0:
                 self._data[curve] = pd.concat([self._data[curve], df])
 
-    def get_curve_vertices(self, code, base_date):
+    def get_curve_vertices(self, code: str, base_date: str | date):
         CurveRetriever.get_curve_vertices(self, code, base_date)
+        if isinstance(base_date, date):
+            base_date = f"{base_date:%Y-%m-%d}"
+
         df = self._data[code]
         df = df[df["refdate"] == base_date]
+        assert len(df) > 0
+
         ts = pd.Timestamp(base_date)
         row_df = pd.DataFrame({"refdate": [ts], "forward_date": [ts], "r_252": [0.0]})
+
         return pd.concat([row_df, df], ignore_index=True)

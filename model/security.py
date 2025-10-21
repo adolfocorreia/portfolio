@@ -9,7 +9,7 @@ Reference: http://en.wikipedia.org/wiki/Security_(finance)
 Fund shares may be categorized as equity securities as well.
 """
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from datetime import date, datetime
 from typing import override
 
@@ -25,6 +25,7 @@ from .category import (
     RealEstateCategories,
     StocksCategories,
 )
+from .curves import Curve
 from .rate import BondRate, CDIPercentualRate, FixedRate, IPCARate, SELICRate
 
 
@@ -331,6 +332,24 @@ class BankBond(DebtSecurity, ABC):
         assert isinstance(issue_date, date)
         self.issue_date: date = date(issue_date.year, issue_date.month, issue_date.day)
         self.unit_value: float = unit_value
+        self.g_spread_at_emission: float = self.compute_g_spread_at_emission()
+
+    @abstractmethod
+    def compute_g_spread_at_emission(self) -> float:
+        pass
+
+    @property
+    def tax_rate(self) -> float:
+        days_to_maturity = (self.maturity - self.issue_date).days
+        assert days_to_maturity > 0
+        if days_to_maturity <= 180:
+            return 22.5 / 100
+        elif days_to_maturity <= 360:
+            return 20.0 / 100
+        elif days_to_maturity <= 720:
+            return 17.5 / 100
+        else:
+            return 15.0 / 100
 
     @override
     def get_value(self, day: str | date) -> float:
@@ -347,13 +366,27 @@ class BankBondCDI(BankBond):
         self,
         name: str,
         maturity: date,
-        rate_value: float,
+        percent: float,
         issue_date: date,
         unit_value: float,
         subcat: str,
     ):
-        rate = CDIPercentualRate(rate_value)
+        rate = CDIPercentualRate(percent)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
+
+    @override
+    def compute_g_spread_at_emission(self) -> float:
+        pre_curve = Curve("di_pre", self.issue_date)
+        risk_free_rate = pre_curve.get_rate(self.maturity)
+
+        percent = self.rate.percent
+        bond_rate = risk_free_rate * percent
+        # Gross up rates for tax-free bonds
+        if self.name[0:3] in ("LCA", "LCI"):
+            bond_rate /= 1.0 - self.tax_rate
+
+        g_spread = bond_rate - risk_free_rate
+        return g_spread
 
 
 class BankBondPre(BankBond):
@@ -369,6 +402,19 @@ class BankBondPre(BankBond):
         rate = FixedRate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
 
+    @override
+    def compute_g_spread_at_emission(self) -> float:
+        pre_curve = Curve("di_pre", self.issue_date)
+        risk_free_rate = pre_curve.get_rate(self.maturity)
+
+        bond_rate = self.rate.rate
+        # Gross up tax-free bonds
+        if self.name[0:3] in ("LCA", "LCI"):
+            bond_rate /= 1.0 - self.tax_rate
+
+        g_spread = bond_rate - risk_free_rate
+        return g_spread
+
 
 class BankBondIPCA(BankBond):
     def __init__(
@@ -382,6 +428,23 @@ class BankBondIPCA(BankBond):
     ):
         rate = IPCARate(rate_value)
         BankBond.__init__(self, name, maturity, rate, issue_date, unit_value, subcat)
+
+    @override
+    def compute_g_spread_at_emission(self) -> float:
+        pre_curve = Curve("di_pre", self.issue_date)
+        risk_free_rate = pre_curve.get_rate(self.maturity)
+
+        real_curve = Curve("di_ipca", self.issue_date)
+        real_rate = real_curve.get_rate(self.maturity)
+
+        inflation = (1.0 + risk_free_rate) / (1.0 + real_rate) - 1.0
+        bond_rate = (1.0 + self.rate.rate) * (1.0 + inflation) - 1.0
+        # Gross up tax-free bonds
+        if self.name[0:3] in ("LCA", "LCI"):
+            bond_rate /= 1.0 - self.tax_rate
+
+        g_spread = bond_rate - risk_free_rate
+        return g_spread
 
 
 ##############
