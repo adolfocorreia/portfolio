@@ -65,7 +65,7 @@ class Indexer:
         return post_factor * pre_factor - 1.0
 
     def __repr__(self):
-        return f"Indexer(pre={self.pre}, post={self.post}, percent={self.percent}, code={self.code})"
+        return f"Indexer(pre={self.pre}, post={self.post}, percent={self.percent:.1f}, code={self.code!r})"
 
 
 class BondRate(ABC):

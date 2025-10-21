@@ -28,3 +28,6 @@ class Curve:
         d = ql.Date(forward_date, "%Y-%m-%d")
         r = self.ql_curve.zeroRate(d, self.day_counter, self.compounding)
         return r.rate()
+
+    def __repr__(self):
+        return f"Curve(code={self.code!r}, base_date={self.base_date:%Y-%m-%d})"

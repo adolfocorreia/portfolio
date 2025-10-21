@@ -47,6 +47,9 @@ class Security(ABC):
         assert self.retriever is not None
         return self.retriever.get_value(self.name, day)
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(name={self.name!r})"
+
 
 #####################
 # EQUITY SECURITIES #
