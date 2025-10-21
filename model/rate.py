@@ -3,16 +3,12 @@ from datetime import date, datetime
 from typing import override
 
 from bizdays import Calendar
-
-from model.fixedincome import (
-    Compounding,
-    DateRangePeriod,
-    DayCount,
-    Frequency,
-    InterestRate,
-)
 from retriever import get_bcb_retriever
 from retriever.retriever import VariationRetriever
+
+from model.fixedincome import DateRangePeriod, InterestRate, ir_over
+
+ANBIMA_CAL = Calendar.load("ANBIMA")
 
 
 class Indexer:
@@ -23,19 +19,8 @@ class Indexer:
         percent: float = 1.0,
         code: str | None = None,
     ):
-        self.cal: Calendar = Calendar.load("ANBIMA")
         assert pre != 0.0 or post is not None
-        self.pre: InterestRate | None = (
-            InterestRate(
-                rate=pre,
-                frequency=Frequency("annual"),
-                compounding=Compounding("exponential"),
-                day_count=DayCount("business/252"),
-                calendar=self.cal,
-            )
-            if pre != 0.0
-            else None
-        )
+        self.pre: InterestRate | None = ir_over(pre) if pre != 0.0 else None
         self.post: VariationRetriever | None = post
         self.percent: float = percent
         self.code: str | None = code
@@ -46,8 +31,7 @@ class Indexer:
         if isinstance(end_date, str):
             end_date = datetime.strptime(end_date, "%Y-%m-%d").date()
 
-        assert self.cal is not None
-        days: int = self.cal.bizdays(begin_date, end_date)
+        days: int = ANBIMA_CAL.bizdays(begin_date, end_date)
         assert days >= 0
 
         post_factor = 1.0
@@ -65,7 +49,7 @@ class Indexer:
         return post_factor * pre_factor - 1.0
 
     def __repr__(self):
-        return f"Indexer(pre={self.pre}, post={self.post}, percent={self.percent:.1f}, code={self.code!r})"
+        return f"Indexer(pre={self.pre}, post={self.post}, percent={self.percent:.2f}, code={self.code!r})"
 
 
 class BondRate(ABC):

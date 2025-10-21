@@ -110,7 +110,7 @@ class GenericPeriod(ABC):
 
     @override
     def __repr__(self) -> str:
-        return f"{self.__class__!r}({self.__dict__!r})"
+        return f"{self.__class__.__name__}({self.__dict__!r})"
 
 
 class FixedTimePeriod(GenericPeriod):
@@ -338,7 +338,7 @@ class DayCount:
 
     def unit_size(self, unit: str) -> float:
         """
-        Returns the amount of time for one year related to a unit and
+        Returns the amount of time for one year related to an unit and
         to this day count rule.
         """
         return self._unit_size[unit]
@@ -406,7 +406,7 @@ class InterestRate:
 
 def ir(ir_spec: str) -> InterestRate:
     """
-    Return a InterestRate object for a given interest rate specification.
+    Return an InterestRate object for a given interest rate specification.
     The interest rate specification is a string like:
 
     '0.06 annual simple actual/365'
@@ -445,6 +445,20 @@ def ir(ir_spec: str) -> InterestRate:
     assert day_count is not None
 
     return InterestRate(rate, frequency, compounding, day_count, calendar)
+
+
+ANBIMA_CAL = Calendar.load("ANBIMA")
+
+
+def ir_over(rate: float) -> InterestRate:
+    """Return an InterestRate object for a given interest rate with the Brazilian Over convention."""
+    return InterestRate(
+        rate=rate,
+        frequency=Frequency("annual"),
+        compounding=Compounding("exponential"),
+        day_count=DayCount("business/252"),
+        calendar=ANBIMA_CAL,
+    )
 
 
 def compound(ir: InterestRate, period: DateRangePeriod) -> float:

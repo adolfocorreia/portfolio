@@ -10,8 +10,12 @@ Fund shares may be categorized as equity securities as well.
 """
 
 from abc import ABC, abstractmethod
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from typing import override
+
+from bizdays import Calendar
+
+CAL = Calendar.load("ANBIMA")
 
 import retriever
 from retriever.retriever import ValueRetriever
@@ -26,6 +30,7 @@ from .category import (
     StocksCategories,
 )
 from .curves import Curve
+from .fixedincome import DateRangePeriod, ir_over
 from .rate import BondRate, CDIPercentualRate, FixedRate, IPCARate, SELICRate
 
 
@@ -311,6 +316,7 @@ class BankBond(DebtSecurity, ABC):
         issue_date: date,
         unit_value: float,
         subcat: str,
+        mark_to_market: bool = True,
     ):
         assert PrivateDebtCategories[subcat] is not None, "Subcategory: %s" % subcat
         assert (
@@ -332,16 +338,22 @@ class BankBond(DebtSecurity, ABC):
         assert isinstance(issue_date, date)
         self.issue_date: date = date(issue_date.year, issue_date.month, issue_date.day)
         self.unit_value: float = unit_value
+        self.mark_to_market = mark_to_market
         self.g_spread_at_emission: float = self.compute_g_spread_at_emission()
 
     @abstractmethod
     def compute_g_spread_at_emission(self) -> float:
         pass
 
+    @abstractmethod
+    def compute_cash_flow_at_maturity(self, reference_day: date) -> float:
+        pass
+
     @property
     def tax_rate(self) -> float:
         days_to_maturity = (self.maturity - self.issue_date).days
         assert days_to_maturity > 0
+        # TODO: place this logic elsewhere
         if days_to_maturity <= 180:
             return 22.5 / 100
         elif days_to_maturity <= 360:
@@ -356,9 +368,37 @@ class BankBond(DebtSecurity, ABC):
         if self.is_expired():
             return 0.0
 
-        indexer = self.rate.get_indexer()
-        variation = indexer.get_variation(self.issue_date, day)
-        return (1.0 + variation) * self.unit_value
+        if isinstance(day, str):
+            day = datetime.strptime(day, "%Y-%m-%d").date()
+
+        if self.mark_to_market:
+            # Mark to market value is equal to the projected cash flow at maturity,
+            # discounted by the sum of the risk-free rate and the bond's g-spread.
+
+            # Compute projected cash flow at maturity (per bond)
+            projected_cash_flow = self.compute_cash_flow_at_maturity(day)
+
+            # Compute discount rate (risk-free + g-spread)
+            curve_date = (
+                day if date.today() > day else CAL.preceding(day - timedelta(days=1))
+            )
+            pre_curve = Curve("di_pre", curve_date)
+            risk_free_rate = pre_curve.get_rate(self.maturity)
+            discount_rate = risk_free_rate + self.g_spread_at_emission
+
+            # Compute discount factor
+            ir = ir_over(discount_rate)
+            discount_factor = ir.discount(DateRangePeriod([day, self.maturity]))
+
+            market_value = projected_cash_flow * discount_factor
+            return market_value
+
+        else:
+            # Mark to curve value is equal to the original issued value,
+            # compounded by past variation of the corresponding indexer.
+            indexer = self.rate.get_indexer()
+            variation = indexer.get_variation(self.issue_date, day)
+            return (1.0 + variation) * self.unit_value
 
 
 class BankBondCDI(BankBond):
@@ -388,6 +428,40 @@ class BankBondCDI(BankBond):
         g_spread = bond_rate - risk_free_rate
         return g_spread
 
+    @override
+    def compute_cash_flow_at_maturity(self, reference_day: date) -> float:
+        assert self.issue_date <= reference_day <= self.maturity
+
+        # To compute the projected cash flow at maturity, two steps are needed:
+        # First we need to take into account the past variation of the indexer
+        # (from the issue date until the reference day).
+        # Then we need to consider the projected variation of the indexer
+        # (from the reference day until maturity) according to the corresponding curves.
+
+        # Get past variation
+        indexer = self.rate.get_indexer()
+        past_variation_factor = (
+            indexer.get_variation(self.issue_date, reference_day) + 1.0
+        )
+
+        # Get projected risk-free and bond rates
+        curve_date = (
+            reference_day
+            if date.today() > reference_day
+            else CAL.preceding(reference_day - timedelta(days=1))
+        )
+        pre_curve = Curve("di_pre", curve_date)
+        risk_free_rate = pre_curve.get_rate(self.maturity)
+        future_bond_rate = risk_free_rate * self.rate.percent
+
+        # Get projected future variation
+        ir = ir_over(future_bond_rate)
+        period = DateRangePeriod([reference_day, self.maturity])
+        future_variation_factor = ir.compound(period)
+
+        factor = past_variation_factor * future_variation_factor
+        return factor * self.unit_value
+
 
 class BankBondPre(BankBond):
     def __init__(
@@ -414,6 +488,17 @@ class BankBondPre(BankBond):
 
         g_spread = bond_rate - risk_free_rate
         return g_spread
+
+    @override
+    def compute_cash_flow_at_maturity(self, reference_day: date) -> float:
+        assert self.issue_date <= reference_day <= self.maturity
+
+        # The projected cash flow at maturity is simply the issued unit value
+        # multiplied by the compounding factor from the issue date until maturity.
+        ir = ir_over(self.rate.rate)
+        period = DateRangePeriod([self.issue_date, self.maturity])
+        factor = ir.compound(period)
+        return factor * self.unit_value
 
 
 class BankBondIPCA(BankBond):
@@ -445,6 +530,11 @@ class BankBondIPCA(BankBond):
 
         g_spread = bond_rate - risk_free_rate
         return g_spread
+
+    @override
+    def compute_cash_flow_at_maturity(self, reference_day: date) -> float:
+        assert self.issue_date <= reference_day <= self.maturity
+        raise NotImplementedError()
 
 
 ##############
