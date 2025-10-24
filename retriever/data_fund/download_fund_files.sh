@@ -42,19 +42,21 @@ else
 fi
 
 # Normalize CSV headers
-for CSV_FILE in inf_diario_fi_"${YEAR}"*.csv; do
+for CSV_FILE in inf_diario_fi_"${YEAR}"*.csv; do (
 	sed --in-place '1s/CNPJ_FUNDO_CLASSE/CNPJ_FUNDO/' "${CSV_FILE}"
 	csvcut --delimiter ';' --columns "CNPJ_FUNDO,DT_COMPTC,VL_TOTAL,VL_QUOTA,VL_PATRIM_LIQ,CAPTC_DIA,RESG_DIA,NR_COTST" "${CSV_FILE}" | sponge "${CSV_FILE}"
 	csvclean --enable-all-checks "${CSV_FILE}" 2>&1 1>/dev/null
-done
+)& done
+wait
 
 # Assemble file for each fund
-for CNPJ in "${FUNDS[@]}"; do
+for CNPJ in "${FUNDS[@]}"; do (
 	CNPJ_NUMBERS=${CNPJ//[\.\/-]/}
 	YEAR_FILE="${CNPJ_NUMBERS}_${YEAR}.csv"
 	echo "Assembling ${YEAR_FILE} file..."
 	csvstack inf_diario_fi_"${YEAR}"*.csv | csvgrep --column "CNPJ_FUNDO" --match "${CNPJ}" | csvsort --column "DT_COMPTC" > "${YEAR_FILE}"
-done
+)& done
+wait
 
 # Remove temporary CSV files
 rm inf_diario_fi_*.csv

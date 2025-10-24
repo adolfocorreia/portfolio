@@ -167,7 +167,7 @@ class Portfolio:
 
         for cat in sorted(MainCategories):
             print(
-                "{:>12s}: $  {:11,.2f}  ({:5.2f}%)".format(
+                "{:>12s}: $ {:12,.2f}  ({:5.2f}%)".format(
                     cat.name,
                     self.categories_values[cat],
                     self.categories_values[cat] / self.portfolio_value * 100.0,
