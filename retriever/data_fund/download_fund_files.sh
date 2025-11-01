@@ -36,8 +36,7 @@ else
 	for MONTH in $(seq -f "%02g" "${LAST_MONTH}"); do
 		ZIP_FILE="inf_diario_fi_${YEAR}${MONTH}.zip"
 		TIME_FLAG=""; [[ -e ${ZIP_FILE} ]] && TIME_FLAG="--time-cond ${ZIP_FILE}"
-		curl --silent ${TIME_FLAG:+${TIME_FLAG}} --remote-time --remote-name "https://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/${ZIP_FILE}"
-		unzip -q -o "${ZIP_FILE}"
+		curl --silent ${TIME_FLAG:+${TIME_FLAG}} --remote-time --remote-name --fail "https://dados.cvm.gov.br/dados/FI/DOC/INF_DIARIO/DADOS/${ZIP_FILE}" && unzip -q -o "${ZIP_FILE}"
 	done
 fi
 
