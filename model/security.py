@@ -15,7 +15,7 @@ from typing import override
 
 from bizdays import Calendar
 
-CAL = Calendar.load("ANBIMA")
+CAL = Calendar.load("B3")
 
 import retriever
 from retriever.retriever import ValueRetriever
