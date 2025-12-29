@@ -13,6 +13,12 @@ trap 'echo_error_line ${LINENO} "${BASH_COMMAND}"' ERR
 # If argument is not present or is invalid, use current year
 [[ -z $YEAR ]] && YEAR=$(date +"%Y")
 
+# Use GNU sed on MacOS
+if [[ "${OSTYPE}" =~ "darwin" ]]; then
+	shopt -s expand_aliases
+	alias sed=gsed
+fi
+
 FUNDS=()
 read_array() {
 	i=0
@@ -58,7 +64,7 @@ for CNPJ in "${FUNDS[@]}"; do (
 wait
 
 # Remove temporary CSV files
-rm inf_diario_fi_*.csv
+rm inf_diario_fi_"${YEAR}"*.csv
 
 # Return with success code if this line is reached
 true
