@@ -31,7 +31,7 @@ PortfolioItem = namedtuple("PortfolioItem", ["sec", "amount"])
 class Portfolio:
     def __init__(self):
         self.at_day = date.today()
-        self.securities = {}
+        self.securities: dict[str,] = {}
         self.portfolio_value = 0.0
         self.categories_values = dict.fromkeys(list(MainCategories), 0.0)
 
@@ -153,13 +153,14 @@ class Portfolio:
         self.subcategories_values[cat][subcat] = subcat_value + total_value
 
     def print_portfolio(self):
-        for name, (security, amount) in sorted(self.securities.items()):
+        for _, (security, amount) in sorted(self.securities.items()):
+            display_name = security.display_name
             unit_value = security.get_value(self.at_day)
             value = unit_value * amount
             if value > 0.0:
                 print(
                     "{:>30s}: {:8.2f} * {:8.2f}  =  $ {:10,.2f}".format(
-                        name, unit_value, amount, value
+                        display_name, unit_value, amount, value
                     )
                 )
 

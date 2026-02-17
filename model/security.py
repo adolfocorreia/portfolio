@@ -14,6 +14,7 @@ from datetime import date, datetime, timedelta
 from typing import override
 
 from bizdays import Calendar
+from retriever import FundRetriever
 
 CAL = Calendar.load("PMC/BMF")
 
@@ -44,6 +45,7 @@ class Security(ABC):
         issuer: str = "",
     ):
         self.name: str = name
+        self.display_name: str = name
         self.retriever: ValueRetriever = retriever
         self.category: OrderedEnum = category
         self.subcategory: OrderedEnum = subcategory
@@ -189,13 +191,15 @@ class RealEstateFundShare(FundShare):
 class StockFundShare(FundShare):
     def __init__(self, name: str, subcat: str):
         assert StocksCategories[subcat] is not None, "Subcategory: %s" % subcat
+        fund_retriever: FundRetriever = retriever.get_fund_retriever()
         FundShare.__init__(
             self,
             name,
-            retriever.get_fund_retriever(),
+            fund_retriever,
             MainCategories.Stocks,
             StocksCategories[subcat],
         )
+        self.display_name = fund_retriever.funds_info.get_fund_name(name)
 
 
 ###################
