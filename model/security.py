@@ -15,7 +15,7 @@ from typing import override
 
 from bizdays import Calendar
 
-CAL = Calendar.load("B3")
+CAL = Calendar.load("PMC/BMF")
 
 import retriever
 from retriever.retriever import ValueRetriever
