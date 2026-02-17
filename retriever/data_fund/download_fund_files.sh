@@ -23,7 +23,7 @@ FUNDS=()
 read_array() {
 	i=0
 	while read -r LINE; do
-		FUNDS[i]=${LINE}
+		FUNDS[i]=$(echo "${LINE}" | cut --delimiter "|" --fields 1)
 		i=$((i + 1))
 	done <"$1"
 }
@@ -46,11 +46,29 @@ else
 	done
 fi
 
-# Normalize CSV headers
+# Normalize CSVs according to the current format (with all columns)
 for CSV_FILE in inf_diario_fi_"${YEAR}"*.csv; do (
-	sed --in-place '1s/CNPJ_FUNDO_CLASSE/CNPJ_FUNDO/' "${CSV_FILE}"
-	csvcut --delimiter ';' --columns "CNPJ_FUNDO,DT_COMPTC,VL_TOTAL,VL_QUOTA,VL_PATRIM_LIQ,CAPTC_DIA,RESG_DIA,NR_COTST" "${CSV_FILE}" | sponge "${CSV_FILE}"
-	csvclean --enable-all-checks "${CSV_FILE}" 2>&1 1>/dev/null
+	# Normalize CSV delimiters
+	csvclean --delimiter ';' --length-mismatch "${CSV_FILE}" | sponge "${CSV_FILE}"
+
+	# Add TP_FUNDO column if not present
+	if [[ ! $(head --lines=1 "${CSV_FILE}") =~ "TP_FUNDO" ]]; then
+		csvstack --group-name "TP_FUNDO" --groups "" "${CSV_FILE}" | sponge "${CSV_FILE}"
+	fi
+
+	# Rename columns with old names (no 'CLASSE')
+	if [[ ! $(head --lines=1 "${CSV_FILE}") =~ "CLASSE" ]]; then
+		sed --in-place '1s/TP_FUNDO/TP_FUNDO_CLASSE/' "${CSV_FILE}"
+		sed --in-place '1s/CNPJ_FUNDO/CNPJ_FUNDO_CLASSE/' "${CSV_FILE}"
+	fi
+
+	# Add ID_SUBCLASSE column if not present
+	if [[ ! $(head --lines=1 "${CSV_FILE}") =~ "ID_SUBCLASSE" ]]; then
+		csvstack --group-name "ID_SUBCLASSE" --groups "" "${CSV_FILE}" | sponge "${CSV_FILE}"
+	fi
+
+	# Reorder columns
+	csvcut --columns "TP_FUNDO_CLASSE,CNPJ_FUNDO_CLASSE,ID_SUBCLASSE,DT_COMPTC,VL_TOTAL,VL_QUOTA,VL_PATRIM_LIQ,CAPTC_DIA,RESG_DIA,NR_COTST" "${CSV_FILE}" | sponge "${CSV_FILE}"
 )& done
 wait
 
@@ -59,7 +77,7 @@ for CNPJ in "${FUNDS[@]}"; do (
 	CNPJ_NUMBERS=${CNPJ//[\.\/-]/}
 	YEAR_FILE="${CNPJ_NUMBERS}_${YEAR}.csv"
 	echo "Assembling ${YEAR_FILE} file..."
-	csvstack inf_diario_fi_"${YEAR}"*.csv | csvgrep --column "CNPJ_FUNDO" --match "${CNPJ}" | csvsort --column "DT_COMPTC" > "${YEAR_FILE}"
+	csvstack inf_diario_fi_"${YEAR}"*.csv | csvgrep --column "CNPJ_FUNDO_CLASSE" --match "${CNPJ}" | csvsort --snifflimit 0 --columns "DT_COMPTC" > "${YEAR_FILE}"
 )& done
 wait
 

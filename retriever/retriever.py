@@ -43,7 +43,8 @@ class DataRetriever(ABC):
         self.data_directory: str = module_dir + "/data_" + asset_type.lower()
 
         self.codes: list[str] = sorted(
-            line.strip() for line in open(self.data_directory + "/codes.txt")
+            line.strip().split("|")[0]
+            for line in open(self.data_directory + "/codes.txt")
         )
 
         self._data: dict[str, pd.DataFrame] | None = None
