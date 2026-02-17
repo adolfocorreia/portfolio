@@ -10,6 +10,7 @@ from .retriever import VariationRetriever
 class CDIRetriever(VariationRetriever):
     def __init__(self):
         VariationRetriever.__init__(self, "cdi")
+        # self.check_and_update_data()
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/CDI_%s.csv"]

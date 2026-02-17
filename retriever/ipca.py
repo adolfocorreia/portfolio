@@ -10,6 +10,7 @@ class IPCARetriever(VariationRetriever):
     def __init__(self):
         self._data = None
         VariationRetriever.__init__(self, "ipca")
+        # self.check_and_update_data()
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/IPCA_%s.csv"]

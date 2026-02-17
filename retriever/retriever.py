@@ -49,7 +49,10 @@ class DataRetriever(ABC):
         self._data: dict[str, pd.DataFrame] | None = None
 
         self._needs_to_be_loaded: bool = True
-        self.check_and_update_data()
+
+    @property
+    def needs_to_be_loaded(self) -> bool:
+        return self._needs_to_be_loaded
 
     def check_and_update_data(self):
         self._check_and_download_data_files()
@@ -169,6 +172,7 @@ class ValueRetriever(DataRetriever, ABC):
         assert code in self._available_codes()
         if isinstance(day, str):
             assert DataRetriever._date_regex.match(day)
+        assert not self.needs_to_be_loaded
 
 
 class VariationRetriever(DataRetriever, ABC):
@@ -186,6 +190,7 @@ class VariationRetriever(DataRetriever, ABC):
             assert DataRetriever._date_regex.match(begin_date)
         if isinstance(end_date, str):
             assert DataRetriever._date_regex.match(end_date)
+        assert not self.needs_to_be_loaded
 
 
 class CurveRetriever(DataRetriever, ABC):
@@ -194,3 +199,4 @@ class CurveRetriever(DataRetriever, ABC):
         assert code in self._available_codes()
         if isinstance(base_date, str):
             assert DataRetriever._date_regex.match(base_date)
+        assert not self.needs_to_be_loaded

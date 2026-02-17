@@ -10,6 +10,7 @@ from .retriever import VariationRetriever
 class BCBRetriever(VariationRetriever):
     def __init__(self):
         VariationRetriever.__init__(self, "bcb")
+        self.check_and_update_data()
 
     @override
     def _get_data_file_patterns(self):

@@ -10,6 +10,7 @@ from .retriever import CurveRetriever
 class B3CurveRetriever(CurveRetriever):
     def __init__(self):
         CurveRetriever.__init__(self, "curves")
+        self.check_and_update_data()
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/yc_" + code + "_%s.csv" for code in self.codes]

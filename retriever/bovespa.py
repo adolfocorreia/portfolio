@@ -81,6 +81,7 @@ def _read_file(file_name):
 class BovespaRetriever(ValueRetriever):
     def __init__(self):
         ValueRetriever.__init__(self, "bovespa")
+        self.check_and_update_data()
 
     def _get_data_file_patterns(self):
         return [self.data_directory + "/COTAHIST_A%s.ZIP"]

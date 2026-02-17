@@ -11,6 +11,7 @@ class FundRetriever(ValueRetriever):
 
     def __init__(self):
         ValueRetriever.__init__(self, "fund")
+        self.check_and_update_data()
 
     def _get_data_file_patterns(self):
         return [
