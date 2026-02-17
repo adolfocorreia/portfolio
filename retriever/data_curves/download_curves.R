@@ -3,6 +3,7 @@
 shhh <- suppressPackageStartupMessages
 shhh(library(argparser))
 shhh(library(lubridate))
+shhh(library(bizdays))
 
 NOW <- Sys.Date()
 
@@ -32,6 +33,15 @@ update_curve_data <- function(file_name, yc_get_function) {
     first_date <- make_date(YEAR, 1, 1)
   }
   last_date <- min(make_date(YEAR, 12, 31), NOW)
+
+  # No need to update curves if no date in interval is a business day
+  if (! any(unlist(lapply(
+    seq(first_date + 1, last_date, by = 'day'), \(d) is.bizday(d, "Brazil/BMF")
+  )))) {
+    # Touch file and return
+    Sys.setFileTime(file_name, Sys.time())
+    return()
+  }
 
   new_df <- yc_get_function(first_date = first_date, last_date = last_date)
 
