@@ -20,6 +20,11 @@ dev = [
     "pandas-stubs>=2.2.3.250308",
 ]
 
+[tool.bandit]
+skips = [
+  "B101",  # assert_used
+]
+
 [tool.commitizen]
 name = "cz_conventional_commits"
 tag_format = "$version"
@@ -27,3 +32,6 @@ version_scheme = "pep440"
 version_provider = "uv"
 update_changelog_on_bump = true
 major_version_zero = true
+
+[tool.isort]
+profile = "black"

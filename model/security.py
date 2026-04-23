@@ -14,11 +14,9 @@ from datetime import date, datetime, timedelta
 from typing import override
 
 from bizdays import Calendar
-from retriever import FundRetriever
-
-CAL = Calendar.load("PMC/BMF")
 
 import retriever
+from retriever import FundRetriever
 from retriever.retriever import ValueRetriever
 
 from .category import (
@@ -33,6 +31,8 @@ from .category import (
 from .curves import Curve
 from .fixedincome import DateRangePeriod, ir_over
 from .rate import BondRate, CDIPercentualRate, FixedRate, IPCARate, SELICRate
+
+CAL = Calendar.load("PMC/BMF")
 
 
 class Security(ABC):

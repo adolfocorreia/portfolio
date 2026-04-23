@@ -1,14 +1,10 @@
-from .selector import (
-    SecuritySelector,
-    join_securities,
-)
-
 from .allocation import (
     Allocation,
     AllocationSet,
     compare_allocation_sets,
     compare_securities_allocation,
 )
+from .selector import SecuritySelector, join_securities
 
 __all__ = [
     "SecuritySelector",

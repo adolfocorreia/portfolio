@@ -1,10 +1,10 @@
 import unittest
 
 from retriever import (
+    get_bovespa_retriever,
     get_cdi_retriever,
     get_debentures_retriever,
     get_directtreasure_retriever,
-    get_bovespa_retriever,
     get_fund_retriever,
     get_index_retriever,
 )

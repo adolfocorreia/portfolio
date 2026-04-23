@@ -3,10 +3,10 @@ from datetime import date, datetime
 from typing import override
 
 from bizdays import Calendar
-from retriever import get_bcb_retriever
-from retriever.retriever import VariationRetriever
 
 from model.fixedincome import DateRangePeriod, InterestRate, ir_over
+from retriever import get_bcb_retriever
+from retriever.retriever import VariationRetriever
 
 ANBIMA_CAL = Calendar.load("ANBIMA")
 
