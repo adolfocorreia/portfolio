@@ -34,7 +34,7 @@ class B3CurveRetriever(CurveRetriever):
             df = pd.read_csv(
                 file_name,
                 parse_dates=["refdate", "forward_date"],
-                usecols=["refdate", "forward_date", "r_252"],
+                usecols=["refdate", "forward_date", "rate"],
             ).sort_index(kind="stable")
 
             if len(df) > 0:
@@ -47,9 +47,9 @@ class B3CurveRetriever(CurveRetriever):
 
         df = self._data[code]
         df = df[df["refdate"] == base_date]
-        assert len(df) > 0
+        assert len(df) > 0, f"Curve '{code}' for '{base_date}' not found"
 
         ts = pd.Timestamp(base_date)
-        row_df = pd.DataFrame({"refdate": [ts], "forward_date": [ts], "r_252": [0.0]})
+        row_df = pd.DataFrame({"refdate": [ts], "forward_date": [ts], "rate": [0.0]})
 
         return pd.concat([row_df, df], ignore_index=True)

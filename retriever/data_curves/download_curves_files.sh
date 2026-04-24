@@ -14,4 +14,4 @@ trap 'echo_error_line ${LINENO} "${BASH_COMMAND}"' ERR
 [[ -z $YEAR ]] && YEAR=$(date +"%Y")
 
 echo "Downloading yield curve files for year ${YEAR}..."
-Rscript download_curves.R "${YEAR}"
+uv run download_curves.py "${YEAR}"

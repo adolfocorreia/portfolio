@@ -20,7 +20,7 @@ class Curve:
         df: pd.DataFrame = curve_retriever.get_curve_vertices(self.code, self.base_date)
 
         dates = df["forward_date"].map(lambda d: ql.Date().from_date(d))
-        rates = df["r_252"]
+        rates = df["rate"]
         calendar = ql.Brazil(
             ql.Brazil.Settlement
         )  # Brazilian banking holidays (federal holidays plus carnival)

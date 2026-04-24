@@ -5,19 +5,20 @@ description = ""
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "bizdays>=1.0.16",
-    "pandas>=2.2.3",
-    "playwright>=1.52.0",
-    "pyarrow>=20.0.0",
-    "python-bcb>=0.3.3",
-    "quantlib>=1.38",
-    "xlrd>=2.0.1",
+    "bizdays>=1.0.19",
+    "pandas>=2.3.3",
+    "playwright>=1.58.0",
+    "pyarrow>=24.0.0",
+    "pyettj",
+    "python-bcb>=0.3.6",
+    "quantlib>=1.42.1",
+    "xlrd>=2.0.2",
 ]
 
 [dependency-groups]
 dev = [
-    "ipython>=9.2.0",
-    "pandas-stubs>=2.2.3.250308",
+    "ipython>=9.12.0",
+    "pandas-stubs>=3.0.0.260204",
 ]
 
 [tool.bandit]
@@ -35,3 +36,6 @@ major_version_zero = true
 
 [tool.isort]
 profile = "black"
+
+[tool.uv.sources]
+pyettj = { git = "https://github.com/rafa-rod/pyettj" }
