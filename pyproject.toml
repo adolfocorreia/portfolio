@@ -7,9 +7,9 @@ requires-python = ">=3.13"
 dependencies = [
     "bizdays>=1.0.19",
     "pandas>=2.3.3",
-    "playwright>=1.58.0",
+    "playwright>=1.59.0",
     "pyarrow>=24.0.0",
-    "pyettj",
+    "pyettj>=0.4.0",
     "python-bcb>=0.3.6",
     "quantlib>=1.42.1",
     "xlrd>=2.0.2",
@@ -17,7 +17,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ipython>=9.12.0",
+    "ipython>=9.13.0",
     "pandas-stubs>=3.0.0.260204",
 ]
 
@@ -36,6 +36,3 @@ major_version_zero = true
 
 [tool.isort]
 profile = "black"
-
-[tool.uv.sources]
-pyettj = { git = "https://github.com/rafa-rod/pyettj" }
