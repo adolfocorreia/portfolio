@@ -21,7 +21,7 @@ repos:
     hooks:
       - id: gitleaks
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.13.10
+    rev: v4.16.3
     hooks:
       - id: commitizen
         stages: [commit-msg]
@@ -59,7 +59,7 @@ repos:
     hooks:
       - id: isort
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.12
+    rev: v0.15.16
     hooks:
       - id: ruff-format
       - id: ruff
@@ -67,11 +67,14 @@ repos:
     rev: 1.9.4
     hooks:
       - id: bandit
-        args: ["--configfile pyproject.toml"]
-  - repo: https://github.com/allganize/ty-pre-commit
-    rev: v0.0.33
+        args: ["--configfile", "pyproject.toml"]
+  - repo: local
     hooks:
-      - id: ty-check
+      - id: ty
+        name: ty
+        entry: uvx ty check
+        language: system
+        types: [python]
   - repo: https://github.com/rubik/xenon
     rev: v0.9.3
     hooks:
