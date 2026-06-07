@@ -32,6 +32,7 @@ from .curves import Curve
 from .fixedincome import DateRangePeriod, ir_over
 from .rate import BondRate, CDIPercentualRate, FixedRate, IPCARate, SELICRate
 
+print("Loading calendar...")
 CAL = Calendar.load("PMC/BMF")
 
 
@@ -546,7 +547,37 @@ class BankBondIPCA(BankBond):
     @override
     def compute_cash_flow_at_maturity(self, reference_day: date) -> float:
         assert self.issue_date <= reference_day <= self.maturity
-        raise NotImplementedError()
+        assert isinstance(self.rate, IPCARate)
+
+        # To compute the projected cash flow at maturity, two steps are needed:
+        # First we need to take into account the past variation of the indexer
+        # (from the issue date until the reference day).
+        # Then we need to consider the projected variation of the indexer
+        # (from the reference day until maturity) according to the corresponding curves.
+
+        # Get past variation
+        indexer = self.rate.get_indexer()
+        past_variation_factor = (
+            indexer.get_variation(self.issue_date, reference_day) + 1.0
+        )
+
+        # Get projected risk-free and bond rates
+        curve_date = (
+            reference_day
+            if date.today() > reference_day
+            else CAL.preceding(reference_day - timedelta(days=1))
+        )
+        real_curve = Curve("di_ipca", curve_date)
+        real_rate = real_curve.get_rate(self.maturity)
+        future_bond_rate = (1.0 + self.rate.rate) * (1.0 + real_rate) - 1.0
+
+        # Get projected future variation
+        ir = ir_over(future_bond_rate)
+        period = DateRangePeriod([reference_day, self.maturity])
+        future_variation_factor = ir.compound(period)
+
+        factor = past_variation_factor * future_variation_factor
+        return factor * self.unit_value
 
 
 ##############
