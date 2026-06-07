@@ -39,16 +39,16 @@ class Security(ABC):
     def __init__(
         self,
         name: str,
-        retriever: ValueRetriever,
+        retriever: ValueRetriever | None,
         category: OrderedEnum,
-        subcategory: OrderedEnum,
+        subcategory: OrderedEnum | None,
         issuer: str = "",
     ):
         self.name: str = name
         self.display_name: str = name
-        self.retriever: ValueRetriever = retriever
+        self.retriever: ValueRetriever | None = retriever
         self.category: OrderedEnum = category
-        self.subcategory: OrderedEnum = subcategory
+        self.subcategory: OrderedEnum | None = subcategory
         self.issuer: str = issuer
 
     def get_value(self, day: str | date) -> float:
@@ -70,7 +70,7 @@ class EquitySecurity(Security, ABC):
         name: str,
         retriever: ValueRetriever,
         category: OrderedEnum,
-        subcategory: OrderedEnum,
+        subcategory: OrderedEnum | None,
     ):
         Security.__init__(self, name, retriever, category, subcategory)
 
@@ -138,7 +138,7 @@ class FundShare(EquitySecurity, ABC):
         name: str,
         retriever: ValueRetriever,
         category: OrderedEnum,
-        subcategory: OrderedEnum,
+        subcategory: OrderedEnum | None,
     ):
         EquitySecurity.__init__(self, name, retriever, category, subcategory)
 
@@ -211,9 +211,9 @@ class DebtSecurity(Security, ABC):
     def __init__(
         self,
         name: str,
-        retriever: ValueRetriever,
+        retriever: ValueRetriever | None,
         category: OrderedEnum,
-        subcategory: OrderedEnum,
+        subcategory: OrderedEnum | None,
         maturity: str | date,
         rate: BondRate,
         issuer: str = "",
@@ -420,6 +420,8 @@ class BankBondCDI(BankBond):
 
     @override
     def compute_g_spread_at_emission(self) -> float:
+        assert isinstance(self.rate, CDIPercentualRate)
+
         pre_curve = Curve("di_pre", self.issue_date)
         risk_free_rate = pre_curve.get_rate(self.maturity)
 
@@ -435,6 +437,7 @@ class BankBondCDI(BankBond):
     @override
     def compute_cash_flow_at_maturity(self, reference_day: date) -> float:
         assert self.issue_date <= reference_day <= self.maturity
+        assert isinstance(self.rate, CDIPercentualRate)
 
         # To compute the projected cash flow at maturity, two steps are needed:
         # First we need to take into account the past variation of the indexer
@@ -482,6 +485,8 @@ class BankBondPre(BankBond):
 
     @override
     def compute_g_spread_at_emission(self) -> float:
+        assert isinstance(self.rate, FixedRate)
+
         pre_curve = Curve("di_pre", self.issue_date)
         risk_free_rate = pre_curve.get_rate(self.maturity)
 
@@ -496,6 +501,7 @@ class BankBondPre(BankBond):
     @override
     def compute_cash_flow_at_maturity(self, reference_day: date) -> float:
         assert self.issue_date <= reference_day <= self.maturity
+        assert isinstance(self.rate, FixedRate)
 
         # The projected cash flow at maturity is simply the issued unit value
         # multiplied by the compounding factor from the issue date until maturity.
@@ -520,6 +526,8 @@ class BankBondIPCA(BankBond):
 
     @override
     def compute_g_spread_at_emission(self) -> float:
+        assert isinstance(self.rate, IPCARate)
+
         pre_curve = Curve("di_pre", self.issue_date)
         risk_free_rate = pre_curve.get_rate(self.maturity)
 
