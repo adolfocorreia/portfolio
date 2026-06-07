@@ -87,6 +87,8 @@ class BovespaRetriever(ValueRetriever):
         return [self.data_directory + "/COTAHIST_A%s.ZIP"]
 
     def _available_codes(self):
+        assert self._data is not None
+        assert isinstance(self._data["bovespa"].index, pd.MultiIndex)
         return self._data["bovespa"].index.levels[1].values
 
     def _load_data_files(self):
@@ -104,9 +106,10 @@ class BovespaRetriever(ValueRetriever):
 
         self._data = {"bovespa": data}
 
-    def get_value(self, code, date):
-        ValueRetriever.get_value(self, code, date)
-        ts = pd.Timestamp(date)
+    def get_value(self, code, day):
+        assert self._data is not None
+        ValueRetriever.get_value(self, code, day)
+        ts = pd.Timestamp(day)
         sub_df = self._data["bovespa"].xs(code, level="CODNEG")
         asof_ts = sub_df.index.asof(ts)
         return sub_df.loc[asof_ts]["PREULT"]
