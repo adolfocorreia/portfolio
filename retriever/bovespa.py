@@ -74,6 +74,7 @@ def _read_file(file_name):
     ).query(
         "TPMERC == 10"  # Mercado a vista
     )
+    df.drop_duplicates(inplace=True)
 
     return df
 
