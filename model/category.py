@@ -1,81 +1,42 @@
-from enum import Enum
+from enum import auto
+
+from ordered_enum import OrderedEnum
 
 
-class OrderedEnum(Enum):
-    def __ge__(self, other):
-        if self.__class__ is other.__class__:
-            return self.value >= other.value
-        return NotImplemented
-
-    def __gt__(self, other):
-        if self.__class__ is other.__class__:
-            return self.value > other.value
-        return NotImplemented
-
-    def __le__(self, other):
-        if self.__class__ is other.__class__:
-            return self.value <= other.value
-        return NotImplemented
-
-    def __lt__(self, other):
-        if self.__class__ is other.__class__:
-            return self.value < other.value
-        return NotImplemented
+class MainCategories(OrderedEnum):
+    Stocks = auto()
+    RealEstate = auto()
+    PrivateDebt = auto()
+    PublicDebt = auto()
+    Cash = auto()
+    Other = auto()
 
 
-MainCategories = OrderedEnum(
-    "MainCategories",
-    [
-        "Stocks",
-        "RealEstate",
-        "PrivateDebt",
-        "PublicDebt",
-        "Cash",
-        "Other",
-    ],
-)
+class StocksCategories(OrderedEnum):
+    NationalIndex = auto()
+    NationalSmall = auto()
+    Foreign = auto()
+    Active = auto()
 
-StocksCategories = OrderedEnum(
-    "StocksCategories",
-    [
-        "NationalIndex",
-        "NationalSmall",
-        "Foreign",
-        "Active",
-    ],
-)
 
-RealEstateCategories = OrderedEnum(
-    "RealEstateCategories",
-    [
-        "Brick",
-        "Paper",
-    ],
-)
+class RealEstateCategories(OrderedEnum):
+    Brick = auto()
+    Paper = auto()
 
-PrivateDebtCategories = OrderedEnum(
-    "PrivateDebtCategories",
-    [
-        "Floating",
-        "Inflation",
-        "Fixed",
-    ],
-)
 
-PublicDebtCategories = OrderedEnum(
-    "PublicDebtCategories",
-    [
-        "Floating",
-        "Inflation",
-        "Fixed",
-    ],
-)
+class PrivateDebtCategories(OrderedEnum):
+    Floating = auto()
+    Inflation = auto()
+    Fixed = auto()
 
-CashCategories = OrderedEnum(
-    "CashCategories",
-    [
-        "Gold",
-        "Dollar",
-        "Cripto",
-    ],
-)
+
+class PublicDebtCategories(OrderedEnum):
+    Floating = auto()
+    Inflation = auto()
+    Fixed = auto()
+
+
+class CashCategories(OrderedEnum):
+    Gold = auto()
+    Dollar = auto()
+    Cripto = auto()

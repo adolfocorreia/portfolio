@@ -647,6 +647,15 @@ wheels = [
 ]
 
 [[package]]
+name = "ordered-enum"
+version = "0.0.10"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/34/20/8d165f16c2ef9d5bc945571898a0c99d3755bc401a1c57517318ba43a58f/ordered_enum-0.0.10.tar.gz", hash = "sha256:6979a367a7f252353eef4d5cd4c3c00c2178a421b52cc5f7cb2ee0d412d7f05b", size = 2772, upload-time = "2025-06-23T16:29:15.472Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6c/31/55f391e6039353ccb97072ab990f21bde06676d1df295310cca51141d510/ordered_enum-0.0.10-py3-none-any.whl", hash = "sha256:f398723003f43bc19ef0e308f687149814a9889e7b81dd1947c556daa94d547e", size = 3570, upload-time = "2025-06-23T16:29:13.938Z" },
+]
+
+[[package]]
 name = "packaging"
 version = "26.2"
 source = { registry = "https://pypi.org/simple" }
@@ -826,6 +835,7 @@ version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
     { name = "bizdays" },
+    { name = "ordered-enum" },
     { name = "pandas" },
     { name = "playwright" },
     { name = "pyarrow" },
@@ -844,6 +854,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "bizdays", specifier = ">=1.0.19" },
+    { name = "ordered-enum", specifier = ">=0.0.10" },
     { name = "pandas", specifier = ">=2.3.3" },
     { name = "playwright", specifier = ">=1.59.0" },
     { name = "pyarrow", specifier = ">=24.0.0" },
