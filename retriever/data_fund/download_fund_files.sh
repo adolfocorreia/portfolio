@@ -13,9 +13,10 @@ trap 'echo_error_line ${LINENO} "${BASH_COMMAND}"' ERR
 # If argument is not present or is invalid, use current year
 [[ -z $YEAR ]] && YEAR=$(date +"%Y")
 
-# Use GNU sed on MacOS
+# Use GNU cut and sed on MacOS
 if [[ "${OSTYPE}" =~ "darwin" ]]; then
 	shopt -s expand_aliases
+	alias cut=gcut
 	alias sed=gsed
 fi
 

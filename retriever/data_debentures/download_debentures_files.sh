@@ -13,6 +13,11 @@ trap 'echo_error_line ${LINENO} "${BASH_COMMAND}"' ERR
 # If argument is not present or is invalid, use current year
 [[ -z $YEAR ]] && YEAR=$(date +"%Y")
 
+# Use GNU head on MacOS
+if [[ "${OSTYPE}" =~ "darwin" ]]; then
+	alias head=ghead
+fi
+
 DEBS=()
 read_array() {
 	i=0
