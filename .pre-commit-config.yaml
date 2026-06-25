@@ -61,8 +61,8 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.15.16
     hooks:
+      - id: ruff-check
       - id: ruff-format
-      - id: ruff
   - repo: https://github.com/PyCQA/bandit
     rev: 1.9.4
     hooks:
