@@ -8,9 +8,9 @@ dependencies = [
     "bizdays>=1.0.19",
     "ordered-enum>=0.0.10",
     "pandas>=2.3.3",
-    "playwright>=1.59.0",
+    "playwright>=1.60.0",
     "pyarrow>=24.0.0",
-    "pyettj>=0.4.0",
+    "pyettj>=0.4.1",
     "python-bcb>=0.3.6",
     "quantlib>=1.42.1",
     "xlrd>=2.0.2",
@@ -18,8 +18,8 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ipython>=9.13.0",
-    "pandas-stubs>=3.0.0.260204",
+    "ipython>=9.14.1",
+    "pandas-stubs>=3.0.3.260530",
 ]
 
 [tool.bandit]
