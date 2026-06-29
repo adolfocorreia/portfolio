@@ -11,7 +11,7 @@ dependencies = [
     "playwright>=1.60.0",
     "pyarrow>=24.0.0",
     "pyettj>=0.4.1",
-    "python-bcb>=0.3.6",
+    "python-bcb>=0.4.0",
     "quantlib>=1.42.1",
     "sh>=2.3.0",
     "xlrd>=2.0.2",
@@ -20,7 +20,7 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "ipython>=9.14.1",
+    "ipython>=9.15.0",
     "pandas-stubs>=3.0.3.260530",
 ]
 
