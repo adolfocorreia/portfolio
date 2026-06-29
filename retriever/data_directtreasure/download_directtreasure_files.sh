@@ -27,11 +27,24 @@ read_array() {
 URL_BASE=https://cdn.tesouro.gov.br/sistemas-internos/apex/producao/sistemas/sistd
 
 for BOND in "${BONDS[@]}"; do
-	echo "Downloading ${BOND}_${YEAR}.xls..."
-	wget -q --random-wait -O "${BOND}_${YEAR}.xls" "${URL_BASE}/${YEAR}/${BOND}_${YEAR}.xls"
+	LOCAL_FILE="${BOND}_${YEAR}.xls"
+
+	if [[ "${BOND}" == "NTN-B1" ]]; then
+		REMOTE_FILE="Tesouro_Renda+_Aposentadoria_Extra_${YEAR}.xls"
+	else
+		REMOTE_FILE="${LOCAL_FILE}"
+	fi
+
+	if [[ "${YEAR}" -lt 2023 && "${BOND}" =~ NTN-B1 ]]; then
+		# Create empty Excel file (with 'Sheet' worksheet)
+		uv run python -c "import xlwt; wb = xlwt.Workbook(); wb.add_sheet('Sheet'); wb.save('${LOCAL_FILE}')"
+	else
+		echo "Downloading ${LOCAL_FILE}..."
+		wget -q --random-wait -O "${LOCAL_FILE}" "${URL_BASE}/${YEAR}/${REMOTE_FILE}"
+	fi
 done
 
 CURRENT_YEAR=$(date +"%Y")
 if [[ "${YEAR}" == "${CURRENT_YEAR}" ]]; then
-	touch *"${CURRENT_YEAR}"*
+	touch ./*"${CURRENT_YEAR}"*
 fi

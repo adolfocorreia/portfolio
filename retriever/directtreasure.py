@@ -15,6 +15,7 @@ class DirectTreasureRetriever(ValueRetriever):
         return [self.data_directory + "/" + code + "_%s.xls" for code in self.codes]
 
     def _available_codes(self):
+        assert self._data is not None
         return self._data.keys()
 
     def _load_data_files(self):
@@ -38,6 +39,10 @@ class DirectTreasureRetriever(ValueRetriever):
             excel = pd.ExcelFile(file_name)
 
             for sheet_name in excel.sheet_names:
+                sheet_name = str(sheet_name)
+                if sheet_name == "Sheet":
+                    continue
+
                 bond_code = sheet_name.replace(" ", "_")
                 if regex.match(bond_code):
                     bond_code = regex.sub(r"NTN-B_Principal_\g<1>", bond_code)
@@ -45,11 +50,12 @@ class DirectTreasureRetriever(ValueRetriever):
                 if bond_code not in self._data:
                     self._data[bond_code] = pd.DataFrame()
 
-                df = excel.parse(
-                    sheet_name,
+                df = pd.read_excel(
+                    excel,
+                    sheet_name=sheet_name,
                     names=names,
                     parse_dates=["Dia"],
-                    dayfirst=True,
+                    date_format="%d/%m/%Y",
                     skiprows=1,
                 )
                 df.drop_duplicates(subset="Dia", inplace=True)
@@ -57,8 +63,9 @@ class DirectTreasureRetriever(ValueRetriever):
 
                 self._data[bond_code] = pd.concat([self._data[bond_code], df])
 
-    def get_value(self, code, date):
-        ValueRetriever.get_value(self, code, date)
-        ts = pd.Timestamp(date)
+    def get_value(self, code, day):
+        ValueRetriever.get_value(self, code, day)
+        ts = pd.Timestamp(day)
+        assert self._data is not None
         asof_ts = self._data[code].index.asof(ts)
         return self._data[code].loc[asof_ts].PU_Base_Manha

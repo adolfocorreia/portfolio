@@ -245,6 +245,8 @@ class DebtSecurity(Security, ABC):
 class TreasureBond(DebtSecurity, ABC):
     def __init__(self, name: str, subcategory: OrderedEnum, rate: BondRate):
         maturity = datetime.strptime(name[-6:], "%d%m%y").date()
+        if maturity.year < 2000:
+            maturity = maturity.replace(year=maturity.year + 100)
         DebtSecurity.__init__(
             self,
             name,
@@ -268,6 +270,8 @@ class TreasureBond(DebtSecurity, ABC):
             return NTNBP(name, rate_value)
         elif name.startswith("NTN-B_"):
             return NTNB(name, rate_value)
+        elif name.startswith("NTN-B1_"):
+            return NTNB1(name, rate_value)
         else:
             raise Exception("Invalid Treasure Bond!")
 
@@ -296,6 +300,13 @@ class NTNF(TreasureBond):
 class NTNB(TreasureBond):
     def __init__(self, name: str, rate_value: float):
         assert name.startswith("NTN-B_") and not name.startswith("NTN-B_Principal_")
+        rate = IPCARate(rate_value)
+        TreasureBond.__init__(self, name, PublicDebtCategories.Inflation, rate)
+
+
+class NTNB1(TreasureBond):
+    def __init__(self, name: str, rate_value: float):
+        assert name.startswith("NTN-B1_")
         rate = IPCARate(rate_value)
         TreasureBond.__init__(self, name, PublicDebtCategories.Inflation, rate)
 

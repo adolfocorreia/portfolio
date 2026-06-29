@@ -5,10 +5,12 @@ import re
 import time
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from contextlib import chdir
 from datetime import date
 from pathlib import Path
 
 import pandas as pd
+from sh import bash
 
 
 def is_file_up_to_date(file_name: str, base_year: int | None = None):
@@ -38,7 +40,9 @@ class DataRetriever(ABC):
     def __init__(self, asset_type: str):
         self.asset_type: str = asset_type.lower()
 
-        module_file = inspect.getfile(inspect.currentframe())
+        frame = inspect.currentframe()
+        assert frame is not None
+        module_file = inspect.getfile(frame)
         module_dir = os.path.dirname(os.path.abspath(module_file))
         self.data_directory: str = module_dir + "/data_" + asset_type.lower()
 
@@ -79,14 +83,8 @@ class DataRetriever(ABC):
 
     def _download_data_files(self, year: int) -> None:
         print("Downloading %s data files..." % self.asset_type)
-        old_path = Path.cwd()
-        os.chdir(self.data_directory)
-        wait_status = os.system(
-            "./download_{}_files.sh {}".format(self.asset_type, year)
-        )
-        exit_code = os.waitstatus_to_exitcode(wait_status)
-        assert exit_code == 0
-        os.chdir(old_path)
+        with chdir(self.data_directory):
+            bash(f"download_{self.asset_type}_files.sh", str(year))
         time.sleep(5)
 
     def _check_and_load_data_files(self):
@@ -174,6 +172,7 @@ class ValueRetriever(DataRetriever, ABC):
         if isinstance(day, str):
             assert DataRetriever._date_regex.match(day)
         assert not self.needs_to_be_loaded
+        return float("nan")
 
 
 class VariationRetriever(DataRetriever, ABC):
@@ -192,6 +191,7 @@ class VariationRetriever(DataRetriever, ABC):
         if isinstance(end_date, str):
             assert DataRetriever._date_regex.match(end_date)
         assert not self.needs_to_be_loaded
+        return float("nan")
 
 
 class CurveRetriever(DataRetriever, ABC):
@@ -201,3 +201,4 @@ class CurveRetriever(DataRetriever, ABC):
         if isinstance(base_date, str):
             assert DataRetriever._date_regex.match(base_date)
         assert not self.needs_to_be_loaded
+        return pd.DataFrame()
