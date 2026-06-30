@@ -29,6 +29,7 @@ class B3CurveRetriever(CurveRetriever):
             print("Loading file %s..." % file_name)
 
             reg_exp = re.search(self.data_directory + r"/yc_(.*)_\d{4}\.csv", file_name)
+            assert reg_exp is not None
             curve = reg_exp.groups()[0]
 
             df = pd.read_csv(
@@ -45,11 +46,9 @@ class B3CurveRetriever(CurveRetriever):
         if isinstance(base_date, date):
             base_date = f"{base_date:%Y-%m-%d}"
 
+        assert self._data is not None
         df = self._data[code]
         df = df[df["refdate"] == base_date]
         assert len(df) > 0, f"Curve '{code}' for '{base_date}' not found"
 
-        ts = pd.Timestamp(base_date)
-        row_df = pd.DataFrame({"refdate": [ts], "forward_date": [ts], "rate": [0.0]})
-
-        return pd.concat([row_df, df], ignore_index=True)
+        return df
