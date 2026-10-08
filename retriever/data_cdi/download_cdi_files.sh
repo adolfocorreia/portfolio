@@ -41,7 +41,7 @@ while [[ "${CURRENT_TS}" -le "${END_TS}" ]]; do
 
 	# Download file only if it does not exist and if day is not Saturday (6) nor Sunday (7)
 	if [[ ! -e ${FILENAME} && $(date --date="@${CURRENT_TS}" "+%u") -lt 6 ]]; then
-		wget -q --random-wait "${URL}/${FILENAME}" || true
+		wget --quiet --random-wait "${URL}/${FILENAME}" || true
 	fi
 
 	if [[ -e ${FILENAME} ]]; then

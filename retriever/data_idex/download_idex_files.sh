@@ -28,5 +28,5 @@ URL_BASE=https://jgp-credito-public-s3.s3.us-east-1.amazonaws.com/idex
 
 for INDEX in "${INDICES[@]}"; do
 	echo "Downloading ${INDEX}.xlsx..."
-	wget -q --random-wait -O "${INDEX}.xlsx" "${URL_BASE}/idex_${INDEX}_datafile.xlsx"
+	wget --quiet --random-wait -O "${INDEX}.xlsx" "${URL_BASE}/idex_${INDEX}_datafile.xlsx"
 done

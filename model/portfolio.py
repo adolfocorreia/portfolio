@@ -170,8 +170,8 @@ class Portfolio:
             print(
                 "{:>12s}: $ {:12,.2f}  ({:5.2f}%)".format(
                     cat.name,
-                    self.categories_values[cat],
-                    self.categories_values[cat] / self.portfolio_value * 100.0,
+                    abs(self.categories_values[cat]),
+                    abs(self.categories_values[cat]) / self.portfolio_value * 100.0,
                 )
             )
         print("       TOTAL: $ {:11,.2f}".format(self.portfolio_value))

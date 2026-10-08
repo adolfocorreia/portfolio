@@ -28,5 +28,5 @@ URL_BASE=https://adata-precos-prod.s3.amazonaws.com/arquivos/indices-historico
 
 for INDEX in "${INDICES[@]}"; do
 	echo "Downloading ${INDEX}.xls..."
-	wget -q --random-wait -O "${INDEX}.xls" "${URL_BASE}/${INDEX}-HISTORICO.xls"
+	wget --quiet --random-wait -O "${INDEX}.xls" "${URL_BASE}/${INDEX}-HISTORICO.xls"
 done

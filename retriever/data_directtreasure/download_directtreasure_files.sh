@@ -40,7 +40,7 @@ for BOND in "${BONDS[@]}"; do
 		uv run python -c "import xlwt; wb = xlwt.Workbook(); wb.add_sheet('Sheet'); wb.save('${LOCAL_FILE}')"
 	else
 		echo "Downloading ${LOCAL_FILE}..."
-		wget -q --random-wait -O "${LOCAL_FILE}" "${URL_BASE}/${YEAR}/${REMOTE_FILE}"
+		wget --quiet --random-wait -O "${LOCAL_FILE}" "${URL_BASE}/${YEAR}/${REMOTE_FILE}"
 	fi
 done
 
