@@ -23,33 +23,36 @@ read_array() {
 }
 [ -e "./codes.txt" ] && read_array "./codes.txt"
 
+
 echo "Downloading and loading precotaxatesourodireto.csv..."
 
+# https://www.tesourodireto.com.br/titulos/historico-de-precos-e-taxas.htm
 # https://www.tesourotransparente.gov.br/ckan/dataset/taxas-dos-titulos-ofertados-pelo-tesouro-direto
 CSV_URL=https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580c81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/precotaxatesourodireto.csv
 wget --quiet --timestamping ${CSV_URL}
 
-duckdb td.ddb -c "
+# If td.ddb does not exist or is older then precotaxatesourodireto.csv
+[[ ( ! -e td.ddb ) || ( td.ddb -ot precotaxatesourodireto.csv ) ]] && duckdb td.ddb -c "
   CREATE OR REPLACE TABLE td AS
   SELECT
-      data_base,
-      CASE tipo_titulo
-        WHEN 'Tesouro Selic'                           THEN 'LFT'
-        WHEN 'Tesouro Prefixado'                       THEN 'LTN'
-        WHEN 'Tesouro IPCA+'                           THEN 'NTN-B'
-        WHEN 'Tesouro IPCA+ com Juros Semestrais'      THEN 'NTN-Bp'
-        WHEN 'Tesouro Renda+ Aposentadoria Extra'      THEN 'NTN-Br'
-        WHEN 'Tesouro Educa+'                          THEN 'NTN-Be'
-        WHEN 'Tesouro IGPM+ com Juros Semestrais'      THEN 'NTN-C'
-        WHEN 'Tesouro Prefixado com Juros Semestrais'  THEN 'NTN-F'
-        ELSE NULL
-      END AS tipo_titulo,
-      data_vencimento,
-      taxa_compra_manha,
-      taxa_venda_manha,
-      pu_compra_manha,
-      pu_venda_manha,
-      pu_base_manha
+    data_base,
+    CASE tipo_titulo
+      WHEN 'Tesouro Selic'                           THEN 'LFT'
+      WHEN 'Tesouro Prefixado'                       THEN 'LTN'
+      WHEN 'Tesouro IPCA+ com Juros Semestrais'      THEN 'NTN-B'
+      WHEN 'Tesouro IPCA+'                           THEN 'NTN-Bp'
+      WHEN 'Tesouro Renda+ Aposentadoria Extra'      THEN 'NTN-Br'
+      WHEN 'Tesouro Educa+'                          THEN 'NTN-Be'
+      WHEN 'Tesouro IGPM+ com Juros Semestrais'      THEN 'NTN-C'
+      WHEN 'Tesouro Prefixado com Juros Semestrais'  THEN 'NTN-F'
+      ELSE NULL
+    END AS tipo_titulo,
+    data_vencimento,
+    taxa_compra_manha,
+    taxa_venda_manha,
+    pu_compra_manha,
+    pu_venda_manha,
+    pu_base_manha
   FROM read_csv(
     'precotaxatesourodireto.csv',
     header=true,
@@ -71,34 +74,26 @@ duckdb td.ddb -c "
 "
 
 
-# https://www.tesourodireto.com.br/titulos/historico-de-precos-e-taxas.htm
-URL_BASE=https://cdn.tesouro.gov.br/sistemas-internos/apex/producao/sistemas/sistd
-
 for BOND in "${BONDS[@]}"; do
-	LOCAL_FILE="${BOND}_${YEAR}.xls"
-
-	if [[ "${BOND}" == "NTN-B1" ]]; then
-		REMOTE_FILE="Tesouro_Renda+_Aposentadoria_Extra_${YEAR}.xls"
-	else
-		REMOTE_FILE="${LOCAL_FILE}"
-	fi
-
-	if [[ "${YEAR}" -lt 2023 && "${BOND}" =~ NTN-B1 ]]; then
-		# Create empty Excel file (with 'Sheet' worksheet)
-		uv run python -c "import xlwt; wb = xlwt.Workbook(); wb.add_sheet('Sheet'); wb.save('${LOCAL_FILE}')"
-	else
-		echo "Downloading ${LOCAL_FILE}..."
-		wget --quiet --random-wait -O "${LOCAL_FILE}" "${URL_BASE}/${YEAR}/${REMOTE_FILE}"
-	fi
-
 	LOCAL_FILE="${BOND}_${YEAR}.csv"
+
 	duckdb td.ddb -c "
 	  COPY (
-	    SELECT *
+	    SELECT
+	      tipo_titulo || '_' || strftime(data_vencimento, '%d%m%y') AS codigo,
+	      data_base,
+	      tipo_titulo,
+	      data_vencimento,
+	      taxa_compra_manha,
+	      taxa_venda_manha,
+	      pu_compra_manha,
+	      pu_venda_manha,
+	      pu_base_manha
 	    FROM td
 	    WHERE year(data_base)=${YEAR} AND tipo_titulo='${BOND}'
 	    ORDER BY data_base, data_vencimento
-	  ) TO '${LOCAL_FILE}' (HEADER);"
+	  ) TO '${LOCAL_FILE}' (HEADER);
+	"
 done
 
 CURRENT_YEAR=$(date +"%Y")

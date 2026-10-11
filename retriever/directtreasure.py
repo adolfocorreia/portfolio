@@ -1,6 +1,7 @@
 import glob
-import re
+import os
 
+import duckdb
 import pandas as pd
 
 from .retriever import ValueRetriever
@@ -12,7 +13,7 @@ class DirectTreasureRetriever(ValueRetriever):
         self.check_and_update_data()
 
     def _get_data_file_patterns(self):
-        return [self.data_directory + "/" + code + "_%s.xls" for code in self.codes]
+        return [self.data_directory + "/" + code + "_%s.csv" for code in self.codes]
 
     def _available_codes(self):
         assert self._data is not None
@@ -21,51 +22,53 @@ class DirectTreasureRetriever(ValueRetriever):
     def _load_data_files(self):
         self._data = {}
 
-        names = [
-            "Dia",
-            "Taxa_Compra_Manha",
-            "Taxa_Venda_Manha",
-            "PU_Compra_Manha",
-            "PU_Venda_Manha",
-            "PU_Base_Manha",
-        ]
-
-        regex = re.compile(r"NTN-B_Princ_([0-9]{6})")
-
-        file_list = sorted(glob.glob(self.data_directory + "/*.xls"))
+        file_list = sorted(glob.glob(self.data_directory + "/*_????.csv"))
         for file_name in file_list:
             print("Loading file %s..." % file_name)
 
-            excel = pd.ExcelFile(file_name)
+            code = os.path.basename(file_name).split("_")[0]
+            assert code in self.codes
 
-            for sheet_name in excel.sheet_names:
-                sheet_name = str(sheet_name)
-                if sheet_name == "Sheet":
-                    continue
-
-                bond_code = sheet_name.replace(" ", "_")
-                if regex.match(bond_code):
-                    bond_code = regex.sub(r"NTN-B_Principal_\g<1>", bond_code)
-
-                if bond_code not in self._data:
-                    self._data[bond_code] = pd.DataFrame()
-
-                df = pd.read_excel(
-                    excel,
-                    sheet_name=sheet_name,
-                    names=names,
-                    parse_dates=["Dia"],
-                    date_format="%d/%m/%Y",
-                    skiprows=1,
+            tickers = (
+                duckdb.sql(
+                    """
+                    SELECT DISTINCT(codigo) AS codigo
+                    FROM query_table($file_name)
+                    WHERE tipo_titulo = $tipo_titulo
+                    ORDER BY 1;
+                    """,
+                    params={"file_name": file_name, "tipo_titulo": code},
                 )
-                df.drop_duplicates(subset="Dia", inplace=True)
-                df.set_index("Dia", inplace=True)
+                .df()["codigo"]
+                .to_list()
+            )
 
-                self._data[bond_code] = pd.concat([self._data[bond_code], df])
+            for ticker in tickers:
+                if ticker not in self._data:
+                    self._data[ticker] = pd.DataFrame()
+
+                df = duckdb.sql(
+                    """
+                    SELECT
+                        data_base,
+                        taxa_compra_manha,
+                        taxa_venda_manha,
+                        pu_compra_manha,
+                        pu_venda_manha,
+                        pu_base_manha
+                    FROM query_table($file_name)
+                    WHERE codigo = $codigo
+                    ORDER BY data_base;
+                    """,
+                    params={"file_name": file_name, "codigo": ticker},
+                ).df()
+                df.set_index(["data_base"], inplace=True)
+
+                self._data[ticker] = pd.concat([self._data[ticker], df])
 
     def get_value(self, code, day):
         ValueRetriever.get_value(self, code, day)
         ts = pd.Timestamp(day)
         assert self._data is not None
         asof_ts = self._data[code].index.asof(ts)
-        return self._data[code].loc[asof_ts].PU_Base_Manha
+        return self._data[code].loc[asof_ts]["pu_base_manha"]
