@@ -1,7 +1,8 @@
 LFT
 LTN
 NTN-B
-NTN-B1
-NTN-B_Principal
+NTN-Bp
+NTN-Br
+NTN-Be
 NTN-C
 NTN-F
