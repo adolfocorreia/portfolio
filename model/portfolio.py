@@ -31,7 +31,7 @@ PortfolioItem = namedtuple("PortfolioItem", ["sec", "amount"])
 class Portfolio:
     def __init__(self):
         self.at_day = date.today()
-        self.securities: dict[str,] = {}
+        self.securities = {}  # dict[str, Security]
         self.portfolio_value = 0.0
         self.categories_values = dict.fromkeys(list(MainCategories), 0.0)
 
@@ -59,75 +59,77 @@ class Portfolio:
         assert df["Data"].is_monotonic_increasing
 
         for _, row in df.iterrows():
-            kind = row.Categoria
+            kind = row["Categoria"]
 
             if kind == "TD":
-                rate = float(row.Taxa[:-1]) / 100.0
-                self.add_security(TreasureBond.create(row.Ativo, rate), row.Quantidade)
+                rate = float(row["Taxa"][:-1]) / 100.0
+                self.add_security(
+                    TreasureBond.create(row["Ativo"], rate), row["Quantidade"]
+                )
             elif kind == "Acao":
-                self.add_security(EquitySecurity.create(row.Ativo), row.Quantidade)
+                self.add_security(
+                    EquitySecurity.create(row["Ativo"]), row["Quantidade"]
+                )
             elif kind == "FII":
-                self.add_security(RealEstateFundShare(row.Ativo), row.Quantidade)
+                self.add_security(RealEstateFundShare(row["Ativo"]), row["Quantidade"])
             elif kind in ("LCI", "LCA", "CDB", "LC"):
-                rate = float(row.Taxa[:-1]) / 100.0
-                indexer = row.Indexador
+                rate = float(row["Taxa"][:-1]) / 100.0
+                indexer = row["Indexador"]
                 if indexer == "CDI":
                     self.add_security(
                         BankBondCDI(
-                            row.Ativo,
-                            row.Vencimento,
+                            row["Ativo"],
+                            row["Vencimento"],
                             rate,
-                            row.Data,
-                            row.PrecoUnitario,
-                            row.Subcategoria,
+                            row["Data"],
+                            row["PrecoUnitario"],
+                            row["Subcategoria"],
                         ),
-                        row.Quantidade,
+                        row["Quantidade"],
                     )
                 elif indexer == "Prefixado":
                     self.add_security(
                         BankBondPre(
-                            row.Ativo,
-                            row.Vencimento,
+                            row["Ativo"],
+                            row["Vencimento"],
                             rate,
-                            row.Data,
-                            row.PrecoUnitario,
-                            row.Subcategoria,
+                            row["Data"],
+                            row["PrecoUnitario"],
+                            row["Subcategoria"],
                         ),
-                        row.Quantidade,
+                        row["Quantidade"],
                     )
                 elif indexer == "IPCA":
                     self.add_security(
                         BankBondIPCA(
-                            row.Ativo,
-                            row.Vencimento,
+                            row["Ativo"],
+                            row["Vencimento"],
                             rate,
-                            row.Data,
-                            row.PrecoUnitario,
-                            row.Subcategoria,
+                            row["Data"],
+                            row["PrecoUnitario"],
+                            row["Subcategoria"],
                         ),
-                        row.Quantidade,
+                        row["Quantidade"],
                     )
                 else:
                     raise Exception(
                         "Unknown indexer for {} security: {}".format(kind, indexer)
                     )
             elif kind == "Deb":
-                rate = float(row.Taxa[:-1]) / 100.0
+                rate = float(row["Taxa"][:-1]) / 100.0
                 self.add_security(
-                    Debenture(row.Ativo, row.Vencimento, rate), row.Quantidade
+                    Debenture(row["Ativo"], row["Vencimento"], rate), row["Quantidade"]
                 )
             elif kind == "ETF":
                 self.add_security(
-                    ExchangeTradedFundShare(row.Ativo, row.Subcategoria), row.Quantidade
+                    ExchangeTradedFundShare(row["Ativo"], row["Subcategoria"]),
+                    row["Quantidade"],
                 )
             elif kind == "HedgeFund":
                 pass
-                # self.add_security(
-                #     HedgeFundShare(row.Ativo),
-                #     row.Quantidade)
             elif kind == "StockFund":
                 self.add_security(
-                    StockFundShare(row.Ativo, row.Subcategoria), row.Quantidade
+                    StockFundShare(row["Ativo"], row["Subcategoria"]), row["Quantidade"]
                 )
             else:
                 raise Exception("Unknown security kind: %s" % kind)
