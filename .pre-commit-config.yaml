@@ -21,16 +21,16 @@ repos:
     hooks:
       - id: gitleaks
   - repo: https://github.com/crate-ci/typos
-    rev: v1.47.2
+    rev: v1.51.1
     hooks:
       - id: typos
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v4.16.4
+    rev: v4.19.2
     hooks:
       - id: commitizen
         stages: [commit-msg]
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.11.0.1
+    rev: v0.11.0.1-1
     hooks:
       - id: shellcheck
   - repo: https://github.com/hukkin/mdformat
@@ -44,15 +44,20 @@ repos:
           - mdformat-gfm
           - mdformat-web
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.22.1
+    rev: v0.23.3
     hooks:
       - id: markdownlint-cli2
   - repo: https://github.com/google/yamlfmt
     rev: v0.21.0
     hooks:
       - id: yamlfmt
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: "4.4.0"
+    hooks:
+      - id: sqlfluff-lint
+      - id: sqlfluff-fix
   - repo: https://github.com/asottile/pyupgrade
-    rev: v3.21.2
+    rev: v3.22.0
     hooks:
       - id: pyupgrade
   - repo: https://github.com/pre-commit/pygrep-hooks
@@ -69,11 +74,11 @@ repos:
       - id: rst-inline-touching-normal
       - id: text-unicode-replacement-char
   - repo: https://github.com/pycqa/isort
-    rev: 9.0.0a3
+    rev: "9.0.2"
     hooks:
       - id: isort
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.15.19
+    rev: v0.17.0
     hooks:
       - id: ruff-check
       - id: ruff-format

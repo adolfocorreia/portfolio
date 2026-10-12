@@ -19,20 +19,20 @@ COPY (
 
     records AS (
         SELECT
-            cast(strptime(substr(line, 3, 8), '%Y%m%d') AS DATE) AS data,
-            substr(line, 13, 12).trim() AS codneg,
+            cast(strptime(substr(line, 3, 8), '%Y%m%d') AS DATE) AS dia,
+            trim(substr(line, 13, 12)) AS codneg,
             substr(line, 25, 3) AS tpmerc,
             cast(substr(line, 109, 13) AS FLOAT) / 100.0 AS preult
         FROM raw_lines
     )
 
     SELECT
-        data,
+        dia,
         codneg,
         preult
     FROM records
     WHERE tpmerc = '010'  -- Mercado à vista
-    ORDER BY data, codneg
+    ORDER BY dia, codneg
 )
 
 TO (getvariable('destination_path'));

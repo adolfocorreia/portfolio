@@ -22,7 +22,7 @@ class BovespaRetriever(ValueRetriever):
         file_list = sorted(glob.glob(self.data_directory + "/COTAHIST_A*.parquet"))
         df_list = [pd.read_parquet(file) for file in file_list]
         data = pd.concat(df_list)
-        data.set_index(["data", "codneg"], inplace=True)
+        data.set_index(["dia", "codneg"], inplace=True)
         self._data = {"bovespa": data}
 
     def get_value(self, code, day):
