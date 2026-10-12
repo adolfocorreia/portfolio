@@ -31,69 +31,20 @@ echo "Downloading and loading precotaxatesourodireto.csv..."
 CSV_URL=https://www.tesourotransparente.gov.br/ckan/dataset/df56aa42-484a-4a59-8184-7676580c81e3/resource/796d2059-14e9-44e3-80c9-2d9e30b405c1/download/precotaxatesourodireto.csv
 wget --quiet --timestamping ${CSV_URL}
 
-# If td.ddb does not exist or is older then precotaxatesourodireto.csv
-[[ ( ! -e td.ddb ) || ( td.ddb -ot precotaxatesourodireto.csv ) ]] && duckdb td.ddb -c "
-  CREATE OR REPLACE TABLE td AS
-  SELECT
-    data_base,
-    CASE tipo_titulo
-      WHEN 'Tesouro Selic'                           THEN 'LFT'
-      WHEN 'Tesouro Prefixado'                       THEN 'LTN'
-      WHEN 'Tesouro IPCA+ com Juros Semestrais'      THEN 'NTN-B'
-      WHEN 'Tesouro IPCA+'                           THEN 'NTN-Bp'
-      WHEN 'Tesouro Renda+ Aposentadoria Extra'      THEN 'NTN-Br'
-      WHEN 'Tesouro Educa+'                          THEN 'NTN-Be'
-      WHEN 'Tesouro IGPM+ com Juros Semestrais'      THEN 'NTN-C'
-      WHEN 'Tesouro Prefixado com Juros Semestrais'  THEN 'NTN-F'
-      ELSE NULL
-    END AS tipo_titulo,
-    data_vencimento,
-    taxa_compra_manha,
-    taxa_venda_manha,
-    pu_compra_manha,
-    pu_venda_manha,
-    pu_base_manha
-  FROM read_csv(
-    'precotaxatesourodireto.csv',
-    header=true,
-    delim=';',
-    decimal_separator=',',
-    thousands='.',
-    dateformat='%d/%m/%Y',
-    columns={
-      'tipo_titulo': varchar,
-      'data_vencimento': date,
-      'data_base': date,
-      'taxa_compra_manha': double,
-      'taxa_venda_manha': double,
-      'pu_compra_manha': double,
-      'pu_venda_manha': double,
-      'pu_base_manha': double
-    }
-  );
-"
+# If td.ddb does not exist or is older than precotaxatesourodireto.csv
+if [[ ( ! -e td.ddb ) || ( td.ddb -ot precotaxatesourodireto.csv ) ]]; then
+  duckdb td.ddb -f load_td_data.sql
+fi
 
 
 for BOND in "${BONDS[@]}"; do
-	LOCAL_FILE="${BOND}_${YEAR}.csv"
+	LOCAL_FILE="${BOND}_${YEAR}.parquet"
 
 	duckdb td.ddb -c "
-	  COPY (
-	    SELECT
-	      tipo_titulo || '_' || strftime(data_vencimento, '%d%m%y') AS codigo,
-	      data_base,
-	      tipo_titulo,
-	      data_vencimento,
-	      taxa_compra_manha,
-	      taxa_venda_manha,
-	      pu_compra_manha,
-	      pu_venda_manha,
-	      pu_base_manha
-	    FROM td
-	    WHERE year(data_base)=${YEAR} AND tipo_titulo='${BOND}'
-	    ORDER BY data_base, data_vencimento
-	  ) TO '${LOCAL_FILE}' (HEADER);
-	"
+	  SET VARIABLE year = ${YEAR};
+	  SET VARIABLE bond = '${BOND}';
+    SET VARIABLE destination_path = '${LOCAL_FILE}';
+	" -f create_td_files.sql
 done
 
 CURRENT_YEAR=$(date +"%Y")

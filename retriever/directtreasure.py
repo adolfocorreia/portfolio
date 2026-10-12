@@ -13,7 +13,7 @@ class DirectTreasureRetriever(ValueRetriever):
         self.check_and_update_data()
 
     def _get_data_file_patterns(self):
-        return [self.data_directory + "/" + code + "_%s.csv" for code in self.codes]
+        return [self.data_directory + "/" + code + "_%s.parquet" for code in self.codes]
 
     def _available_codes(self):
         assert self._data is not None
@@ -22,9 +22,9 @@ class DirectTreasureRetriever(ValueRetriever):
     def _load_data_files(self):
         self._data = {}
 
-        file_list = sorted(glob.glob(self.data_directory + "/*_????.csv"))
+        file_list = sorted(glob.glob(self.data_directory + "/*_????.parquet"))
         for file_name in file_list:
-            print("Loading file %s..." % file_name)
+            print(f"Loading file {file_name}...")
 
             code = os.path.basename(file_name).split("_")[0]
             assert code in self.codes
