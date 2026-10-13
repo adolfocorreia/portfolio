@@ -35,7 +35,7 @@ class Portfolio:
         self.portfolio_value = 0.0
         self.categories_values = dict.fromkeys(list(MainCategories), 0.0)
 
-        self.subcategories_values = dict.fromkeys(list(MainCategories), {})
+        self.subcategories_values = {key: {} for key in list(MainCategories)}
         self.subcategories_values[MainCategories.Stocks] = dict.fromkeys(
             list(StocksCategories), 0.0
         )
@@ -112,9 +112,7 @@ class Portfolio:
                         row["Quantidade"],
                     )
                 else:
-                    raise Exception(
-                        "Unknown indexer for {} security: {}".format(kind, indexer)
-                    )
+                    raise ValueError(f"Unknown indexer for {kind} security: {indexer}")
             elif kind == "Deb":
                 rate = float(row["Taxa"][:-1]) / 100.0
                 self.add_security(
@@ -132,7 +130,7 @@ class Portfolio:
                     StockFundShare(row["Ativo"], row["Subcategoria"]), row["Quantidade"]
                 )
             else:
-                raise Exception("Unknown security kind: %s" % kind)
+                raise ValueError(f"Unknown security kind: {kind}")
 
     def add_security(self, security, amount):
         unit_value = security.get_value(self.at_day)
@@ -155,28 +153,25 @@ class Portfolio:
         self.subcategories_values[cat][subcat] = subcat_value + total_value
 
     def print_portfolio(self):
+        print(f"Position at {self.at_day:%Y-%m-%d}:")
+
         for _, (security, amount) in sorted(self.securities.items()):
             display_name = security.display_name
             unit_value = security.get_value(self.at_day)
             value = unit_value * amount
             if value > 0.0:
                 print(
-                    "{:>30s}: {:8.2f} * {:8.2f}  =  $ {:10,.2f}".format(
-                        display_name, unit_value, amount, value
-                    )
+                    f"{display_name:>30s}: {unit_value:8.2f} * {amount:8.2f}  =  $ {value:10,.2f}"
                 )
 
         print()
 
         for cat in sorted(MainCategories):
-            print(
-                "{:>12s}: $ {:12,.2f}  ({:5.2f}%)".format(
-                    cat.name,
-                    abs(self.categories_values[cat]),
-                    abs(self.categories_values[cat]) / self.portfolio_value * 100.0,
-                )
-            )
-        print("       TOTAL: $ {:11,.2f}".format(self.portfolio_value))
+            name = cat.name
+            value = self.categories_values[cat]
+            percent = value / self.portfolio_value * 100.0
+            print(f"{name:>12s}: $ {value:12,.2f}  ({percent:5.2f}%)")
+        print(f"       TOTAL: $ {self.portfolio_value:11,.2f}")
 
     def get_allocation(self):
         allocations = [
